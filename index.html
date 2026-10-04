@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RQ Kitchen — المنيو والطلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Alexandria:wght@400;500;700&family=Kaushan+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#F7F3EF; --line:#ECE3DA; --ink:#1C1410; --muted:#5E5048;
+  --brand:#F29835; --brand-ink:#14100D; --brand-text:#A84F07; --disc:#FDE7CB; --ok:#1F8A4C; --wa:#1DA851; --danger:#B42318;
+  --display:'Bricolage Grotesque','Arial Black',system-ui,sans-serif;
+  --ar:'Alexandria','Geeza Pro','Segoe UI',Tahoma,sans-serif;
+  --script:'Kaushan Script','Brush Script MT',cursive;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141110; --surface:#1E1916; --line:#33291F; --ink:#FFF4E6; --muted:#C9BBAE; --brand-text:#F7B060; --disc:#3A2A1A;
+}}
+:root[data-theme="dark"]{--bg:#141110; --surface:#1E1916; --line:#33291F; --ink:#FFF4E6; --muted:#C9BBAE; --brand-text:#F7B060; --disc:#3A2A1A;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);-webkit-text-size-adjust:100%}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ar);font-size:16px;line-height:1.55}
+img{max-width:100%;display:block}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:8px}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+
+/* hero */
+.hero{padding-top:28px;padding-bottom:18px}
+.brandrow{display:flex;align-items:center;gap:16px}
+.brandrow img{width:96px;height:auto}
+.tag{font-family:var(--script);color:var(--brand-text);font-size:clamp(22px,5.4vw,30px);line-height:1.1;margin:0;transform:rotate(-3deg);transform-origin:right center}
+.lede{margin:14px 0 0;color:var(--muted);font-size:15px}
+.branches{margin-top:18px}
+.branches h2{font-size:17px;margin:0 0 10px;font-weight:700}
+.bgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:720px){.bgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.branch{appearance:none;border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 14px;text-align:right;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:76px}
+.branch b{font-family:var(--display);font-weight:800;font-size:17px;direction:ltr;text-align:right}
+.branch span{font-size:13px;color:var(--muted)}
+.branch .a{direction:ltr;text-align:right;font-size:12px}
+.branch .st{font-size:12px;font-weight:700;margin-top:4px}
+.branch .st.on{color:var(--ok)}
+.branch .st.off{color:var(--danger)}
+.branch.shut{opacity:.75}
+.closed{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:#FDECEA;color:#7A1C12;font-size:14px}
+.send:disabled{background:#9AA59E;cursor:not-allowed}
+.branch[aria-pressed="true"]{border-color:var(--brand);background:var(--disc)}
+.branch[aria-pressed="true"] b::after{content:" ✓";color:var(--brand-text)}
+
+/* category nav */
+.cats{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.cats .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+.cats .wrap::-webkit-scrollbar{display:none}
+.cats a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;white-space:nowrap}
+.cats a.on{background:var(--ink);color:var(--bg)}
+
+/* sections */
+section.cat{padding:26px 0 8px}
+.cat h2{margin:0 0 4px;font-size:clamp(24px,6vw,32px);font-weight:700;line-height:1.2}
+.cat h2 small{display:block;font-family:var(--display);font-weight:800;font-size:15px;color:var(--brand-text);direction:ltr;text-align:right;letter-spacing:.2px}
+.list{display:grid;gap:12px;margin-top:14px}
+@media (min-width:760px){.list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.item{display:grid;grid-template-columns:104px minmax(0,1fr);gap:14px;align-items:center;padding:12px;border-radius:20px;background:var(--surface)}
+.item.noimg{grid-template-columns:minmax(0,1fr)}
+.plate{position:relative;width:104px;height:96px;display:flex;align-items:center;justify-content:center}
+.plate::before{content:"";position:absolute;width:86px;height:86px;border-radius:50%;background:var(--disc)}
+.plate img{position:relative;max-height:96px;max-width:104px;object-fit:contain}
+.plate.photo::before{display:none}
+.plate.photo img{width:104px;height:96px;object-fit:cover;border-radius:14px}
+.info{min-width:0;display:flex;flex-direction:column;gap:4px}
+.name{font-family:var(--display);font-weight:800;font-size:17px;line-height:1.15;direction:ltr;text-align:right;margin:0}
+.ing{font-size:13px;color:var(--muted);direction:ltr;text-align:right;line-height:1.45;margin:0}
+.buy{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.price{font-family:var(--display);font-weight:800;font-size:18px;direction:ltr}
+.price small{font-size:12px;color:var(--muted);font-weight:600;margin-left:3px}
+.add{appearance:none;border:0;background:var(--brand);color:var(--brand-ink);font-weight:700;border-radius:999px;padding:8px 16px;cursor:pointer;font-size:14px;min-height:40px}
+.step{display:inline-flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.step button{appearance:none;border:0;background:transparent;width:40px;height:40px;font-size:20px;font-weight:700;cursor:pointer;color:var(--ink)}
+.step output{min-width:24px;text-align:center;font-family:var(--display);font-weight:800}
+
+/* cart bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,transparent);pointer-events:none}
+.bar button{pointer-events:auto;width:100%;max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:18px;background:var(--ink);color:var(--bg);padding:14px 18px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 10px 30px rgba(28,20,16,.25)}
+.bar .count{background:var(--brand);color:var(--brand-ink);border-radius:999px;min-width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;padding:0 8px;font-family:var(--display)}
+.bar .tot{font-family:var(--display);font-weight:800;direction:ltr}
+.bar[hidden]{display:none}
+.spacer{height:110px}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:50;display:none}
+.sheet.open{display:block}
+.scrim{position:absolute;inset:0;background:rgba(20,16,14,.5)}
+.panel{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow:auto;background:var(--bg);border-radius:24px 24px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));max-width:680px;margin:0 auto;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}}
+.panel header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.panel h3{margin:0;font-size:21px}
+.x{appearance:none;border:0;background:var(--surface);width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer}
+.lines{display:flex;flex-direction:column;gap:10px;margin:8px 0 14px}
+.line{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.line .n{font-family:var(--display);font-weight:800;font-size:15px;direction:ltr;text-align:right;flex:1;min-width:0}
+.line .p{font-family:var(--display);font-weight:800;direction:ltr;min-width:64px;text-align:left}
+.sum{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin:4px 0 16px}
+.sum span:last-child{font-family:var(--display);direction:ltr}
+fieldset{border:0;margin:0 0 14px;padding:0}
+legend,label.l{font-weight:700;font-size:15px;margin-bottom:6px;display:block}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{flex:1 1 auto;min-width:96px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;padding:10px 12px;border:2px solid var(--line);border-radius:14px;cursor:pointer;font-size:14px}
+.seg input:checked + span{border-color:var(--brand);background:var(--disc);font-weight:700}
+.seg input:focus-visible + span{outline:3px solid var(--brand);outline-offset:2px}
+.f{display:block;width:100%;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:12px 14px;font-size:16px}
+.f:focus{border-color:var(--brand);outline:none}
+.row2{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:520px){.row2{grid-template-columns:1fr 1fr}}
+.err{color:var(--danger);font-size:13px;margin-top:6px;min-height:0}
+.send{appearance:none;border:0;width:100%;background:var(--wa);color:#fff;font-weight:700;font-size:17px;border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0;text-align:center}
+.pick{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--disc);font-size:14px}
+.empty{color:var(--muted);text-align:center;padding:20px 0}
+footer{padding:30px 0 10px;color:var(--muted);font-size:13px;text-align:center}
+footer a{color:var(--brand-text)}
+.toast{max-width:calc(100% - 40px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="hero wrap">
+  <div class="brandrow">
+    <img id="logo" alt="RQ Kitchen">
+    <p class="tag">Same Passion, Better Bites</p>
+  </div>
+  <p class="lede">اختر الفرع، أضف طلبك للسلة، وأرسله لنا على واتساب، واستلمه من الفرع.</p>
+  <p class="closed" id="closedNote" hidden></p>
+  <div class="branches">
+    <h2>من أي فرع تطلب؟</h2>
+    <div class="bgrid" id="branches"></div>
+  </div>
+</header>
+<nav class="cats" aria-label="الأقسام"><div class="wrap" id="catnav"></div></nav>
+<main class="wrap" id="menu"></main>
+<footer class="wrap">
+  <p>تابعونا على إنستقرام <a href="https://instagram.com/rqkitchen.ae" target="_blank" rel="noopener">@rqkitchen.ae</a></p>
+</footer>
+<div class="spacer"></div>
+
+<div class="bar" id="bar" hidden><button type="button" id="openCart"><span><span class="count" id="count">0</span>&nbsp; راجع طلبك</span><span class="tot" id="tot">0 AED</span></button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="scrim" id="scrim"></div>
+  <div class="panel">
+    <header><h3 id="sheetTitle">طلبك</h3><button class="x" type="button" id="closeCart" aria-label="إغلاق">×</button></header>
+    <div class="lines" id="lines"></div>
+    <div class="sum"><span>المجموع</span><span id="sum">0 AED</span></div>
+    <form id="form" novalidate>
+      <fieldset><legend>الفرع</legend><div class="seg" id="branchSeg"></div><div class="err" id="eBranch"></div></fieldset>
+      <p class="pick">الطلب <b>استلام من الفرع</b>، جهّز نفسك وتعال استلمه.</p>
+      <div class="row2">
+        <div><label class="l" for="name">الاسم</label><input class="f" id="name" autocomplete="name"><div class="err" id="eName"></div></div>
+        <div><label class="l" for="phone">رقم الجوال</label><input class="f" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05X XXX XXXX" dir="ltr" style="text-align:right"><div class="err" id="ePhone"></div></div>
+      </div>
+      
+      <fieldset style="margin-top:12px"><legend>طريقة الدفع</legend><div class="seg">
+        <label><input type="radio" name="pay" value="كاش" checked><span>كاش</span></label>
+        <label><input type="radio" name="pay" value="بطاقة"><span>بطاقة عند الاستلام</span></label>
+      </div></fieldset>
+      <label class="l" for="notes">ملاحظات (اختياري)</label><textarea class="f" id="notes" rows="2" placeholder="مثلاً: بدون بصل"></textarea>
+      <button class="send" type="submit" style="margin-top:16px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.6L3 21z"></path><path d="M9 9.5c.3 2.2 2.3 4.2 4.5 4.5l1.2-1.2 2 1-.4 1.4c-3.8.4-8-3.8-7.6-7.6L10.1 7l1 2-1.2 1.2" stroke-width="1.6"></path></svg>
+        أرسل الطلب على واتساب
+      </button>
+      <p class="err" id="sendNote" hidden style="text-align:center"></p>
+      <p class="note">بيفتح واتساب ومعه رسالة الطلب جاهزة، اضغط إرسال وبيأكد لك الفرع الطلب ووقت الاستلام.</p>
+    </form>
+  </div>
+</div>
+
+<script id="data" type="application/json">{"items": [{"id": "huwar-0", "category_id": "huwar", "name": "Classic Huwar Burger", "ingredients": "Burger bun, RQ sauce, Loloroso lettuce, Slice onion, Slice tomato, Burger pickles, Slice cheese, Huwar patty, Pickle sweet relish (natural)", "price": 42.0, "image": "classic_huwar.webp", "sort": 0, "active": true}, {"id": "huwar-1", "category_id": "huwar", "name": "RQ Huwar Burger", "ingredients": "Huwar patty, RQ sauce, Cheese slice, Burger pickles, Sweet pickle relish, Burger bun", "price": 42.0, "image": "rq_huwar.webp", "sort": 1, "active": true}, {"id": "huwar-2", "category_id": "huwar", "name": "Double Huwar Burger", "ingredients": "Burger bun, RQ sauce, Caramelized onion, Burger pickles, Cheese, Huwar patty (x2), Pickle sweet relish (natural)", "price": 50.0, "image": "double_huwar.webp", "sort": 2, "active": true}, {"id": "wagyu-0", "category_id": "wagyu", "name": "Classic Wagyu", "ingredients": "Burger bun, RQ sauce, Loloroso lettuce, Slice onion, Slice tomato, Burger pickles, Slice cheese, Wagyu patty, Pickle sweet relish", "price": 53.0, "image": "classic_huwar.webp", "sort": 0, "active": true}, {"id": "wagyu-1", "category_id": "wagyu", "name": "Double Wagyu Burger", "ingredients": "Burger bun, RQ sauce, Caramelized onion, Burger pickles, Slice cheese, Wagyu patty (x2), Pickle sweet relish (natural)", "price": 63.0, "image": "double_wagyu.webp", "sort": 1, "active": true}, {"id": "wagyu-2", "category_id": "wagyu", "name": "Double Beef Burger with Jalapeño", "ingredients": "Burger bun, Fresh jalapeño, Slice cheese (1 slice), Wagyu beef patty (x2), RQ sauce", "price": 63.0, "image": "double_beef_jal.webp", "sort": 2, "active": true}, {"id": "wagyu-3", "category_id": "wagyu", "name": "RQ Wagyu Burger", "ingredients": "Burger bun, Burger pickles, Pickle sweet relish, Slice cheese, Wagyu patty, RQ sauce", "price": 53.0, "image": "rq_huwar.webp", "sort": 3, "active": true}, {"id": "chicken-0", "category_id": "chicken", "name": "Crispy Chicken Burger", "ingredients": "Burger bun, Coleslaw sauce, Iceberg lettuce, Slice cheese, Crispy chicken, Burger pickles", "price": 42.0, "image": "crispy_chicken.webp", "sort": 0, "active": true}, {"id": "chicken-1", "category_id": "chicken", "name": "New Chicken Jalapeño", "ingredients": "Burger bun, Japanese mayo, Jalapeño, Mix cheese, Frico cheese, Smash chicken breast (fried)", "price": 55.0, "image": "chicken_jalapeno.webp", "sort": 1, "active": true}, {"id": "chicken-2", "category_id": "chicken", "name": "Buffalo Chicken Burger", "ingredients": "Burger bun, Onion rings, Slice cheese, Buffalo chicken, Iceberg lettuce, Japanese mayo dressing", "price": 42.0, "image": "buffalo.webp", "sort": 2, "active": true}, {"id": "chicken-3", "category_id": "chicken", "name": "Chicken Coleslaw Burger", "ingredients": "Burger bun, Coleslaw, Burger pickles, Slice cheese, Crispy chicken, Coleslaw sauce", "price": 42.0, "image": "coleslaw.webp", "sort": 3, "active": true}, {"id": "sushi-0", "category_id": "sushi", "name": "Al Ain Sushi (5 pcs)", "ingredients": "Nori, Sushi rice, Shrimp tempura (2 pcs), Avocado, Cheese, Crispy panko, Teriyaki sauce, Al Ain sauce", "price": 63.0, "image": "alain_new.webp", "sort": 0, "active": true}, {"id": "sushi-1", "category_id": "sushi", "name": "Chicken Volcano Roll (8 cuts)", "ingredients": "Nori, Sushi rice, Crispy chicken, Philadelphia cheese, Cheetos, Teriyaki sauce, Spicy mayo, Spicy sweet chilli, White tanuki, Togarashi", "price": 63.0, "image": "chicken_volcano.webp", "sort": 1, "active": true}, {"id": "sushi-2", "category_id": "sushi", "name": "Double Shrimp (6 cuts)", "ingredients": "Nori, Rice, Avocado, Shrimp tempura (2 pcs), Orange tobiko, Sesame seed, Shamsa sauce, Spicy sweet chilli, Togarashi", "price": 73.0, "image": "double_shrimp.webp", "sort": 2, "active": true}, {"id": "sushi-3", "category_id": "sushi", "name": "Crunchy Crab (8 cuts)", "ingredients": "Nori, Sushi rice, Cucumber, Avocado, Tempura shrimp (2 pcs), Crab stick (2 pcs), Crunchy sauce, Black tanuki", "price": 63.0, "image": "crunchy_crab.webp", "sort": 3, "active": true}, {"id": "sushi-4", "category_id": "sushi", "name": "Dynamite Shrimp", "ingredients": "Shrimp (8–9 pcs), Dynamite sauce, Togarashi, Chives", "price": 57.0, "image": "dynamite_shrimp.webp", "sort": 4, "active": true}, {"id": "sushi-5", "category_id": "sushi", "name": "Crab Salad Sushi", "ingredients": "Nori, Sushi rice, Crab stick, Carrots, Cucumber, White & black sesame, Japanese mayo, Spicy mayo, Tobiko (orange), Togarashi", "price": 63.0, "image": "crab_salad_sushi.webp", "sort": 5, "active": true}, {"id": "sushi-6", "category_id": "sushi", "name": "Spicy Tempura (8 cuts)", "ingredients": "Nori, Sushi rice, Shrimp tempura (2 pcs), Avocado, Cucumber, Shamsa sauce, Cream cheese, Sriracha, Red chilli, Chives", "price": 63.0, "image": "spicy_tempura.webp", "sort": 6, "active": true}, {"id": "sushi-7", "category_id": "sushi", "name": "Crispy Shrimp Rice Roll (8 cuts, grilled)", "ingredients": "Nori, Rice, Shrimp tempura (2 pcs), Avocado, Cream cheese, Spicy mayo, Teriyaki, White tanuki, Togarashi", "price": 63.0, "image": "crispy_shrimp_roll.webp", "sort": 7, "active": true}, {"id": "sushi-8", "category_id": "sushi", "name": "RQ Deep Fry Futomaki (6 cuts)", "ingredients": "Nori, Rice, Avocado, Cucumber, Crab stick (1 pc), Shrimp tempura (1 pc), Cream cheese, Spicy mayo, Teriyaki sauce, Crispy crab", "price": 63.0, "image": "futomaki.webp", "sort": 8, "active": true}, {"id": "hotdog-0", "category_id": "hotdog", "name": "Beef Hot Dog", "ingredients": "RQ sauce, Slice cheese, Beef hotdog", "price": 22.0, "image": "beef_hotdog.webp", "sort": 0, "active": true}, {"id": "hotdog-1", "category_id": "hotdog", "name": "Classic Beef Hot Dog", "ingredients": "Crispy onion, Mustard, Mayonnaise, Ketchup, Beef hotdog", "price": 25.0, "image": "rq_classic_hotdog.webp", "sort": 1, "active": true}, {"id": "hotdog-2", "category_id": "hotdog", "name": "RQ Beef Hot Dog", "ingredients": "RQ sauce, Caramelized onion, Crispy onion, Pickles, RQ beef hotdog", "price": 32.0, "image": "rq_beef_hotdog.webp", "sort": 2, "active": true}, {"id": "hotdog-3", "category_id": "hotdog", "name": "RQ Special Hot Dog", "ingredients": "Crispy onion, Beef bacon, Jalapeño, Slice cheese, Smoke sauce, Beef hotdog", "price": 29.0, "image": "rq_special_hotdog.webp", "sort": 3, "active": true}, {"id": "hotdog-4", "category_id": "hotdog", "name": "Special Shrimp Wrap", "ingredients": "Tortilla, Crispy shrimp, Gerger, Dynamite sauce, Hummus, Fries", "price": 47.0, "image": "shrimp_wrap.webp", "sort": 4, "active": true}, {"id": "apps-0", "category_id": "apps", "name": "Classic Fries", "ingredients": "Crispy fries, Salt", "price": 21.0, "image": "classic_fries.webp", "sort": 0, "active": true}, {"id": "apps-1", "category_id": "apps", "name": "Cheese Fries", "ingredients": "", "price": 27.0, "image": "classic_fries.webp", "sort": 1, "active": true}, {"id": "apps-2", "category_id": "apps", "name": "Truffle Fries", "ingredients": "", "price": 42.0, "image": "classic_fries.webp", "sort": 2, "active": true}, {"id": "apps-3", "category_id": "apps", "name": "Honey Chicken Tender", "ingredients": "", "price": 34.0, "image": "honey_tender.webp", "sort": 3, "active": true}, {"id": "apps-4", "category_id": "apps", "name": "Crab Salad", "ingredients": "Crab stick, Cucumber, Carrot, Shamsa sauce, Orange tobiko, Togarashi", "price": 35.0, "image": "crab_salad.webp", "sort": 4, "active": true}, {"id": "apps-5", "category_id": "apps", "name": "RQ Signature Fries", "ingredients": "", "price": 32.0, "image": "signature_fries.webp", "sort": 5, "active": true}, {"id": "combo-0", "category_id": "combo", "name": "RQ Wagyu Combo Box", "ingredients": "Wagyu sandwich, Fries, RQ sauce, Soft drink", "price": 70.0, "image": "combo_photo.webp", "sort": 0, "active": true}, {"id": "drinks-0", "category_id": "drinks", "name": "Coca Cola", "ingredients": "", "price": 7.0, "image": null, "sort": 0, "active": true}, {"id": "drinks-1", "category_id": "drinks", "name": "Pepsi", "ingredients": "", "price": 7.0, "image": null, "sort": 1, "active": true}, {"id": "drinks-2", "category_id": "drinks", "name": "Mountain Dew", "ingredients": "", "price": 7.0, "image": null, "sort": 2, "active": true}, {"id": "drinks-3", "category_id": "drinks", "name": "Sprite", "ingredients": "", "price": 7.0, "image": null, "sort": 3, "active": true}, {"id": "drinks-4", "category_id": "drinks", "name": "Shani", "ingredients": "", "price": 8.0, "image": null, "sort": 4, "active": true}], "categories": [{"id": "huwar", "name_en": "Huwar Burger", "name_ar": "برجر حوار", "sort": 0}, {"id": "wagyu", "name_en": "Wagyu Burger", "name_ar": "برجر واغيو", "sort": 1}, {"id": "chicken", "name_en": "Chicken", "name_ar": "دجاج", "sort": 2}, {"id": "sushi", "name_en": "Sushi", "name_ar": "سوشي", "sort": 3}, {"id": "hotdog", "name_en": "Hot Dog & Wrap", "name_ar": "هوت دوق وراب", "sort": 4}, {"id": "apps", "name_en": "Appetizers", "name_ar": "مقبلات", "sort": 5}, {"id": "combo", "name_en": "Combo", "name_ar": "كومبو", "sort": 6}, {"id": "drinks", "name_en": "Drinks", "name_ar": "مشروبات", "sort": 7}], "branches": [{"id": "wathba", "name": "Al Wathba", "name_ar": "الوثبة", "address": "ADNOC Al Wathba 717", "whatsapp": "971504102252", "open_time": "15:00:00", "close_time": "00:00:00", "manual_closed": false, "sort": 0}, {"id": "nahyan", "name": "Al Nahyan", "name_ar": "النهيان", "address": "Abu Dhabi, Al Nahyan", "whatsapp": "971504666123", "open_time": "15:00:00", "close_time": "00:00:00", "manual_closed": false, "sort": 1}, {"id": "mbz", "name": "MBZ", "name_ar": "مدينة محمد بن زايد", "address": "Mohamed Bin Zayed City", "whatsapp": "971504102212", "open_time": "15:00:00", "close_time": "00:00:00", "manual_closed": false, "sort": 2}, {"id": "alain", "name": "Al Ain", "name_ar": "العين", "address": "Bin Ham Hall", "whatsapp": "971504102262", "open_time": "15:00:00", "close_time": "00:00:00", "manual_closed": false, "sort": 3}]}</script>
+<script>
+(function(){
+var SB='https://dhqgorvtwgzekmmjztyr.supabase.co', KEY='sb_publishable_yAYV8YXgiq3DxyJZPqELXw_QbzvL5Fe';
+var SNAP=JSON.parse(document.getElementById('data').textContent);
+function api(path){return fetch(SB+'/rest/v1/'+path,{headers:{apikey:KEY,Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});}
+var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmtPrice(p){p=Number(p);return (p%1?p.toFixed(2):String(p));}
+var BR=[],CATS=[],byId={},cart=store.get('rq-cart',{}),branch=store.get('rq-branch',null);
+document.getElementById('logo').src='logo.png';
+
+// ---- opening hours (Asia/Dubai) ----
+function nowMin(){var parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dubai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());var h=0,m=0;parts.forEach(function(p){if(p.type==='hour')h=+p.value;if(p.type==='minute')m=+p.value;});return h*60+m;}
+function tmin(t){var a=String(t||'0:0').split(':');return (+a[0])*60+(+a[1]);}
+function fmtT(t){var m=tmin(t),h=Math.floor(m/60),mi=m%60,ap=h>=12?'م':'ص';h=h%12;if(h===0)h=12;return h+':'+(mi<10?'0':'')+mi+' '+ap;}
+function isOpen(b){if(!b||b.manual_closed)return false;var o=tmin(b.open_time),c=tmin(b.close_time),n=nowMin();if(o===c)return true;return o<c?(n>=o&&n<c):(n>=o||n<c);}
+function statusText(b){if(b.manual_closed)return 'مغلق مؤقتاً';return isOpen(b)?'مفتوح الحين · لين '+fmtT(b.close_time):'مغلق · يفتح '+fmtT(b.open_time);}
+function curBranch(){return BR.find(function(b){return b.id===branch;});}
+
+// ---- branches ----
+var bwrap=document.getElementById('branches'), seg=document.getElementById('branchSeg');
+function renderBranches(){
+  bwrap.innerHTML=BR.map(function(b){var op=isOpen(b);return '<button type="button" class="branch'+(op?'':' shut')+'" data-b="'+esc(b.id)+'" aria-pressed="'+(branch===b.id)+'"><b>'+esc(b.name)+'</b><span>'+esc(b.name_ar)+'</span><span class="a">'+esc(b.address)+'</span><span class="st '+(op?'on':'off')+'">'+statusText(b)+'</span></button>';}).join('');
+  seg.innerHTML=BR.map(function(b){return '<label><input type="radio" name="branch" value="'+esc(b.id)+'"'+(branch===b.id?' checked':'')+'><span>'+esc(b.name_ar)+(isOpen(b)?'':' · مغلق')+'</span></label>';}).join('');
+  var any=BR.some(isOpen), cb=curBranch();
+  var bar=document.getElementById('closedNote');
+  if(!any){bar.hidden=false;bar.textContent='كل الفروع مغلقة الحين. تقدر تتصفح المنيو، والطلب يفتح من الساعة '+fmtT(BR[0]?BR[0].open_time:'15:00')+'.';}
+  else bar.hidden=true;
+  var send=document.querySelector('.send'), sn=document.getElementById('sendNote');
+  if(cb&&!isOpen(cb)){send.disabled=true;sn.textContent='فرع '+cb.name_ar+' '+(cb.manual_closed?'مغلق مؤقتاً.':'مغلق الحين، يفتح الساعة '+fmtT(cb.open_time)+'.')+' اختر فرع ثاني مفتوح.';sn.hidden=false;}
+  else{send.disabled=false;sn.hidden=true;}
+}
+bwrap.addEventListener('click',function(e){var t=e.target.closest('.branch');if(!t)return;branch=t.dataset.b;store.set('rq-branch',branch);renderBranches();var b=curBranch();toast(isOpen(b)?'تم اختيار فرع '+b.name_ar:'فرع '+b.name_ar+' مغلق الحين');});
+seg.addEventListener('change',function(e){branch=e.target.value;store.set('rq-branch',branch);renderBranches();document.getElementById('eBranch').textContent='';});
+
+// ---- menu ----
+var nav=document.getElementById('catnav'), menu=document.getElementById('menu');
+function render(){
+  byId={};CATS.forEach(function(c){c.items.forEach(function(it){byId[it.id]=it;});});
+  Object.keys(cart).forEach(function(k){if(!byId[k])delete cart[k];});
+  nav.innerHTML=CATS.map(function(c){return '<a href="#c-'+esc(c.id)+'" data-c="'+esc(c.id)+'">'+esc(c.name_ar)+'</a>';}).join('');
+  menu.innerHTML=CATS.map(function(c){
+    return '<section class="cat" id="c-'+esc(c.id)+'"><h2>'+esc(c.name_ar)+'<small>'+esc(c.name_en)+'</small></h2><div class="list">'+c.items.map(function(it){
+      var photo=/combo_photo/.test(it.image||'');
+      var pic=it.image?'<div class="plate'+(photo?' photo':'')+'"><img loading="lazy" src="'+esc(it.image)+'" alt="'+esc(it.name)+'"></div>':'';
+      return '<article class="item'+(it.image?'':' noimg')+'">'+pic+'<div class="info"><h3 class="name">'+esc(it.name)+'</h3>'+(it.ingredients?'<p class="ing">'+esc(it.ingredients)+'</p>':'')+
+        '<div class="buy"><span class="price">'+fmtPrice(it.price)+'<small>AED</small></span><span class="ctl" data-id="'+esc(it.id)+'"></span></div></div></article>';
+    }).join('')+'</div></section>';
+  }).join('');
+  renderCtls();renderBar();observe();
+}
+function ctlHTML(id){var q=cart[id]||0;var nm=esc(byId[id].name);
+  return q? '<span class="step"><button type="button" data-a="inc" data-id="'+esc(id)+'" aria-label="زيادة '+nm+'">+</button><output aria-live="polite">'+q+'</output><button type="button" data-a="dec" data-id="'+esc(id)+'" aria-label="إنقاص '+nm+'">−</button></span>'
+          : '<button type="button" class="add" data-a="inc" data-id="'+esc(id)+'">أضف</button>';}
+function renderCtls(){document.querySelectorAll('.ctl').forEach(function(el){el.innerHTML=ctlHTML(el.dataset.id);});}
+function change(id,d){var q=(cart[id]||0)+d;if(q<=0)delete cart[id];else cart[id]=q;store.set('rq-cart',cart);renderCtls();renderBar();renderLines();}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(!b)return;var id=b.dataset.id;if(!byId[id])return;var was=cart[id]||0;change(id,b.dataset.a==='inc'?1:-1);if(b.dataset.a==='inc'&&!was)toast('أُضيف '+byId[id].name);});
+var io;
+function observe(){
+  if(!('IntersectionObserver' in window))return; if(io)io.disconnect();
+  var links=nav.querySelectorAll('a');
+  io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){links.forEach(function(a){var on=a.dataset.c===en.target.id.slice(2);a.classList.toggle('on',on);if(on){var r=a.getBoundingClientRect(),wr=nav.getBoundingClientRect();nav.scrollBy({left:(r.left+r.width/2)-(wr.left+wr.width/2),behavior:'smooth'});}});}});},{rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('section.cat').forEach(function(s){io.observe(s);});
+}
+function totals(){var n=0,t=0;Object.keys(cart).forEach(function(k){n+=cart[k];t+=cart[k]*Number(byId[k].price);});return{n:n,t:Math.round(t*100)/100};}
+function renderBar(){var x=totals();document.getElementById('bar').hidden=!x.n;document.getElementById('count').textContent=x.n;document.getElementById('tot').textContent=fmtPrice(x.t)+' AED';document.getElementById('sum').textContent=fmtPrice(x.t)+' AED';}
+function renderLines(){var ks=Object.keys(cart),L=document.getElementById('lines');
+  if(!ks.length){L.innerHTML='<p class="empty">سلتك فاضية. أضف أصناف من المنيو.</p>';return;}
+  L.innerHTML=ks.map(function(k){var it=byId[k];return '<div class="line"><span class="n">'+esc(it.name)+'</span>'+ctlHTML(k)+'<span class="p">'+fmtPrice(it.price*cart[k])+' AED</span></div>';}).join('');}
+
+// ---- sheet ----
+var sheet=document.getElementById('sheet');
+function openSheet(){renderLines();renderBranches();sheet.classList.add('open');document.body.style.overflow='hidden';document.getElementById('closeCart').focus();}
+function closeSheet(){sheet.classList.remove('open');document.body.style.overflow='';document.getElementById('openCart').focus();}
+document.getElementById('openCart').onclick=openSheet;
+document.getElementById('closeCart').onclick=closeSheet;
+document.getElementById('scrim').onclick=closeSheet;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sheet.classList.contains('open'))closeSheet();});
+var form=document.getElementById('form');
+var saved=store.get('rq-customer',{});['name','phone'].forEach(function(f){if(saved[f])document.getElementById(f).value=saved[f];});
+form.addEventListener('submit',function(e){
+  e.preventDefault();
+  var ok=true;function err(id,msg){document.getElementById(id).textContent=msg;if(msg)ok=false;}
+  var name=document.getElementById('name').value.trim(), phone=document.getElementById('phone').value.trim(), notes=document.getElementById('notes').value.trim();
+  var b=curBranch();
+  err('eBranch',b?'':'اختر الفرع اللي تبي تطلب منه.');
+  err('eName',name?'':'اكتب اسمك.');
+  err('ePhone',/^[+0-9\s-]{8,}$/.test(phone)?'':'اكتب رقم جوال صحيح.');
+  var x=totals(); if(!x.n){toast('السلة فاضية');return;}
+  if(!ok){var first=form.querySelector('.err:not(:empty)');if(first)first.scrollIntoView({block:'center',behavior:'smooth'});return;}
+  if(!isOpen(b)){renderBranches();toast('الفرع مغلق الحين');return;}
+  store.set('rq-customer',{name:name,phone:phone});
+  var lines=Object.keys(cart).map(function(k){var it=byId[k];return cart[k]+' × '+it.name+' = '+fmtPrice(it.price*cart[k])+' AED';});
+  var msg=['طلب جديد من المنيو الإلكتروني – RQ Kitchen','','الفرع: '+b.name_ar+' ('+b.name+')','نوع الطلب: استلام من الفرع','الاسم: '+name,'الجوال: '+phone,
+    'الدفع: '+form.querySelector('input[name="pay"]:checked').value,'','الطلب:'].concat(lines,['','المجموع: '+fmtPrice(x.t)+' AED']);
+  if(notes)msg.push('ملاحظات: '+notes);
+  var url='https://wa.me/'+String(b.whatsapp).replace(/\D/g,'')+'?text='+encodeURIComponent(msg.join('\n'));
+  var w=window.open(url,'_blank','noopener'); if(!w)window.location.href=url;
+  toast('فتحنا واتساب، اضغط إرسال هناك');
+});
+var tt;function toast(s){var t=document.getElementById('toast');t.textContent=s;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},1800);}
+
+// ---- load ----
+function apply(br,cats,items){
+  BR=br.slice().sort(function(a,b){return a.sort-b.sort;});
+  if(branch&&!BR.some(function(b){return b.id===branch;}))branch=null;
+  CATS=cats.slice().sort(function(a,b){return a.sort-b.sort;}).map(function(c){return{id:c.id,name_en:c.name_en,name_ar:c.name_ar,items:items.filter(function(i){return i.category_id===c.id&&i.active!==false;}).sort(function(a,b){return a.sort-b.sort;})};}).filter(function(c){return c.items.length;});
+  render();renderBranches();
+}
+apply(SNAP.branches,SNAP.categories,SNAP.items);
+function load(){
+  Promise.all([api('menu_branches?select=*'),api('menu_categories?select=*'),api('menu_items?select=*&active=eq.true')])
+    .then(function(r){store.set('rq-snap',{b:r[0],c:r[1],i:r[2]});apply(r[0],r[1],r[2]);})
+    .catch(function(){var s=store.get('rq-snap',null);if(s)apply(s.b,s.c,s.i);});
+}
+var cached=store.get('rq-snap',null); if(cached)apply(cached.b,cached.c,cached.i);
+load(); setInterval(renderBranches,60000); setInterval(function(){api('menu_branches?select=*').then(function(b){BR=b.sort(function(x,y){return x.sort-y.sort;});renderBranches();}).catch(function(){});},120000);
+})();
+</script>
+</body>
+</html>
