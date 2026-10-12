@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1C1410">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RQ الفرع">
+<link rel="apple-touch-icon" href="logo.png">
+<title>RQ — شاشة الفرع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Alexandria:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EFE9E3; --card:#FFFFFF; --surface:#F5EFE9; --line:#E2D7CC; --ink:#1C1410; --muted:#6A5A50;
+  --brand:#F29835; --brand-ink:#14100D; --brand-text:#A84F07; --disc:#FDE7CB;
+  --ok:#17803F; --ok-bg:#E2F3E8; --danger:#B42318; --danger-bg:#FDECEA; --blue:#1F5FBF; --blue-bg:#E6EEFB;
+  --display:'Bricolage Grotesque','Arial Black',system-ui,sans-serif; --ar:'Alexandria','Geeza Pro','Segoe UI',Tahoma,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F0D0C;--card:#1C1815;--surface:#26201C;--line:#3A2F27;--ink:#FFF4E6;--muted:#C9BBAE;--brand-text:#F7B060;--disc:#3A2A1A;--ok-bg:#133222;--danger-bg:#3A1714;--blue-bg:#16243D;--blue:#8DB4F5}}
+:root[data-theme="dark"]{--bg:#0F0D0C;--card:#1C1815;--surface:#26201C;--line:#3A2F27;--ink:#FFF4E6;--muted:#C9BBAE;--brand-text:#F7B060;--disc:#3A2A1A;--ok-bg:#133222;--danger-bg:#3A1714;--blue-bg:#16243D;--blue:#8DB4F5}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ar);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:10px}
+[hidden]{display:none !important}
+.lat{font-family:var(--display);direction:ltr;unicode-bidi:isolate}
+
+/* login */
+.login{max-width:440px;margin:0 auto;padding:calc(36px + env(safe-area-inset-top,0px)) 22px 30px}
+.login .badge{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.login .badge img{width:84px;background:#fff;border-radius:16px;padding:6px 10px}
+.login .badge b{display:block;font-size:22px;font-weight:800}
+.login .badge span{color:var(--muted);font-size:14px}
+.lbl{display:block;font-weight:700;font-size:14px;margin:0 0 8px}
+.brgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.brgrid label{display:block}
+.brgrid input{position:absolute;opacity:0;pointer-events:none}
+.brgrid span{display:block;text-align:center;padding:14px 8px;border:2px solid var(--line);border-radius:14px;font-weight:700;background:var(--card)}
+.brgrid input:checked+span{border-color:var(--brand);background:var(--disc)}
+.brgrid input:focus-visible+span{outline:3px solid var(--brand);outline-offset:2px}
+.f{display:block;width:100%;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:12px 14px;font-size:16px}
+.f:focus{border-color:var(--brand);outline:none}
+.pin{font-family:var(--display);letter-spacing:10px;text-align:center;font-size:22px}
+.err{color:var(--danger);font-size:14px;margin-top:8px;min-height:20px}
+
+.btn{appearance:none;border:0;border-radius:14px;padding:12px 16px;font-weight:800;font-size:15px;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;text-align:center}
+.btn.block{width:100%}
+.btn.pri{background:var(--brand);color:var(--brand-ink)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.dark{background:var(--ink);color:var(--bg)}
+.btn.ghost{background:var(--surface);color:var(--ink)}
+.btn.blue{background:var(--blue-bg);color:var(--blue)}
+.btn.danger{background:transparent;color:var(--danger);border:2px solid currentColor}
+.btn.sm{min-height:40px;padding:8px 12px;font-size:13.5px;border-radius:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:18px;height:18px;flex:none}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:#1C1410;color:#FFF4E6;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top img{width:52px;background:#fff;border-radius:10px;padding:3px 6px}
+.top .t{flex:1;min-width:150px}
+.top .t b{display:block;font-size:18px;font-weight:800}
+.top .t small{display:block;font-size:12.5px;opacity:.8}
+.top .clock{font-family:var(--display);font-size:20px;direction:ltr}
+.tbtn{appearance:none;border:0;background:rgba(255,255,255,.1);color:inherit;border-radius:12px;padding:9px 12px;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.tbtn.warn{background:var(--brand);color:var(--brand-ink);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.tbtn.warn{animation:none}}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;opacity:.85}
+.live i{width:8px;height:8px;border-radius:50%;background:#2FB45F}
+.live.off i{background:#F05A4A}
+
+/* board */
+.tabs{display:none;gap:6px;padding:10px 12px 0}
+.tabs button{flex:1;appearance:none;border:0;background:var(--card);border-radius:12px;padding:10px 6px;font-weight:800;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.n{background:var(--brand);color:var(--brand-ink);font-family:var(--display);min-width:22px;height:22px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px}
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px;align-items:start}
+.col h2{margin:4px 4px 10px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.col .empty{color:var(--muted);text-align:center;padding:30px 10px;border:2px dashed var(--line);border-radius:16px;font-size:14px}
+@media (max-width:899px){.tabs{display:flex}.board{grid-template-columns:1fr}.col{display:none}.col.on{display:block}.col h2{display:none}}
+
+.card{background:var(--card);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(28,20,16,.06);border-top:6px solid var(--line)}
+.card.st-new{border-top-color:var(--brand)}
+.card.st-new.late{border-top-color:var(--danger);box-shadow:0 0 0 3px var(--danger)}
+.card.st-accepted,.card.st-preparing{border-top-color:#C9A227}
+.card.st-ready{border-top-color:var(--ok)}
+.card.st-on_way{border-top-color:var(--blue)}
+.card.st-delivered,.card.st-picked_up{border-top-color:var(--ok);opacity:.85}
+.card.st-cancelled{border-top-color:var(--danger);opacity:.7}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ch .no{font-family:var(--display);font-weight:800;font-size:24px;direction:ltr}
+.ago{font-size:13px;color:var(--muted);font-weight:600}
+.ago.late{color:var(--danger)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:99px;padding:4px 10px;white-space:nowrap}
+.pill.del{background:var(--blue-bg);color:var(--blue)}
+.pill.pick{background:var(--disc);color:var(--brand-text)}
+.pill.cash{background:var(--ok-bg);color:var(--ok)}
+.pill.card{background:var(--surface);color:var(--ink)}
+.pill.bad{background:var(--danger-bg);color:var(--danger)}
+.items{list-style:none;margin:0 0 10px;padding:10px 12px;background:var(--surface);border-radius:14px}
+.items li{padding:4px 0;border-bottom:1px dashed var(--line)}
+.items li:last-child{border-bottom:0}
+.items .r{display:flex;gap:10px;align-items:baseline;direction:ltr;justify-content:flex-end;text-align:right}
+.items .q{font-family:var(--display);font-weight:800;font-size:18px;color:var(--brand-text);min-width:30px;text-align:left}
+.items .nm{font-weight:700;font-size:15.5px;font-family:var(--display)}
+.items .nt{display:block;font-size:13px;color:var(--danger);font-weight:700;text-align:right;direction:rtl}
+.note{background:var(--disc);color:var(--brand-text);border-radius:12px;padding:8px 12px;font-size:14px;font-weight:600;margin-bottom:10px}
+.cust{font-size:14px;margin-bottom:10px;display:flex;flex-direction:column;gap:2px}
+.cust b{font-size:15px}
+.cust .ph{font-family:var(--display);direction:ltr;text-align:right;color:var(--muted)}
+.cust .ad{color:var(--muted);font-size:13px}
+.tot{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-bottom:12px}
+.tot b{font-family:var(--display);font-size:20px;direction:ltr}
+.drv{display:flex;align-items:center;gap:10px;background:var(--blue-bg);color:var(--blue);border-radius:12px;padding:8px 12px;font-size:13.5px;font-weight:700;margin-bottom:10px}
+.drv.none{background:var(--surface);color:var(--muted)}
+.drv svg{width:20px;height:20px;flex:none}
+.acts{display:grid;gap:8px}
+.acts.two{grid-template-columns:1fr 1fr}
+.links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.eta{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.eta label{flex:1;min-width:60px}
+.eta input{position:absolute;opacity:0;pointer-events:none}
+.eta span{display:block;text-align:center;padding:8px 4px;border:2px solid var(--line);border-radius:10px;font-weight:700;font-size:13.5px}
+.eta input:checked+span{border-color:var(--brand);background:var(--disc)}
+.eta input:focus-visible+span{outline:3px solid var(--brand);outline-offset:2px}
+.hist{padding:0 12px 30px}
+.hist summary{cursor:pointer;font-weight:800;padding:12px 4px}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.sum{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 12px}
+.sum div{background:var(--card);border-radius:14px;padding:10px 14px}
+.sum span{display:block;font-size:12.5px;color:var(--muted)}
+.sum b{font-family:var(--display);font-size:20px;direction:ltr;display:block;text-align:right}
+
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(20,16,14,.55);padding:16px}
+.modal.open{display:flex}
+.modal .p{background:var(--card);width:100%;max-width:460px;border-radius:22px;padding:20px}
+.modal h2{margin:0 0 6px;font-size:20px}
+.modal p{margin:0 0 14px;color:var(--muted)}
+.reasons{display:grid;gap:8px;margin-bottom:12px}
+.reasons label{display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;cursor:pointer}
+.reasons input{accent-color:var(--brand);width:18px;height:18px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:14px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 40px)}
+.toast.show{opacity:1}
+.demo{background:var(--brand);color:var(--brand-ink);font-size:12.5px;text-align:center;padding:6px 12px;font-weight:600}
+
+/* receipt print */
+#receipt{display:none}
+@media print{
+  body *{visibility:hidden}
+  #receipt,#receipt *{visibility:visible}
+  #receipt{display:block;position:absolute;inset:0 auto auto 0;width:72mm;padding:2mm;font-family:Arial,sans-serif;color:#000;font-size:12pt}
+  #receipt h3{margin:0;text-align:center;font-size:16pt}
+  #receipt .c{text-align:center}
+  #receipt hr{border:0;border-top:1px dashed #000;margin:6px 0}
+  #receipt table{width:100%;border-collapse:collapse}
+  #receipt td{padding:2px 0;vertical-align:top}
+  #receipt .big{font-size:22pt;font-weight:bold;text-align:center}
+  @page{margin:0}
+}
+</style>
+</head>
+<body>
+<div class="demo" id="demo" hidden>معاينة تجريبية: الطلبات هنا وهمية</div>
+
+<section id="loginV" class="login" hidden>
+  <div class="badge"><img src="logo.png" alt="RQ Kitchen"><div><b>شاشة الفرع</b><span>استقبال طلبات التطبيق</span></div></div>
+  <form id="lf" novalidate>
+    <span class="lbl" id="brL">الفرع</span>
+    <div class="brgrid" id="brgrid" role="radiogroup" aria-labelledby="brL"></div>
+    <label class="lbl" for="lpin">الرقم السري للفرع</label>
+    <input class="f pin" id="lpin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" placeholder="••••">
+    <button class="btn pri block" id="lbtn" style="margin-top:14px">دخول</button>
+    <div class="err" id="lerr" role="alert"></div>
+  </form>
+</section>
+
+<section id="appV" hidden>
+  <header class="top">
+    <img src="logo.png" alt="">
+    <div class="t"><b id="bName"></b><small><span class="live" id="live"><i></i><span id="liveT">متصل</span></span> · <span id="bOpen"></span></small></div>
+    <span class="clock" id="clock"></span>
+    <button type="button" class="tbtn warn" id="sound">فعّل صوت التنبيه</button>
+    <button type="button" class="tbtn" id="logout">خروج</button>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" data-col="c-new" aria-selected="true">جديدة <span class="n" id="tn-new" hidden></span></button>
+    <button type="button" role="tab" data-col="c-prep" aria-selected="false">نجهّزها <span class="n" id="tn-prep" hidden></span></button>
+    <button type="button" role="tab" data-col="c-ready" aria-selected="false">جاهزة <span class="n" id="tn-ready" hidden></span></button>
+  </nav>
+  <main class="board">
+    <section class="col on" id="c-new"><h2>طلبات جديدة <span class="n" id="n-new" hidden></span></h2><div id="l-new"></div></section>
+    <section class="col" id="c-prep"><h2>نجهّزها <span class="n" id="n-prep" hidden></span></h2><div id="l-prep"></div></section>
+    <section class="col" id="c-ready"><h2>جاهزة وفي الطريق <span class="n" id="n-ready" hidden></span></h2><div id="l-ready"></div></section>
+  </main>
+  <details class="hist" id="hist"><summary>طلبات آخر 24 ساعة</summary><div class="sum" id="hsum"></div><div class="hgrid" id="hlist"></div></details>
+</section>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mT"><div class="p"><h2 id="mT"></h2><p id="mP"></p><div id="mB"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button type="button" class="btn ghost" id="mNo">رجوع</button><button type="button" class="btn danger" id="mYes">تأكيد</button></div></div></div>
+<div id="receipt"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var SB='https://dhqgorvtwgzekmmjztyr.supabase.co', KEY='sb_publishable_yAYV8YXgiq3DxyJZPqELXw_QbzvL5Fe';
+var H={apikey:KEY,'Content-Type':'application/json',Accept:'application/json'};
+var $=function(s){return document.querySelector(s);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function money(p){p=Math.round(Number(p)*100)/100;return (p%1?p.toFixed(2):String(p));}
+var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:function(k){try{localStorage.removeItem(k);}catch(e){}}};
+var tt;function toast(s){var t=$('#toast');t.textContent=s;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2400);}
+var I={
+  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"/></svg>',
+  scoot:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M8.5 17h7M15 17l-2-7h3l2 4M5 11h6"/></svg>'
+};
+var ERR={bad_pin:'الرقم السري غلط.',locked:'محاولات كثيرة غلط. جرّب بعد 10 دقائق.',no_branch:'اختر الفرع.',not_found:'ما لقينا الطلب.',bad_status:'ما تقدر تغيّر الطلب لهالحالة.',closed:'الطلب مقفل.',net:'تعذّر الاتصال. تأكد من الإنترنت.'};
+function emsg(e){return ERR[e]||ERR.net;}
+
+var DEMO=false, AUTH=store.get('rqb-auth',null), BR=[], ACTIVE=[], HIST=[], known=null, soundOn=false, audio=null, ringTimer=null, wake=null, lastOk=Date.now(), col='c-new';
+var preview=location.protocol==='file:'||/claude|anthropic|usercontent/.test(location.hostname);
+
+function rpc(fn,b){if(DEMO)return Promise.resolve(demo(fn,b||{}));return fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:H,body:JSON.stringify(b||{})}).then(function(r){return r.json().catch(function(){return null;}).then(function(j){if(!r.ok)throw new Error('net');return j;});});}
+function rest(p){if(DEMO)return Promise.resolve(DB.branches);return fetch(SB+'/rest/v1/'+p,{headers:H}).then(function(r){if(!r.ok)throw new Error('net');return r.json();});}
+
+/* ---------- preview-only fake backend ---------- */
+var DB=null;
+function demoInit(){var now=Date.now();var mk=function(no,kind,st,min,items,pay,extra){return Object.assign({id:'o'+no,order_no:no,branch_id:'mbz',kind:kind,status:st,payment:pay,name:['أحمد','سارة','خالد','مريم'][no%4],phone:'97150'+(1000000+no),address:kind==='delivery'?{label:'البيت',area:'MBZ Zone '+(no%20+1),details:'Villa '+no,lat:24.33,lng:54.55}:null,notes:no%2?'بدون بصل':'',subtotal:items.reduce(function(a,i){return a+i.price*i.qty;},0),delivery_fee:kind==='delivery'?10:0,total:items.reduce(function(a,i){return a+i.price*i.qty;},0)+(kind==='delivery'?10:0),eta_minutes:null,history:[{s:'new',at:new Date(now-min*60000).toISOString()}],created_at:new Date(now-min*60000).toISOString(),items:items,driver:null},extra||{});};
+  var A=[{name:'Double Wagyu Burger',price:63,qty:1,note:'بدون بصل'},{name:'Classic Fries',price:21,qty:2,note:''}],B=[{name:'Crunchy Crab (8 cuts)',price:63,qty:1,note:''},{name:'Pepsi',price:7,qty:2,note:''}],C=[{name:'RQ Special Hot Dog',price:29,qty:2,note:''}];
+  DB={branches:[{id:'wathba',name_ar:'الوثبة',sort:0,open_time:'15:00',close_time:'00:00',manual_closed:false},{id:'nahyan',name_ar:'النهيان',sort:1,open_time:'15:00',close_time:'00:00',manual_closed:false},{id:'mbz',name_ar:'مدينة محمد بن زايد',sort:2,open_time:'00:00',close_time:'00:00',manual_closed:false},{id:'alain',name_ar:'العين',sort:3,open_time:'15:00',close_time:'00:00',manual_closed:false}],
+    orders:[mk(1061,'delivery','new',1,A,'cash'),mk(1060,'pickup','new',4,C,'card'),mk(1058,'delivery','preparing',12,B,'cash',{eta_minutes:20,driver:{name:'محمد',phone:'971500000001'}}),mk(1057,'pickup','ready',18,C,'cash'),mk(1055,'delivery','on_way',30,A,'card',{driver:{name:'محمد',phone:'971500000001'}}),mk(1050,'delivery','delivered',95,B,'cash'),mk(1049,'pickup','cancelled',120,C,'cash',{cancel_reason:'صنف خلص'})]};
+  setTimeout(function(){DB.orders.unshift(mk(1062,'delivery','new',0,B,'cash'));},20000);}
+function demo(fn,b){
+  if(fn==='app_staff_login')return /^\d{4,8}$/.test(b.p||'')?{ok:true}:{ok:false,error:'bad_pin'};
+  if(fn==='app_staff_orders'){var act=['new','accepted','preparing','ready','on_way'];return{ok:true,now:new Date().toISOString(),orders:DB.orders.filter(function(o){return b.scope==='active'?act.indexOf(o.status)>-1:true;})};}
+  if(fn==='app_staff_set_status'){var o=DB.orders.find(function(x){return x.id===b.order_id;});o.status=b.status;if(b.eta)o.eta_minutes=b.eta;if(b.reason)o.cancel_reason=b.reason;o.history.push({s:b.status,at:new Date().toISOString()});return{ok:true};}
+  return{ok:true};
+}
+
+/* ---------- time ---------- */
+function nowMin(){var p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dubai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),h=0,m=0;p.forEach(function(x){if(x.type==='hour')h=+x.value;if(x.type==='minute')m=+x.value;});return h*60+m;}
+function tmin(t){var a=String(t||'0:0').split(':');return (+a[0])*60+(+a[1]);}
+function fmtT(t){var m=tmin(t),h=Math.floor(m/60),mi=m%60,ap=h>=12?'م':'ص';h=h%12;if(h===0)h=12;return h+':'+(mi<10?'0':'')+mi+' '+ap;}
+function isOpen(b){if(!b||b.manual_closed)return false;var o=tmin(b.open_time),c=tmin(b.close_time),n=nowMin();if(o===c)return true;return o<c?(n>=o&&n<c):(n>=o||n<c);}
+function mins(s){return Math.max(0,Math.floor((Date.now()-new Date(s).getTime())/60000));}
+function hhmm(s){try{return new Intl.DateTimeFormat('ar-AE',{timeZone:'Asia/Dubai',hour:'numeric',minute:'2-digit'}).format(new Date(s));}catch(e){return '';}}
+function tick(){try{$('#clock').textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dubai',hour:'2-digit',minute:'2-digit'}).format(new Date());}catch(e){}}
+
+/* ---------- login ---------- */
+function branchName(id){var b=BR.find(function(x){return x.id===id;});return b?b.name_ar:id;}
+function showLogin(){$('#loginV').hidden=false;$('#appV').hidden=true;stopRing();
+  var last=store.get('rqb-last',null);
+  $('#brgrid').innerHTML=BR.map(function(b,i){return '<label><input type="radio" name="br" value="'+esc(b.id)+'"'+((last?b.id===last:i===0)?' checked':'')+'><span>'+esc(b.name_ar)+'</span></label>';}).join('');}
+$('#lf').addEventListener('submit',function(e){e.preventDefault();var b=document.querySelector('[name=br]:checked'),p=$('#lpin').value.trim(),E=$('#lerr');E.textContent='';
+  if(!b){E.textContent=ERR.no_branch;return;}if(!/^\d{4,8}$/.test(p)){E.textContent=ERR.bad_pin;return;}
+  var btn=$('#lbtn');btn.disabled=true;rpc('app_staff_login',{branch_id:b.value,p:p}).then(function(r){if(r&&r.ok){AUTH={b:b.value,p:p};store.set('rqb-auth',AUTH);store.set('rqb-last',b.value);known=null;start();}else E.textContent=emsg(r&&r.error);}).catch(function(){E.textContent=ERR.net;}).finally(function(){btn.disabled=false;});});
+$('#logout').onclick=function(){confirmBox('خروج من شاشة الفرع','بتوقف التنبيهات على هالجهاز لين تدخل مرة ثانية.','',function(){AUTH=null;store.del('rqb-auth');showLogin();});};
+
+/* ---------- sound ---------- */
+function unlock(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();soundOn=true;}catch(e){}var s=$('#sound');s.classList.remove('warn');s.textContent='الصوت شغّال';}
+$('#sound').onclick=function(){unlock();ding();keepAwake();};
+document.addEventListener('pointerdown',function once(){if(!soundOn&&AUTH){unlock();keepAwake();}},{once:true});
+function ding(){if(!audio||!soundOn)return;try{[0,.22,.44,.9,1.12,1.34].forEach(function(t,i){var o=audio.createOscillator(),g=audio.createGain();o.type='square';o.frequency.value=i%3===2?1320:988;o.connect(g);g.connect(audio.destination);g.gain.setValueAtTime(0.0001,audio.currentTime+t);g.gain.exponentialRampToValueAtTime(0.25,audio.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+t+0.18);o.start(audio.currentTime+t);o.stop(audio.currentTime+t+0.2);});}catch(e){}if(navigator.vibrate)navigator.vibrate([300,150,300]);}
+function startRing(){if(ringTimer)return;ding();ringTimer=setInterval(function(){if(ACTIVE.some(function(o){return o.status==='new';}))ding();else stopRing();},8000);}
+function stopRing(){clearInterval(ringTimer);ringTimer=null;}
+function keepAwake(){if('wakeLock' in navigator&&!wake){navigator.wakeLock.request('screen').then(function(w){wake=w;w.addEventListener('release',function(){wake=null;});}).catch(function(){});}}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&AUTH){keepAwake();load();}});
+
+/* ---------- render ---------- */
+var REASONS=['صنف من الطلب خلص','الفرع مزدحم جداً','الفرع بيقفل','العنوان خارج نطاق التوصيل'];
+function tags(o){return '<div class="tags">'+(o.kind==='delivery'?'<span class="pill del">توصيل</span>':'<span class="pill pick">استلام من الفرع</span>')+(o.payment==='cash'?'<span class="pill cash">كاش</span>':'<span class="pill card">بطاقة عند الاستلام</span>')+(o.eta_minutes&&['accepted','preparing'].indexOf(o.status)>-1?'<span class="pill pick">جاهز خلال '+o.eta_minutes+' د</span>':'')+'</div>';}
+function itemsHTML(o){return '<ul class="items">'+o.items.map(function(i){return '<li><div class="r"><span class="nm">'+esc(i.name)+'</span><span class="q">'+i.qty+'×</span></div>'+(i.note?'<span class="nt">'+esc(i.note)+'</span>':'')+'</li>';}).join('')+'</ul>';}
+function custHTML(o){var a=o.address,tel='+'+String(o.phone||'').replace(/\D/g,'');
+  return '<div class="cust"><b>'+esc(o.name)+'</b><span class="ph">'+esc(tel)+'</span>'+(a?'<span class="ad">'+esc(a.label||'')+' · '+esc(a.area||'')+(a.details?' · '+esc(a.details):'')+'</span>':'')+'</div>';}
+function driverHTML(o){if(o.kind!=='delivery'||['delivered','cancelled'].indexOf(o.status)>-1)return '';var d=o.driver;
+  if(d)return '<div class="drv">'+I.scoot+'<span>'+(o.status==='on_way'?'السائق '+esc(d.name)+' في الطريق للعميل':'السائق '+esc(d.name)+' بيستلم الطلب')+'</span></div>';
+  return '<div class="drv none">'+I.scoot+'<span>'+(o.status==='new'?'السائقين يشوفونه بعد ما تقبله':'ما أخذه سائق للحين')+'</span></div>';}
+function linksHTML(o){var tel='+'+String(o.phone||'').replace(/\D/g,''),a=o.address;
+  return '<div class="links"><a class="btn sm ghost" href="tel:'+esc(tel)+'">'+I.phone+' العميل</a>'+(a&&a.lat!=null?'<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+a.lat+','+a.lng+'">'+I.map+' الموقع</a>':'')+
+    (o.driver?'<a class="btn sm ghost" href="tel:+'+esc(String(o.driver.phone||'').replace(/\D/g,''))+'">'+I.phone+' السائق</a>':'')+'<button type="button" class="btn sm ghost" data-print="'+esc(o.id)+'">'+I.print+' طباعة</button></div>';}
+function actsHTML(o){var id=esc(o.id);
+  if(o.status==='new')return '<div class="eta" role="radiogroup" aria-label="وقت التجهيز">'+[10,15,20,30].map(function(m,i){return '<label><input type="radio" name="eta-'+id+'" value="'+m+'"'+(i===1?' checked':'')+'><span>'+m+' د</span></label>';}).join('')+'</div>'+
+    '<div class="acts two"><button type="button" class="btn ok" data-act="accept" data-id="'+id+'">قبول الطلب</button><button type="button" class="btn danger" data-act="reject" data-id="'+id+'">رفض</button></div>';
+  if(o.status==='accepted')return '<div class="acts"><button type="button" class="btn dark" data-act="preparing" data-id="'+id+'">بدأنا التجهيز</button></div>';
+  if(o.status==='preparing')return '<div class="acts"><button type="button" class="btn ok" data-act="ready" data-id="'+id+'">الطلب جاهز</button></div>';
+  if(o.status==='ready'&&o.kind==='pickup')return '<div class="acts"><button type="button" class="btn ok" data-act="picked_up" data-id="'+id+'">العميل استلم الطلب</button></div>';
+  if(o.status==='ready'&&o.kind==='delivery'&&!o.driver)return '<div class="acts"><button type="button" class="btn blue" data-act="on_way" data-id="'+id+'">طلع مع سائق الفرع</button></div>';
+  if(o.status==='on_way'&&!o.driver)return '<div class="acts"><button type="button" class="btn ok" data-act="delivered" data-id="'+id+'">تم التوصيل</button></div>';
+  return '';}
+function cardHTML(o,hist){var m=mins(o.created_at),late=o.status==='new'&&m>=3;
+  return '<article class="card st-'+o.status+(late?' late':'')+'"><div class="ch"><span class="no">#'+o.order_no+'</span><span class="ago'+(late?' late':'')+'">'+(hist?hhmm(o.created_at):(m<1?'الحين':'قبل '+m+' د'))+'</span></div>'+tags(o)+
+    (o.status==='cancelled'?'<div class="note" style="background:var(--danger-bg);color:var(--danger)">ملغي: '+esc(o.cancel_reason||'')+'</div>':'')+
+    itemsHTML(o)+(o.notes?'<div class="note">ملاحظة العميل: '+esc(o.notes)+'</div>':'')+custHTML(o)+driverHTML(o)+
+    '<div class="tot"><span>الإجمالي'+(o.delivery_fee>0?' (مع التوصيل)':'')+'</span><b>'+money(o.total!=null?o.total:o.subtotal+o.delivery_fee)+' AED</b></div>'+(hist?'':actsHTML(o))+linksHTML(o)+'</article>';}
+function render(){
+  var groups={new:[],prep:[],ready:[]};
+  ACTIVE.slice().sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at);}).forEach(function(o){if(o.status==='new')groups.new.push(o);else if(o.status==='accepted'||o.status==='preparing')groups.prep.push(o);else groups.ready.push(o);});
+  [['new','ما فيه طلبات جديدة. أول ما يوصل طلب بتسمع تنبيه.'],['prep','ما فيه طلبات قيد التجهيز.'],['ready','ما فيه طلبات جاهزة.']].forEach(function(g){var k=g[0],l=groups[k];
+    $('#l-'+k).innerHTML=l.length?l.map(function(o){return cardHTML(o,false);}).join(''):'<div class="empty">'+g[1]+'</div>';
+    ['#n-','#tn-'].forEach(function(p){var n=$(p+k);n.hidden=!l.length;n.textContent=l.length;});});
+  var nn=groups.new.length;document.title=(nn?'('+nn+') طلب جديد · ':'')+'RQ — شاشة الفرع';
+}
+function renderHist(){var done=HIST.filter(function(o){return o.status==='delivered'||o.status==='picked_up';}),canc=HIST.filter(function(o){return o.status==='cancelled';});
+  var sales=done.reduce(function(a,o){return a+Number(o.total||0);},0),cash=done.filter(function(o){return o.payment==='cash';}).reduce(function(a,o){return a+Number(o.total||0);},0);
+  $('#hsum').innerHTML='<div><span>طلبات منتهية</span><b>'+done.length+'</b></div><div><span>المبيعات</span><b>'+money(sales)+' AED</b></div><div><span>منها كاش</span><b>'+money(cash)+' AED</b></div><div><span>ملغية</span><b>'+canc.length+'</b></div>';
+  var list=HIST.filter(function(o){return ['delivered','picked_up','cancelled'].indexOf(o.status)>-1;});
+  $('#hlist').innerHTML=list.length?list.map(function(o){return cardHTML(o,true);}).join(''):'<p style="color:var(--muted)">ما فيه طلبات منتهية.</p>';}
+
+/* ---------- actions ---------- */
+document.querySelectorAll('[data-col]').forEach(function(b){b.onclick=function(){col=b.dataset.col;document.querySelectorAll('[data-col]').forEach(function(x){x.setAttribute('aria-selected',x===b);});document.querySelectorAll('.col').forEach(function(c){c.classList.toggle('on',c.id===col);});};});
+document.addEventListener('click',function(e){var b=e.target.closest('[data-act]');if(b){act(b);return;}var p=e.target.closest('[data-print]');if(p)printOrder(p.dataset.print);});
+function act(b){var id=b.dataset.id,a=b.dataset.act,o=ACTIVE.find(function(x){return x.id===id;});if(!o)return;
+  if(a==='reject')return confirmBox('رفض الطلب #'+o.order_no,'اختر السبب، بيوصل للعميل.','<div class="reasons">'+REASONS.map(function(r,i){return '<label><input type="radio" name="rsn" value="'+esc(r)+'"'+(i?'':' checked')+'>'+esc(r)+'</label>';}).join('')+'</div>',function(){var r=document.querySelector('[name=rsn]:checked');setStatus(o,'cancelled',null,r?r.value:'اعتذر الفرع',b);});
+  if(a==='accept'){var e=document.querySelector('[name="eta-'+id+'"]:checked');return setStatus(o,'accepted',e?Number(e.value):15,null,b);}
+  if(a==='on_way')return confirmBox('طلع الطلب #'+o.order_no+'؟','استخدم هذا بس إذا وصّله سائق الفرع بدون تطبيق السائق.','',function(){setStatus(o,'on_way',null,null,b);},'ok');
+  if(a==='delivered')return confirmBox('وصل الطلب #'+o.order_no+'؟','تأكد إن السائق سلّم الطلب وحصّل المبلغ.','',function(){setStatus(o,'delivered',null,null,b);},'ok');
+  setStatus(o,a,null,null,b);}
+var MSG={accepted:'قبلت الطلب',preparing:'الطلب في المطبخ',ready:'الطلب جاهز',picked_up:'تم تسليم الطلب',on_way:'الطلب طلع',delivered:'تم التوصيل',cancelled:'تم رفض الطلب'};
+function setStatus(o,st,eta,reason,btn){if(btn)btn.disabled=true;
+  rpc('app_staff_set_status',{branch_id:AUTH.b,p:AUTH.p,order_id:o.id,status:st,eta:eta,reason:reason}).then(function(r){
+    if(r&&r.ok){toast(MSG[st]+' #'+o.order_no);if(st==='accepted'&&window.matchMedia('(min-width:900px)').matches===false)$('[data-col="c-prep"]').click();return load();}
+    if(r&&(r.error==='bad_pin'||r.error==='locked')){AUTH=null;store.del('rqb-auth');showLogin();toast('الرقم السري تغيّر، سجّل دخول مرة ثانية');return;}
+    toast(emsg(r&&r.error));if(btn)btn.disabled=false;}).catch(function(){toast(ERR.net);if(btn)btn.disabled=false;});}
+function confirmBox(t,p,b,yes,kind){$('#mT').textContent=t;$('#mP').textContent=p;$('#mB').innerHTML=b||'';var y=$('#mYes');y.className='btn '+(kind==='ok'?'ok':'danger');var m=$('#modal');m.classList.add('open');y.focus();y.onclick=function(){m.classList.remove('open');yes();};$('#mNo').onclick=function(){m.classList.remove('open');};}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')$('#modal').classList.remove('open');});
+function printOrder(id){var o=ACTIVE.concat(HIST).find(function(x){return x.id===id;});if(!o)return;var a=o.address;
+  $('#receipt').innerHTML='<h3>RQ Kitchen</h3><div class="c">فرع '+esc(branchName(AUTH.b))+'</div><hr><div class="big">#'+o.order_no+'</div><div class="c">'+(o.kind==='delivery'?'توصيل':'استلام من الفرع')+' · '+hhmm(o.created_at)+'</div><hr>'+
+    '<table>'+o.items.map(function(i){return '<tr><td dir="ltr" style="text-align:left">'+i.qty+'×</td><td dir="ltr" style="text-align:left">'+esc(i.name)+(i.note?'<br><b>* '+esc(i.note)+'</b>':'')+'</td><td dir="ltr" style="text-align:right">'+money(i.price*i.qty)+'</td></tr>';}).join('')+'</table><hr>'+
+    (o.notes?'<div><b>ملاحظة:</b> '+esc(o.notes)+'</div><hr>':'')+'<div>'+esc(o.name)+' · <span dir="ltr">+'+esc(String(o.phone).replace(/\D/g,''))+'</span></div>'+(a?'<div>'+esc(a.area||'')+' · '+esc(a.details||'')+'</div>':'')+'<hr>'+
+    (o.delivery_fee>0?'<table><tr><td>التوصيل</td><td dir="ltr" style="text-align:right">'+money(o.delivery_fee)+'</td></tr></table>':'')+'<div class="big">'+money(o.total)+' AED</div><div class="c">'+(o.payment==='cash'?'كاش':'بطاقة عند الاستلام')+'</div>';
+  window.print();}
+
+/* ---------- load ---------- */
+var busy=false;
+function load(){if(!AUTH||busy)return Promise.resolve();busy=true;
+  return rpc('app_staff_orders',{branch_id:AUTH.b,p:AUTH.p,scope:'active'}).then(function(r){
+    if(!r||!r.ok){if(r&&(r.error==='bad_pin'||r.error==='locked'||r.error==='no_branch')){AUTH=null;store.del('rqb-auth');showLogin();toast(emsg(r.error));}return;}
+    lastOk=Date.now();setLive(true);
+    var ids=r.orders.filter(function(o){return o.status==='new';}).map(function(o){return o.id;});
+    if(known){var fresh=ids.filter(function(id){return known.indexOf(id)<0;});if(fresh.length){toast(fresh.length===1?'طلب جديد!':fresh.length+' طلبات جديدة!');if(!soundOn)$('#sound').classList.add('warn');}}
+    known=r.orders.map(function(o){return o.id;});
+    ACTIVE=r.orders;render();
+    if(ids.length)startRing();else stopRing();
+  }).catch(function(){setLive(false);}).finally(function(){busy=false;});}
+function loadHist(){if(!AUTH)return;rpc('app_staff_orders',{branch_id:AUTH.b,p:AUTH.p,scope:'today'}).then(function(r){if(r&&r.ok){HIST=r.orders;renderHist();}}).catch(function(){});}
+$('#hist').addEventListener('toggle',function(){if(this.open)loadHist();});
+function setLive(ok){var l=$('#live');l.classList.toggle('off',!ok);$('#liveT').textContent=ok?'متصل':'غير متصل، نحاول نرجع';}
+setInterval(function(){if(Date.now()-lastOk>20000)setLive(false);},5000);
+
+function start(){$('#loginV').hidden=true;$('#appV').hidden=false;var b=BR.find(function(x){return x.id===AUTH.b;});
+  $('#bName').textContent='فرع '+branchName(AUTH.b);$('#bOpen').textContent=b?(isOpen(b)?'الفرع مفتوح لين '+fmtT(b.close_time):'الفرع مغلق في التطبيق'):'';
+  if(soundOn){$('#sound').classList.remove('warn');$('#sound').textContent='الصوت شغّال';}
+  load();}
+setInterval(function(){if(AUTH&&!$('#appV').hidden)load();},5000);
+setInterval(function(){if(AUTH&&!$('#appV').hidden){render();if($('#hist').open)loadHist();}},30000);
+setInterval(tick,10000);tick();
+
+function boot(){rest('menu_branches?select=id,name_ar,sort,open_time,close_time,manual_closed&order=sort').then(function(b){BR=b;if(AUTH&&BR.some(function(x){return x.id===AUTH.b;}))start();else showLogin();}).catch(function(){
+  if(preview){DEMO=true;demoInit();$('#demo').hidden=false;BR=DB.branches;showLogin();return;}
+  document.body.insertAdjacentHTML('afterbegin','<div class="login"><h2>تعذّر الاتصال</h2><p>تأكد من الإنترنت.</p><button class="btn pri" onclick="location.reload()">إعادة المحاولة</button></div>');});}
+boot();
+})();
+</script>
+</body>
+</html>

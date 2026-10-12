@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>إدارة السواقين — RQ Kitchen</title>
+<title>إدارة التطبيق — RQ Kitchen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Alexandria:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -58,6 +58,16 @@ header.top h1{font-size:19px;margin:0;flex:1}
 .phone:focus-within{border-color:var(--brand)}
 .phone span{display:flex;align-items:center;padding:0 10px;background:var(--surface);font-family:var(--display);color:var(--muted)}
 .phone input{flex:1;border:0;outline:none;padding:10px;font-size:16px;background:var(--bg);font-family:var(--display);min-width:0}
+.tabs{display:flex;gap:8px;padding-top:12px}
+.tabs button{appearance:none;border:0;border-radius:999px;padding:9px 16px;background:var(--surface);cursor:pointer;font-weight:700}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.bcard{background:var(--surface);border-radius:16px;padding:16px;margin-bottom:12px}
+.bcard h3{margin:0 0 2px;font-size:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g2 .f{font-family:var(--display)}
+.sep{height:1px;background:var(--line);margin:14px 0}
+.pinrow{display:flex;gap:8px}
+.pinrow .f{letter-spacing:5px;font-family:var(--display)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 40px)}
 .toast.show{opacity:1}
 </style>
@@ -65,7 +75,7 @@ header.top h1{font-size:19px;margin:0;flex:1}
 <body>
 <div id="loginView" class="wrap login">
   <img src="logo.png" alt="RQ Kitchen">
-  <h1 style="font-size:22px;margin:0 0 6px">إدارة السواقين</h1>
+  <h1 style="font-size:22px;margin:0 0 6px">إدارة التطبيق</h1>
   <p class="hint">نفس الرقم السري حق لوحة تحكم المنيو</p>
   <form id="loginForm"><input class="f" id="pin" type="password" inputmode="numeric" autocomplete="current-password" style="text-align:center;font-size:20px;letter-spacing:6px" aria-label="الرقم السري">
   <button class="btn pri" style="width:100%;margin-top:12px" id="loginBtn">دخول</button></form>
@@ -73,8 +83,13 @@ header.top h1{font-size:19px;margin:0;flex:1}
 </div>
 
 <div id="appView" hidden>
-  <header class="top wrap"><img src="logo.png" alt=""><h1>إدارة السواقين</h1><button class="btn ghost" id="logout">خروج</button></header>
-  <main class="wrap">
+  <header class="top wrap"><img src="logo.png" alt=""><h1>إدارة التطبيق</h1><button class="btn ghost" id="logout">خروج</button></header>
+  <nav class="tabs wrap" role="tablist"><button type="button" role="tab" aria-selected="true" data-tab="drivers">السواقين</button><button type="button" role="tab" aria-selected="false" data-tab="branches">الفروع والتوصيل</button></nav>
+  <main class="wrap" id="t-branches" hidden>
+    <div class="share" style="margin-top:14px">شاشة الفرع: <code id="brLink"></code> · كل فرع يدخل برقمه السري، وتقدر تدخل أي فرع برقم لوحة التحكم.</div>
+    <div id="blist" style="margin-top:12px"></div>
+  </main>
+  <main class="wrap" id="t-drivers">
     <div class="share">السواقين يدخلون من الرابط <code id="drvLink"></code> برقم جوالهم والرقم السري اللي تحدده لهم هنا.</div>
     <div class="bar"><h2>السواقين</h2><button class="btn pri" id="add">+ سائق جديد</button></div>
     <div id="list"></div>
@@ -101,11 +116,29 @@ function rpc(fn,b){return fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:H,b
 function rest(p){return fetch(SB+'/rest/v1/'+p,{headers:H}).then(function(r){if(!r.ok)throw new Error('net');return r.json();});}
 var $=function(s){return document.querySelector(s);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-var ERR={bad_pin:'الرقم السري غلط.',locked:'محاولات كثيرة غلط. جرّب بعد 10 دقائق.',bad_phone:'رقم الجوال غير صحيح.',bad_name:'اكتب الاسم.',bad_pin_format:'الرقم السري لازم 4 أرقام.',phone_taken:'هالرقم مسجّل لسائق ثاني.',net:'تعذّر الاتصال، تأكد من الإنترنت.'};
+var ERR={short_pin:'الرقم السري من 4 إلى 8 أرقام.',bad_pin:'الرقم السري غلط.',locked:'محاولات كثيرة غلط. جرّب بعد 10 دقائق.',bad_phone:'رقم الجوال غير صحيح.',bad_name:'اكتب الاسم.',bad_pin_format:'الرقم السري لازم 4 أرقام.',phone_taken:'هالرقم مسجّل لسائق ثاني.',net:'تعذّر الاتصال، تأكد من الإنترنت.'};
 function msg(e){return ERR[e]||ERR.net;}
 var tt;function toast(s){var t=$('#toast');t.textContent=s;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2200);}
 var PIN=null;try{PIN=sessionStorage.getItem('rq-admin-pin');}catch(e){}
-var BR=[],DR=[],cur=null;
+var BR=[],DR=[],cur=null,BS={};
+document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){document.querySelectorAll('[data-tab]').forEach(function(x){x.setAttribute('aria-selected',x===b);});$('#t-drivers').hidden=b.dataset.tab!=='drivers';$('#t-branches').hidden=b.dataset.tab!=='branches';if(b.dataset.tab==='branches')loadBranches();};});
+$('#brLink').textContent=location.origin.replace(/^https?:\/\//,'')+'/branch';
+function num(v){return v==null?'':Number(v);}
+function loadBranches(){return Promise.all([rpc('app_branches',{}),rpc('app_admin_branch_settings',{p:PIN})]).then(function(r){var list=r[0]||[];BS={};((r[1]&&r[1].branches)||[]).forEach(function(x){BS[x.id]=x;});
+  $('#blist').innerHTML=list.map(function(b){var hp=BS[b.id]&&BS[b.id].has_staff_pin;return '<div class="bcard" data-b="'+esc(b.id)+'"><h3>'+esc(b.name_ar)+'</h3><p class="hint" style="margin:0 0 12px">'+esc(b.address||'')+'</p>'+
+    '<label class="switch"><input type="checkbox" data-k="delivery_enabled"'+(b.delivery_enabled?' checked':'')+'><span>توصيل</span></label>'+
+    '<label class="switch"><input type="checkbox" data-k="pickup_enabled"'+(b.pickup_enabled?' checked':'')+'><span>استلام من الفرع</span></label>'+
+    '<div class="g2"><div><label class="lbl">رسوم التوصيل (AED)</label><input class="f" data-k="delivery_fee" type="number" min="0" step="0.5" inputmode="decimal" value="'+num(b.delivery_fee)+'"></div><div><label class="lbl">أقل طلب للتوصيل (AED)</label><input class="f" data-k="min_order" type="number" min="0" step="1" inputmode="numeric" value="'+num(b.min_order)+'"></div>'+
+    '<div><label class="lbl">وقت التوصيل (دقيقة)</label><input class="f" data-k="delivery_minutes" type="number" min="5" step="5" inputmode="numeric" value="'+num(b.delivery_minutes)+'"></div><div><label class="lbl">وقت تجهيز الاستلام (دقيقة)</label><input class="f" data-k="pickup_minutes" type="number" min="5" step="5" inputmode="numeric" value="'+num(b.pickup_minutes)+'"></div></div>'+
+    '<button class="btn pri" data-savebr style="margin-top:12px">حفظ إعدادات '+esc(b.name_ar)+'</button>'+
+    '<div class="sep"></div><label class="lbl">الرقم السري لشاشة الفرع '+(hp?'<span class="pill on">محدد</span>':'<span class="pill off">مو محدد</span>')+'</label><div class="pinrow"><input class="f" data-pin type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="4 إلى 8 أرقام"><button class="btn ghost" data-savepin>'+(hp?'تغيير':'حفظ')+'</button></div></div>';}).join('');
+}).catch(function(e){toast(msg(e.message));});}
+document.addEventListener('click',function(e){var s=e.target.closest('[data-savebr]'),p=e.target.closest('[data-savepin]');if(!s&&!p)return;var c=e.target.closest('[data-b]'),id=c.dataset.b;
+  if(s){var b={id:id};c.querySelectorAll('[data-k]').forEach(function(i){b[i.dataset.k]=i.type==='checkbox'?i.checked:i.value;});if(!b.delivery_enabled&&!b.pickup_enabled){toast('لازم يكون فيه توصيل أو استلام على الأقل');return;}
+    s.disabled=true;rpc('app_admin_save_branch',{p:PIN,b:b}).then(function(r){if(!r.ok)throw new Error(r.error);toast('تم الحفظ');return loadBranches();}).catch(function(err){toast(msg(err.message));}).finally(function(){s.disabled=false;});}
+  if(p){var v=c.querySelector('[data-pin]').value.trim();if(!/^\d{4,8}$/.test(v)){toast('الرقم السري من 4 إلى 8 أرقام');return;}
+    p.disabled=true;rpc('app_admin_set_staff_pin',{p:PIN,branch_id:id,new_pin:v}).then(function(r){if(!r.ok)throw new Error(r.error);toast('تم حفظ الرقم السري للفرع');return loadBranches();}).catch(function(err){toast(msg(err.message));}).finally(function(){p.disabled=false;});}
+});
 $('#drvLink').textContent=location.origin.replace(/^https?:\/\//,'')+'/driver';
 
 $('#loginForm').addEventListener('submit',function(e){e.preventDefault();var p=$('#pin').value.trim(),b=$('#loginBtn');b.disabled=true;
