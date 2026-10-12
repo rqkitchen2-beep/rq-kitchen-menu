@@ -31,7 +31,9 @@ def make_cert(outdir, password):
     cid = j["data"]["id"]
     cert = x509.load_der_x509_certificate(base64.b64decode(j["data"]["attributes"]["certificateContent"]))
     p12 = pkcs12.serialize_key_and_certificates(b"rq", key, cert, None,
-        serialization.BestAvailableEncryption(password.encode()))
+        serialization.PrivateFormat.PKCS12.encryption_builder().kdf_rounds(50000)
+        .key_cert_algorithm(pkcs12.PBES.PBESv1SHA1And3KeyTripleDESCBC).hmac_hash(hashes.SHA1())
+        .build(password.encode()))  # legacy format: macOS `security import` rejects AES p12
     os.makedirs(outdir, exist_ok=True)
     open(os.path.join(outdir, "dist.p12"), "wb").write(p12)
     print(cid)
