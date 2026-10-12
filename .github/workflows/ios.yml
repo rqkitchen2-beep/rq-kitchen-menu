@@ -1,0 +1,92 @@
+name: iOS build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'native/**'
+      - '.github/workflows/ios.yml'
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  ASC_KEY_ID: UC2RA225DB
+  ASC_ISSUER: b8b36c2c-fdf9-40d8-a572-a8c2f019f780
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      team: ${{ steps.reg.outputs.team }}
+      matrix: ${{ steps.reg.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Register bundle IDs
+        id: reg
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/st"
+          ST="$RUNNER_TEMP/st/setup.txt"
+          echo "run: $GITHUB_RUN_NUMBER  $(date -u)" > "$ST"
+          if [ -z "$ASC_KEY" ]; then echo "ERROR: secret ASC_KEY missing" | tee -a "$ST"; exit 1; fi
+          printf '%s\n' "$ASC_KEY" > "$RUNNER_TEMP/key.p8"
+          export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
+          pip install -q pyjwt cryptography
+          T1=$(python3 native/scripts/asc.py ensure-bundle com.rqkitchen.app "RQ Kitchen" 2>>"$ST")
+          T2=$(python3 native/scripts/asc.py ensure-bundle com.rqkitchen.driver "RQ Driver" 2>>"$ST")
+          echo "team: $T1 / $T2" >> "$ST"
+          A1=$(python3 native/scripts/asc.py find-app com.rqkitchen.app)
+          A2=$(python3 native/scripts/asc.py find-app com.rqkitchen.driver)
+          echo "app_customer: ${A1:-MISSING}" >> "$ST"
+          echo "app_driver: ${A2:-MISSING}" >> "$ST"
+          REQ=$(cat native/build-request.txt)
+          M="[]"
+          L=""
+          for a in $REQ; do
+            if [ "$a" = customer ]; then L="$L\"customer\","; fi
+            if [ "$a" = driver ]; then L="$L\"driver\","; fi
+          done
+          [ -n "$L" ] && M="[${L%,}]"
+          echo "matrix: $M" >> "$ST"
+          echo "team=$T1" >> "$GITHUB_OUTPUT"
+          echo "matrix=$M" >> "$GITHUB_OUTPUT"
+      - name: Publish status
+        if: always()
+        run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"
+
+  build:
+    needs: setup
+    if: needs.setup.outputs.matrix != '[]'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build and upload
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+          TEAM_ID: ${{ needs.setup.outputs.team }}
+          APP: ${{ matrix.app }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/st"
+          bash native/scripts/build-ios.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
+          RC=${PIPESTATUS[0]}
+          { echo "app: $APP  run: $GITHUB_RUN_NUMBER  rc: $RC  $(date -u)"; grep -E "^(STEP|RESULT|ERROR)" "$RUNNER_TEMP/build.log"; echo "---- errors ----"; grep -iE "error:|❌|failed|No suitable|ITMS|code signing|provision" "$RUNNER_TEMP/build.log" | grep -v "^STEP" | head -60; echo "---- tail ----"; tail -80 "$RUNNER_TEMP/build.log"; } > "$RUNNER_TEMP/st/build-$APP.txt"
+          exit $RC
+      - name: Publish status
+        if: always()
+        run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"

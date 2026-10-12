@@ -1,0 +1,16 @@
+{
+  "name": "rq-kitchen-driver",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@capacitor/cli": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/ios": "latest",
+    "@capacitor/geolocation": "latest",
+    "@capacitor/splash-screen": "latest",
+    "@capacitor/status-bar": "latest",
+    "@capacitor/haptics": "latest",
+    "@capacitor-community/background-geolocation": "latest",
+    "@capacitor/local-notifications": "latest"
+  }
+}

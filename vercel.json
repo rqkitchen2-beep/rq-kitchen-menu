@@ -1,6 +1,20 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "has": [{ "type": "host", "value": "app.rqkitchen.app" }], "destination": "/app.html" }
-  ]
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "app.rqkitchen.app"
+        }
+      ],
+      "destination": "/app.html"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "ios-status": false
+    }
+  }
 }
