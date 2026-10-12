@@ -60,6 +60,8 @@ jobs:
           echo "matrix=$M" >> "$GITHUB_OUTPUT"
       - name: Publish status
         if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"
 
   build:
@@ -89,4 +91,6 @@ jobs:
           exit $RC
       - name: Publish status
         if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"

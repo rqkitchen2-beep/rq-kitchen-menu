@@ -10,7 +10,7 @@ for i in 1 2 3 4 5; do
     mkdir -p "$W" && cd "$W" && git init -q && git checkout -q -b ios-status && git remote add origin "$URL"; cd - >/dev/null
   fi
   cp "$SRC"/* "$W"/ 2>/dev/null
-  cd "$W" && git add -A && git commit -qm "status run $GITHUB_RUN_NUMBER" || exit 0
-  git push -q origin ios-status && exit 0
+  cd "$W" && git add -A && { git commit -qm "status run $GITHUB_RUN_NUMBER" || exit 0; }
+  git push -q origin ios-status && { echo "status pushed"; exit 0; }
   cd - >/dev/null; sleep $((i*3))
 done
