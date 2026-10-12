@@ -84,6 +84,7 @@ jobs:
           TEAM_ID: ${{ needs.setup.outputs.team }}
           APP: ${{ matrix.app }}
         run: |
+          set +e
           mkdir -p "$RUNNER_TEMP/st"
           bash native/scripts/build-ios.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
           RC=${PIPESTATUS[0]}
