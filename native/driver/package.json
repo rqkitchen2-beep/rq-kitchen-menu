@@ -10,7 +10,6 @@
     "@capacitor/splash-screen": "latest",
     "@capacitor/status-bar": "latest",
     "@capacitor/haptics": "latest",
-    "@capacitor-community/background-geolocation": "latest",
     "@capacitor/local-notifications": "latest"
   }
 }

@@ -45,8 +45,6 @@ else
   setp NSLocationWhenInUseUsageDescription string "نستخدم موقعك لإرسال موقع السائق للعميل أثناء توصيل الطلب."
   setp NSLocationAlwaysAndWhenInUseUsageDescription string "نستخدم موقعك أثناء التوصيل حتى لو كانت الشاشة مقفلة، ليتابع العميل وصول طلبه."
   setp NSLocationAlwaysUsageDescription string "نستخدم موقعك أثناء التوصيل حتى لو كانت الشاشة مقفلة، ليتابع العميل وصول طلبه."
-  $PB -c "Delete :UIBackgroundModes" "$PLIST" >/dev/null 2>&1
-  $PB -c "Add :UIBackgroundModes array" -c "Add :UIBackgroundModes:0 string location" -c "Add :UIBackgroundModes:1 string audio" "$PLIST"
 fi
 
 step "icons"
