@@ -25,6 +25,7 @@ jobs:
     outputs:
       team: ${{ steps.reg.outputs.team }}
       matrix: ${{ steps.reg.outputs.matrix }}
+      cert: ${{ steps.cert.outputs.cert }}
     steps:
       - uses: actions/checkout@v4
       - name: Register bundle IDs
@@ -58,6 +59,26 @@ jobs:
           echo "matrix: $M" >> "$ST"
           echo "team=$T1" >> "$GITHUB_OUTPUT"
           echo "matrix=$M" >> "$GITHUB_OUTPUT"
+      - name: Distribution certificate
+        id: cert
+        if: steps.reg.outputs.matrix != '[]'
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          set -e
+          export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
+          P=$(printf '%s' "$ASC_KEY" | sha256sum | cut -c1-40)
+          CID=$(python3 native/scripts/signing.py make-cert "$RUNNER_TEMP/cert" "$P" 2>>"$RUNNER_TEMP/st/setup.txt")
+          echo "cert: $CID" >> "$RUNNER_TEMP/st/setup.txt"
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in "$RUNNER_TEMP/cert/dist.p12" -out "$RUNNER_TEMP/cert/dist.p12.enc" -pass "pass:$P"
+          rm "$RUNNER_TEMP/cert/dist.p12"
+          echo "cert=$CID" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: steps.cert.outputs.cert != ''
+        with:
+          name: dist-cert
+          path: ${{ runner.temp }}/cert/dist.p12.enc
+          retention-days: 1
       - name: Publish status
         if: always()
         env:
@@ -78,10 +99,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-cert
+          path: ${{ runner.temp }}/cert
       - name: Build and upload
         env:
           ASC_KEY: ${{ secrets.ASC_KEY }}
           TEAM_ID: ${{ needs.setup.outputs.team }}
+          CERT_ID: ${{ needs.setup.outputs.cert }}
           APP: ${{ matrix.app }}
         run: |
           set +e

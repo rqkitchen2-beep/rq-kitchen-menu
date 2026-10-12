@@ -56,10 +56,31 @@ for f in "$APPDIR"/App/Assets.xcassets/Splash.imageset/*.png; do cp "$DIR/assets
 ls "$ICONSET"
 
 step "signing settings"
+[ -n "$CERT_ID" ] || die "certificate id missing"
+BUNDLE=$(python3 -c "import json;print(json.load(open('$DIR/capacitor.config.json'))['appId'])")
+python3 -m venv "$RUNNER_TEMP/venv" && "$RUNNER_TEMP/venv/bin/pip" install -q pyjwt cryptography || die "pip failed"
+export ASC_KEY_PATH="$KEY"
+P=$(printf '%s' "$ASC_KEY" | shasum -a 256 | cut -c1-40)
+OSSL=/opt/homebrew/opt/openssl@3/bin/openssl; [ -x "$OSSL" ] || OSSL=openssl
+"$OSSL" enc -d -aes-256-cbc -pbkdf2 -in "$RUNNER_TEMP/cert/dist.p12.enc" -out "$RUNNER_TEMP/dist.p12" -pass "pass:$P" || die "cert decrypt failed"
+KC="$RUNNER_TEMP/build.keychain-db"
+security create-keychain -p ci "$KC"
+security set-keychain-settings -lut 21600 "$KC"
+security unlock-keychain -p ci "$KC"
+security import "$RUNNER_TEMP/dist.p12" -k "$KC" -P "$P" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productbuild || die "keychain import failed"
+security set-key-partition-list -S apple-tool:,apple: -s -k ci "$KC" >/dev/null
+security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+security find-identity -v -p codesigning "$KC"
+PROF_OUT=$("$RUNNER_TEMP/venv/bin/python" "$ROOT/native/scripts/signing.py" make-profile "$BUNDLE" "$CERT_ID" "$RUNNER_TEMP/app.mobileprovision") || die "profile failed"
+PROF_UUID=${PROF_OUT%%|*}; PROF_NAME=${PROF_OUT#*|}
+echo "profile: $PROF_NAME ($PROF_UUID)"
+mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+cp "$RUNNER_TEMP/app.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROF_UUID.mobileprovision"
 PBX="$APPDIR/App.xcodeproj/project.pbxproj"
-sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = $TEAM_ID;/g" "$PBX"
+sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\";/g" "$PBX"
+sed -i '' -e 's/"iPhone Developer"/"Apple Distribution"/g' -e 's/"Apple Development"/"Apple Distribution"/g' -e 's/= "iPhone Developer";/= "Apple Distribution";/g' "$PBX"
 sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
-grep -c "DEVELOPMENT_TEAM = $TEAM_ID" "$PBX"
+grep -E "CODE_SIGN|PROVISIONING|DEVELOPMENT_TEAM" "$PBX" | sort | uniq -c
 
 if [ -d "$APPDIR/App.xcworkspace" ]; then CONT=(-workspace "$APPDIR/App.xcworkspace"); else CONT=(-project "$APPDIR/App.xcodeproj"); fi
 BUILD_NO=$(( GITHUB_RUN_NUMBER + 0 ))
@@ -69,7 +90,7 @@ step "archive"
 xcodebuild "${CONT[@]}" -scheme App -configuration Release -destination "generic/platform=iOS" \
   -archivePath "$RUNNER_TEMP/App.xcarchive" archive \
   MARKETING_VERSION="$VER" CURRENT_PROJECT_VERSION="$BUILD_NO" \
-  "${AUTH[@]}" | grep -vE "^(CompileC|Ld |    cd |    export |    /Applications|CpResource|ProcessInfoPlist|CopySwiftLibs|Touch |PhaseScript|CompileSwift|SwiftDriver|SwiftCompile|SwiftEmit|EmitSwift|WriteAuxiliary|MkDir|ProcessProductPackaging|CodeSign |GenerateDSYM|RegisterExecutionPolicy|Validate|Copy |CreateBuildDirectory|ClangStatCache|SwiftMergeGeneratedHeaders)" 
+  OTHER_CODE_SIGN_FLAGS="--keychain $KC" | grep -vE "^(CompileC|Ld |    cd |    export |    /Applications|CpResource|ProcessInfoPlist|CopySwiftLibs|Touch |PhaseScript|CompileSwift|SwiftDriver|SwiftCompile|SwiftEmit|EmitSwift|WriteAuxiliary|MkDir|ProcessProductPackaging|CodeSign |GenerateDSYM|RegisterExecutionPolicy|Validate|Copy |CreateBuildDirectory|ClangStatCache|SwiftMergeGeneratedHeaders)" 
 [ ${PIPESTATUS[0]} -eq 0 ] || die "archive failed"
 
 step "export + upload"
@@ -79,7 +100,9 @@ cat > "$RUNNER_TEMP/export.plist" <<PL
 <plist version="1.0"><dict>
 <key>method</key><string>app-store-connect</string>
 <key>destination</key><string>upload</string>
-<key>signingStyle</key><string>automatic</string>
+<key>signingStyle</key><string>manual</string>
+<key>signingCertificate</key><string>Apple Distribution</string>
+<key>provisioningProfiles</key><dict><key>$BUNDLE</key><string>$PROF_NAME</string></dict>
 <key>teamID</key><string>$TEAM_ID</string>
 <key>uploadSymbols</key><true/>
 <key>manageAppVersionAndBuildNumber</key><false/>
