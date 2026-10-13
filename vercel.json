@@ -39,6 +39,11 @@
       ],
       "destination": "/app",
       "permanent": false
+    },
+    {
+      "source": "/apk",
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-branch/RQ-Branch.apk",
+      "permanent": false
     }
   ],
   "headers": [

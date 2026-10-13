@@ -1,0 +1,57 @@
+name: Android build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'native/android/**'
+      - 'native/branch/**'
+      - 'native/plugins/**'
+      - 'native/loader/**'
+      - 'native/scripts/build-android.sh'
+      - '.github/workflows/android.yml'
+
+concurrency:
+  group: android-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Build APK
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+          APP: branch
+        run: |
+          set +e
+          mkdir -p "$RUNNER_TEMP/st"
+          bash native/scripts/build-android.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
+          RC=${PIPESTATUS[0]}
+          { echo "android branch run: $GITHUB_RUN_NUMBER rc: $RC $(date -u)"; grep -E "^(STEP|RESULT|ERROR)" "$RUNNER_TEMP/build.log"; echo "---- errors ----"; grep -iE "error|FAILED|What went wrong" "$RUNNER_TEMP/build.log" | head -60; echo "---- tail ----"; tail -60 "$RUNNER_TEMP/build.log"; } > "$RUNNER_TEMP/st/build-android-branch.txt"
+          exit $RC
+      - name: Publish APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view android-branch >/dev/null 2>&1 || gh release create android-branch --title "RQ Branch (Android)" --notes "RQ Branch screen app for Android POS devices (Sunmi). Install the APK on the device."
+          gh release upload android-branch "$RUNNER_TEMP/RQ-Branch.apk" --clobber
+          echo "RESULT: published" >> "$RUNNER_TEMP/st/build-android-branch.txt"
+      - name: Publish status
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"
