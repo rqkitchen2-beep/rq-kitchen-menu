@@ -15,7 +15,7 @@
     [/دقة (\d+) م/g,'accuracy $1 m'],
     [new RegExp('قبل (\\d+) د'+NA,'g'),'$1 min ago'],[new RegExp('قبل (\\d+) س'+NA,'g'),'$1 h ago'],
     [new RegExp('(\\d+) د'+NA,'g'),'$1 min'],[new RegExp('(\\d+) س'+NA,'g'),'$1 h'],
-    [/([\d.]+) كم/g,'$1 km'],[/مختارات RQ/g,'RQ Picks'],[/(\d+)×/g,'$1×']
+    [/يبعد عنك ([\d.]+ (?:كم|م))/g,'is $1 away'],[/(\d+) من (\d+)/g,'$1 of $2'],[/([\d.]+) كم/g,'$1 km'],[new RegExp('(\\d+) م'+NA,'g'),'$1 m'],[/مختارات RQ/g,'RQ Picks'],[/(\d+)×/g,'$1×']
   ];
   var MAXW=1;for(var k in D){var w=k.split(' ').length;if(w>MAXW)MAXW=w;}
   function trRun(r){
@@ -33,13 +33,40 @@
     return s.replace(RUN,function(r){return trRun(r);}).replace(/،/g,',').replace(/؟/g,'?');
   }
   var st=document.createElement('style');
-  st.textContent='.l-ar{display:none}html.lang-en .l-ar{display:inline}html.lang-en .l-en{display:none}html.lang-en .tile .tn,html.lang-en .agcard .meta em,html.lang-en .agcard .meta span,html.lang-en .brrow small,html.lang-en .mitem .mn,html.lang-en .mitem .mi,html.lang-en .line .ln b,html.lang-en .ocard .r2,html.lang-en .iname,html.lang-en .acc div>span{text-align:left}html.lang-en .line .lp{text-align:right}html.lang-en h2 small{display:none}html.lang-en .lhero h1{max-width:46%}html.lang-en .step{flex-direction:row-reverse}html.lang-en .iconbtn svg,html.lang-en .row-link svg{transform:scaleX(-1)}html.lang-en .iing,html.lang-en .items .nt,html.lang-en .cust .ph,html.lang-en .sum b{text-align:left}html.lang-en .items .r{justify-content:flex-start;flex-direction:row-reverse;text-align:left}html.lang-en .sw::after{right:auto;left:4px}html.lang-en .onl.on .sw::after{transform:translateX(24px)}.langlink{background:none;border:1px solid currentColor;border-radius:99px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;color:inherit;opacity:.85;cursor:pointer}';
+  st.textContent='.l-ar{display:none}html.lang-en .l-ar{display:inline}html.lang-en .l-en{display:none}html.lang-en .tile .tn,html.lang-en .agcard .meta em,html.lang-en .agcard .meta span,html.lang-en .brrow small,html.lang-en .mitem .mn,html.lang-en .mitem .mi,html.lang-en .line .ln b,html.lang-en .ocard .r2,html.lang-en .iname,html.lang-en .acc div>span{text-align:left}html.lang-en .line .lp{text-align:right}html.lang-en h2 small{display:none}html.lang-en .lhero h1{max-width:46%}html.lang-en .step{flex-direction:row-reverse}html.lang-en .tfab[data-back] svg,html.lang-en .iconbtn svg,html.lang-en .row-link svg{transform:scaleX(-1)}html.lang-en .iing,html.lang-en .items .nt,html.lang-en .cust .ph,html.lang-en .sum b{text-align:left}html.lang-en .items .r{justify-content:flex-start;flex-direction:row-reverse;text-align:left}html.lang-en .sw::after{right:auto;left:4px}html.lang-en .onl.on .sw::after{transform:translateX(24px)}.thseg{display:inline-flex;background:var(--surface,#eee);border:1px solid var(--line,#ddd);border-radius:99px;padding:3px;gap:2px}.thseg button{border:0;background:none;font:inherit;font-size:13px;padding:6px 12px;border-radius:99px;color:inherit;cursor:pointer}.thseg button[aria-pressed=true]{background:var(--brand,#F39A2B);color:#1C1410;font-weight:700}[data-theme-toggle] svg{display:block}.langlink{background:none;border:1px solid currentColor;border-radius:99px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;color:inherit;opacity:.85;cursor:pointer}';
   (document.head||document.documentElement).appendChild(st);
   window.RQLang={
     lang:lang, t:function(s){return lang==='en'?tr(s):s;},
     set:function(l){try{localStorage.setItem(KEY,l);}catch(e){}location.reload();},
     toggle:function(){this.set(lang==='en'?'ar':'en');}
   };
+  /* theme: auto (follows the phone) / light / dark, saved per device */
+  var TK='rq-theme', theme='';
+  try{theme=localStorage.getItem(TK)||'';}catch(e){}
+  if(theme!=='light'&&theme!=='dark')theme='';
+  var mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+  function isDark(){return theme==='dark'||(theme!=='light'&&mq&&mq.matches);}
+  function applyTheme(){
+    var h=document.documentElement;
+    if(theme)h.setAttribute('data-theme',theme);else h.removeAttribute('data-theme');
+    var P=window.RQPlug&&window.RQPlug('StatusBar');
+    if(P){try{P.setStyle({style:isDark()?'DARK':'LIGHT'});}catch(e){}}
+    var on=theme||'auto';
+    var bs=document.querySelectorAll('[data-theme-set]');
+    for(var i=0;i<bs.length;i++)bs[i].setAttribute('aria-pressed',bs[i].getAttribute('data-theme-set')===on?'true':'false');
+  }
+  window.RQTheme={get:function(){return theme||'auto';},dark:isDark,
+    set:function(t){theme=(t==='light'||t==='dark')?t:'';try{if(theme)localStorage.setItem(TK,theme);else localStorage.removeItem(TK);}catch(e){}applyTheme();},
+    toggle:function(){this.set(isDark()?'light':'dark');}};
+  applyTheme();
+  if(mq){try{mq.addEventListener('change',applyTheme);}catch(e){}}
+  document.addEventListener('DOMContentLoaded',applyTheme);
+  document.addEventListener('click',function(e){var t=e.target&&e.target.closest;if(!t)return;
+    var s=e.target.closest('[data-theme-set]');if(s){e.preventDefault();window.RQTheme.set(s.getAttribute('data-theme-set'));return;}
+    var g=e.target.closest('[data-theme-toggle]');if(g){e.preventDefault();window.RQTheme.toggle();}},true);
+  new MutationObserver(function(){var bs=document.querySelectorAll('[data-theme-set]:not([aria-pressed])');if(bs.length)applyTheme();})
+    .observe(document.documentElement,{childList:true,subtree:true});
+
   /* language buttons: any element with data-lang-toggle */
   document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('[data-lang-toggle]');if(b){e.preventDefault();window.RQLang.toggle();}},true);
   if(lang!=='en'){return;}
