@@ -63,6 +63,13 @@ jobs:
           echo "matrix: $M" >> "$ST"
           echo "team=$T1" >> "$GITHUB_OUTPUT"
           echo "matrix=$M" >> "$GITHUB_OUTPUT"
+      - name: Apple Pay setup
+        continue-on-error: true
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
+          { echo "---- apple pay ----"; python3 native/scripts/applepay.py 2>&1; } >> "$RUNNER_TEMP/st/setup.txt"
       - name: Distribution certificate
         id: cert
         if: steps.reg.outputs.matrix != '[]'
