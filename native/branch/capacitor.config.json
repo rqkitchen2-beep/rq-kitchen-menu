@@ -15,7 +15,7 @@
       "showSpinner": false
     },
     "StatusBar": {
-      "style": "LIGHT",
+      "style": "DEFAULT",
       "overlaysWebView": true
     },
     "PushNotifications": {

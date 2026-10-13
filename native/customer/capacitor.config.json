@@ -16,7 +16,7 @@
       "launchAutoHide": true
     },
     "StatusBar": {
-      "style": "LIGHT",
+      "style": "DEFAULT",
       "overlaysWebView": true
     },
     "PushNotifications": {

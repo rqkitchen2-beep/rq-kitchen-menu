@@ -62,7 +62,7 @@ button{cursor:pointer}
 .btn svg{width:20px;height:20px;flex:none}
 
 /* header */
-.hdr{background:var(--ink);color:#FFF4E6;padding:calc(14px + env(safe-area-inset-top,0px)) 0 18px;border-radius:0 0 26px 26px}
+.hdr{background:#1C1612;color:#FFF4E6;padding:calc(14px + env(safe-area-inset-top,0px)) 0 18px;border-radius:0 0 26px 26px}
 .hdr .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .hdr b{display:block;font-size:19px;font-weight:800}
 .hdr small{display:block;opacity:.75;font-size:13px}
@@ -321,5 +321,6 @@ if(preview){fetch(SB+'/rest/v1/',{headers:H}).then(function(r){if(!r.ok&&r.statu
 else boot();
 })();
 </script>
+<script>/* native status bar follows light/dark */(function(){var P=window.RQPlug&&window.RQPlug('StatusBar');if(!P)return;var m=matchMedia('(prefers-color-scheme: dark)');function u(){try{P.setStyle({style:m.matches?'DARK':'LIGHT'});}catch(e){}}u();try{m.addEventListener('change',u);}catch(e){}})();</script>
 </body>
 </html>

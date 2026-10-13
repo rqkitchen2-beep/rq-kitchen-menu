@@ -256,7 +256,7 @@ button{cursor:pointer}
 .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* tracking */
-.trk{background:var(--ink);color:#FFF4E6;border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden}
+.trk{background:#1C1612;color:#FFF4E6;border:1px solid rgba(255,244,230,.08);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden}
 .trk::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:var(--brand);opacity:.18;inset-inline-start:-70px;bottom:-110px}
 .trk small{opacity:.8;font-size:13px;display:block;padding-inline-end:84px}
 .trk h2{margin:4px 0 2px;font-size:24px;font-weight:800;position:relative}
@@ -326,7 +326,9 @@ button{cursor:pointer}
 .acc{display:flex;align-items:center;gap:14px;padding:18px;background:var(--brand);color:var(--brand-ink);border-radius:var(--r-lg)}
 .acc .avatar{width:56px;height:56px;font-size:22px}
 .acc b{display:block;font-size:19px}
-.acc span{font-family:var(--display);direction:ltr;display:block;text-align:right;font-weight:600}
+.acc div>span{font-family:var(--display);direction:ltr;display:block;text-align:right;font-weight:600}
+.row-link svg{width:18px;height:18px;flex:none}
+.row-link>span{display:inline-flex;align-items:center;color:var(--muted)}
 .row-link{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;background:none;border-top:0;border-left:0;border-right:0;width:100%;text-align:start;font-size:15px}
 </style>
 </head>
@@ -837,5 +839,6 @@ loadMenu().then(loadMe).then(function(){
 setInterval(function(){if(DEMO)return;rpc('app_branches').then(function(b){if(Array.isArray(b)){S.branches=b.sort(function(x,y){return x.sort-y.sort;});}}).catch(function(){});},120000);
 })();
 </script>
+<script>/* native status bar follows light/dark */(function(){var P=window.RQPlug&&window.RQPlug('StatusBar');if(!P)return;var m=matchMedia('(prefers-color-scheme: dark)');function u(){try{P.setStyle({style:m.matches?'DARK':'LIGHT'});}catch(e){}}u();try{m.addEventListener('change',u);}catch(e){}})();</script>
 </body>
 </html>

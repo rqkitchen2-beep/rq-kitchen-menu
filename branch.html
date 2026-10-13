@@ -369,5 +369,6 @@ function boot(){rest('menu_branches?select=id,name_ar,sort,open_time,close_time,
 boot();
 })();
 </script>
+<script>/* native status bar follows light/dark */(function(){var P=window.RQPlug&&window.RQPlug('StatusBar');if(!P)return;var m=matchMedia('(prefers-color-scheme: dark)');function u(){try{P.setStyle({style:m.matches?'DARK':'LIGHT'});}catch(e){}}u();try{m.addEventListener('change',u);}catch(e){}})();</script>
 </body>
 </html>
