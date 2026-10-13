@@ -1,6 +1,8 @@
-run: 7  Mon Oct 12 23:59:41 UTC 2026
+run: 8  Tue Oct 13 00:03:36 UTC 2026
 team: Z34R6L55G2 / Z34R6L55G2
 app_customer: 6822102459
 app_driver: 6822102915
-app_branch: MISSING
-matrix: []
+app_branch: 6822106188
+matrix: ["customer","driver","branch"]
+revoked old cert QQAW94GMKD
+cert: V2Q2F27698
