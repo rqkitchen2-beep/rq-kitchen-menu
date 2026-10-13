@@ -67,6 +67,9 @@
   new MutationObserver(function(){var bs=document.querySelectorAll('[data-theme-set]:not([aria-pressed])');if(bs.length)applyTheme();})
     .observe(document.documentElement,{childList:true,subtree:true});
 
+  /* in the iOS apps, open map / WhatsApp links in their own app (a new-window link would do nothing there) */
+  document.addEventListener('click',function(e){if(!window.RQ_NATIVE||e.defaultPrevented)return;var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;
+    var h=a.getAttribute('href')||'';if(/^https?:/i.test(h)&&(a.target==='_blank'||a.host!==location.host)){e.preventDefault();location.href=h;}},false);
   /* language buttons: any element with data-lang-toggle */
   document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('[data-lang-toggle]');if(b){e.preventDefault();window.RQLang.toggle();}},true);
   if(lang!=='en'){return;}
