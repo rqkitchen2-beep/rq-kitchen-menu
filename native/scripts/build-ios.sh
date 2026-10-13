@@ -59,6 +59,42 @@ else
   $PB -c "Add :UIBackgroundModes array" -c "Add :UIBackgroundModes:0 string location" "$PLIST"
 fi
 
+step "localized permission texts"
+LOC_EN_WHEN="We use your location to set your delivery address accurately on the map."
+LOC_EN_ALWAYS=""
+if [ "$APP" = driver ]; then
+  LOC_EN_WHEN="We use your location to share the driver's position with the customer during delivery."
+  LOC_EN_ALWAYS="We use your location during deliveries, even when the screen is locked, so the customer can follow their order."
+elif [ "$APP" = branch ]; then
+  LOC_EN_WHEN="This app does not use your location."
+fi
+mkdir -p "$APPDIR/App/en.lproj" "$APPDIR/App/ar.lproj"
+{
+  echo "\"CFBundleDisplayName\" = \"$NAME\";"
+  echo "\"NSLocationWhenInUseUsageDescription\" = \"$LOC_EN_WHEN\";"
+  [ -n "$LOC_EN_ALWAYS" ] && echo "\"NSLocationAlwaysAndWhenInUseUsageDescription\" = \"$LOC_EN_ALWAYS\";" && echo "\"NSLocationAlwaysUsageDescription\" = \"$LOC_EN_ALWAYS\";"
+} > "$APPDIR/App/en.lproj/InfoPlist.strings"
+python3 - "$PLIST" "$APPDIR/App/ar.lproj/InfoPlist.strings" <<'PY'
+import plistlib,sys
+d=plistlib.load(open(sys.argv[1],'rb'))
+keys=['CFBundleDisplayName','NSLocationWhenInUseUsageDescription','NSLocationAlwaysAndWhenInUseUsageDescription','NSLocationAlwaysUsageDescription']
+with open(sys.argv[2],'w') as f:
+    for k in keys:
+        if k in d: f.write('"%s" = "%s";\n'%(k,d[k].replace('"','\\"')))
+PY
+cat > "$RUNNER_TEMP/loc.rb" <<'RB'
+require 'xcodeproj'
+p = Xcodeproj::Project.open(ARGV[0])
+t = p.targets.find { |x| x.name == 'App' }
+g = p.main_group.find_subpath('App', false)
+vg = g.new_variant_group('InfoPlist.strings')
+%w[en ar].each { |l| r = vg.new_reference("#{l}.lproj/InfoPlist.strings"); r.name = l }
+t.resources_build_phase.add_file_reference(vg)
+p.root_object.known_regions = (p.root_object.known_regions + %w[en ar]).uniq
+p.save
+RB
+ruby "$RUNNER_TEMP/loc.rb" "$APPDIR/App.xcodeproj" && echo "RESULT: localized InfoPlist en/ar" || echo "RESULT: WARNING localization skipped"
+
 step "push delegate"
 python3 - "$APPDIR/App/AppDelegate.swift" <<'PY' || die "AppDelegate patch failed"
 import sys
