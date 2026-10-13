@@ -21,15 +21,7 @@ bid = next((d["id"] for d in j.get("data", []) if d["attributes"]["identifier"] 
 s, j = call("GET", f"/v1/bundleIds/{bid}/bundleIdCapabilities?limit=50")
 caps = {c["attributes"]["capabilityType"]: c for c in j.get("data", [])}
 print("caps:", list(caps))
-if "APPLE_PAY" not in caps:
-    body = {"data": {"type": "bundleIdCapabilities", "attributes": {"capabilityType": "APPLE_PAY"},
-            "relationships": {"bundleId": {"data": {"type": "bundleIds", "id": bid}}}}}
-    if mid: body["data"]["relationships"]["merchantIds"] = {"data": [{"type": "merchantIds", "id": mid}]}
-    s, j = call("POST", "/v1/bundleIdCapabilities", body); show("enable-applepay", s, j)
-    if s >= 300 and mid:
-        del body["data"]["relationships"]["merchantIds"]
-        s, j = call("POST", "/v1/bundleIdCapabilities", body); show("enable-applepay-plain", s, j)
-else:
-    show("applepay-cap", 200, caps["APPLE_PAY"])
+# The capability is already on (enabled 2026-10-13). Never post it again: re-enabling
+# resets the merchant IDs linked to the app ID in the developer portal.
 if mid:
     s, j = call("GET", f"/v1/merchantIds/{mid}/relationships/bundleIds"); show("merchant-bundles", s, j)
