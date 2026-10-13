@@ -59,6 +59,26 @@ else
   $PB -c "Add :UIBackgroundModes array" -c "Add :UIBackgroundModes:0 string location" "$PLIST"
 fi
 
+step "push delegate"
+python3 - "$APPDIR/App/AppDelegate.swift" <<'PY' || die "AppDelegate patch failed"
+import sys
+p=sys.argv[1]; s=open(p).read()
+add = """
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+    }
+"""
+if "didRegisterForRemoteNotificationsWithDeviceToken" not in s:
+    i = s.rindex("}")
+    s = s[:i] + add + s[i:]
+open(p,"w").write(s)
+PY
+echo "RESULT: plugins $(python3 -c "import json;print(','.join(json.load(open('$APPDIR/App/capacitor.config.json')).get('packageClassList',[])))")"
+
 step "icons"
 ICONSET="$APPDIR/App/Assets.xcassets/AppIcon.appiconset"
 for f in "$ICONSET"/*.png; do cp "$DIR/assets/icon.png" "$f"; done
@@ -87,7 +107,12 @@ echo "profile: $PROF_NAME ($PROF_UUID)"
 mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 cp "$RUNNER_TEMP/app.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROF_UUID.mobileprovision"
 PBX="$APPDIR/App.xcodeproj/project.pbxproj"
-sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\";/g" "$PBX"
+cat > "$APPDIR/App/App.entitlements" <<ENT
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>aps-environment</key><string>production</string></dict></plist>
+ENT
+sed -i '' "s#CODE_SIGN_STYLE = Automatic;#CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\"; CODE_SIGN_ENTITLEMENTS = App/App.entitlements;#g" "$PBX"
 sed -i '' -e 's/"iPhone Developer"/"Apple Distribution"/g' -e 's/"Apple Development"/"Apple Distribution"/g' -e 's/= "iPhone Developer";/= "Apple Distribution";/g' "$PBX"
 [ "$APP" = branch ] || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
 grep -E "CODE_SIGN|PROVISIONING|DEVELOPMENT_TEAM" "$PBX" | sort | uniq -c

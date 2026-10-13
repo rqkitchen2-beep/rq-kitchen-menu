@@ -444,6 +444,8 @@ function demo(fn,b){
     case 'app_login':if(!normPhone(b.phone))return{ok:false,error:'bad_phone'};if(!D.cust){D.cust={name:'ضيف RQ',phone:normPhone(b.phone),pin:b.pin};}return{ok:true,token:'demo'};
     case 'app_me':if(!D.cust)return{ok:false,error:'auth'};return{ok:true,customer:{name:D.cust.name,phone:D.cust.phone,orders:D.orders.length},addresses:D.addrs};
     case 'app_logout':D.cust=null;return{ok:true};
+    case 'app_delete_account':D.cust=null;return{ok:true};
+    case 'app_push_register':case 'app_push_unregister':return{ok:true};
     case 'app_update_name':D.cust.name=b.name;return{ok:true};
     case 'app_save_address':if(!b.a.area||b.a.area.trim().length<2)return{ok:false,error:'bad_address'};if(b.a.lat==null||b.a.lng==null)return{ok:false,error:'no_location'};var a={id:'a'+Date.now(),label:b.a.label||'البيت',area:b.a.area,details:b.a.details||'',lat:b.a.lat,lng:b.a.lng};D.addrs.unshift(a);return{ok:true,id:a.id};
     case 'app_remove_address':D.addrs=D.addrs.filter(function(x){return x.id!==b.address_id;});return{ok:true};
@@ -490,11 +492,13 @@ function loadMenu(){
 function loadMe(){
   if(!S.token)return Promise.resolve();
   return rpc('app_me',{t:S.token}).then(function(r){
-    if(r&&r.ok){S.me=r.customer;S.addresses=r.addresses||[];if(S.addr&&!S.addresses.some(function(a){return a.id===S.addr;}))S.addr=null;if(!S.addr&&S.addresses[0])S.addr=S.addresses[0].id;}
+    if(r&&r.ok){pushReg();S.me=r.customer;S.addresses=r.addresses||[];if(S.addr&&!S.addresses.some(function(a){return a.id===S.addr;}))S.addr=null;if(!S.addr&&S.addresses[0])S.addr=S.addresses[0].id;}
     else if(r&&r.error==='auth'){logoutLocal();}
   }).catch(function(){});
 }
 function loadOrders(){if(!S.token)return Promise.resolve([]);return rpc('app_my_orders',{t:S.token}).then(function(r){if(r&&r.ok){S.orders=r.orders;return r.orders;}if(r&&r.error==='auth')logoutLocal();return [];}).catch(function(){return S.orders||[];});}
+function pushReg(){if(window.RQPush&&S.token)RQPush.register(function(tk){if(S.token)rpc('app_push_register',{t:S.token,token:tk}).catch(function(){});});}
+function pushUnreg(){var tk=window.RQPush&&RQPush.token();if(tk)rpc('app_push_unregister',{token:tk}).catch(function(){});}
 function logoutLocal(){S.token=null;S.me=null;S.addresses=[];S.orders=null;S.addr=null;store.del('rqa-token');store.del('rqa-addr');}
 
 /* ---------------- render helpers ---------------- */
@@ -683,12 +687,20 @@ V.account=function(){
   h+='<div class="box"><h3>عناويني</h3>'+(S.addresses.length?S.addresses.map(function(a){return '<div class="line"><div class="ln"><b style="font-family:var(--ar);direction:rtl">'+esc(a.label)+'</b><small>'+esc(a.area)+(a.details?' · '+esc(a.details):'')+'</small></div><button type="button" class="btn sm ghost" data-deladdr="'+esc(a.id)+'">حذف</button></div>';}).join(''):'<p style="margin:0;color:var(--muted);font-size:14px">ما فيه عناوين محفوظة.</p>')+
     '<button type="button" class="btn line block" data-sheet="address" style="margin-top:10px">+ أضف عنوان</button></div>';
   h+='<div class="box"><a class="row-link" href="#/orders">طلباتي <span>'+ICON.back.replace('M9 6l6 6-6 6','M15 6l-6 6 6 6')+'</span></a><a class="row-link" href="https://instagram.com/rqkitchen.ae" target="_blank" rel="noopener">تابعنا على إنستقرام <span class="lat">@rqkitchen.ae</span></a></div>';
-  h+='<button type="button" class="btn danger block" id="logout" style="margin-top:16px">تسجيل خروج</button></div>';
+  h+='<button type="button" class="btn danger block" id="logout" style="margin-top:16px">تسجيل خروج</button>';
+  h+='<button type="button" class="btn ghost block" id="delAcc" style="margin-top:10px;color:var(--muted);font-size:13px">حذف الحساب نهائياً</button></div>';
   return h;
 };
 V.account.after=function(){
   var s=$('#saveName');if(s)s.onclick=function(){var v=$('#nm').value.trim();rpc('app_update_name',{t:S.token,name:v}).then(function(r){if(r&&r.ok){S.me.name=v;toast('تم حفظ الاسم');render();}else toast(emsg(r&&r.error));}).catch(function(){toast(ERR.net);});};
-  var l=$('#logout');if(l)l.onclick=function(){rpc('app_logout',{t:S.token}).catch(function(){});logoutLocal();toast('تم تسجيل الخروج');go('#/home');};
+  var l=$('#logout');if(l)l.onclick=function(){pushUnreg();rpc('app_logout',{t:S.token}).catch(function(){});logoutLocal();toast('تم تسجيل الخروج');go('#/home');};
+  var da=$('#delAcc');if(da)da.onclick=function(){
+    if(!confirm('متأكد تبي تحذف حسابك؟ بنحذف اسمك ورقمك وعناوينك نهائياً، وما تقدر ترجعها.'))return;
+    da.disabled=true;pushUnreg();
+    rpc('app_delete_account',{t:S.token}).then(function(r){
+      if(r&&r.ok){logoutLocal();toast('تم حذف حسابك');go('#/home');}
+      else{da.disabled=false;toast(r&&r.error==='active_order'?'عندك طلب جاري. تقدر تحذف الحساب بعد ما يخلص الطلب.':emsg(r&&r.error));}
+    }).catch(function(){da.disabled=false;toast(ERR.net);});};
 };
 
 V.login=function(){

@@ -85,6 +85,24 @@
       navigator.geolocation.clearWatch=function(id){var c=ids[id];if(c)Geo.clearWatch({id:c});ids[id]=null;};
     }
 
+    /* push notifications: the page passes a callback that saves the device token */
+    var Push=plug('PushNotifications');
+    if(Push){
+      var cb=null,tok=null;
+      try{tok=localStorage.getItem('rq-push-token');}catch(_){}
+      Push.addListener('registration',function(t){tok=t&&t.value;try{localStorage.setItem('rq-push-token',tok);}catch(_){}if(cb&&tok)cb(tok);});
+      Push.addListener('pushNotificationActionPerformed',function(a){var d=a&&a.notification&&a.notification.data;
+        if(d&&d.url&&d.url!=='#')location.hash=d.url;});
+      window.RQPush={
+        register:function(f){cb=f;
+          Push.checkPermissions().then(function(p){
+            if(p.receive==='granted')return Push.register();
+            if(p.receive!=='denied')return Push.requestPermissions().then(function(r){if(r.receive==='granted')return Push.register();});
+          }).catch(function(){});},
+        token:function(){return tok;}
+      };
+    }
+
     /* keep the screen on (driver and branch) */
     if(RQ){
       var held=false;

@@ -42,6 +42,13 @@ def make_profile(ident, cert_id, outpath):
     s, j = call("GET", f"/v1/bundleIds?filter[identifier]={ident}&limit=5")
     bid = next((d["id"] for d in j.get("data", []) if d["attributes"]["identifier"] == ident), None)
     if not bid: die("bundle not found " + ident, j)
+    s, j = call("GET", f"/v1/bundleIds/{bid}/bundleIdCapabilities?limit=50")
+    caps = [c["attributes"]["capabilityType"] for c in j.get("data", [])]
+    if "PUSH_NOTIFICATIONS" not in caps:
+        s, j = call("POST", "/v1/bundleIdCapabilities", {"data": {"type": "bundleIdCapabilities",
+            "attributes": {"capabilityType": "PUSH_NOTIFICATIONS"},
+            "relationships": {"bundleId": {"data": {"type": "bundleIds", "id": bid}}}}})
+        print("push capability:", s, file=sys.stderr)
     name = f"RQ AppStore {ident}"
     s, j = call("GET", f"/v1/bundleIds/{bid}/profiles?limit=50")
     for p in j.get("data", []):

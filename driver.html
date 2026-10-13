@@ -308,9 +308,10 @@ function refresh(){if(!T||busy)return Promise.resolve();busy=true;
     var fresh=(r.available||[]).filter(function(o){return !seenAvail[o.id];});
     if(DATA&&fresh.length&&r.driver.online){ding();toast(fresh.length===1?'طلب توصيل جديد #'+fresh[0].order_no:fresh.length+' طلبات توصيل جديدة');fresh.forEach(function(o){hl[o.id]=1;});}
     (r.available||[]).forEach(function(o){seenAvail[o.id]=1;});
+    if(!DATA&&window.RQPush)RQPush.register(function(tk){if(T)rpc('app_driver_push_register',{t:T,token:tk}).catch(function(){});});
     DATA=r;showApp();if(r.driver.online)startGps();else stopGps();render();
   }).catch(function(){}).finally(function(){busy=false;});}
-function logoutLocal(){if(window.RQBG)RQBG.stop();T=null;store.del('rqd-token');DATA=null;showLogin();toast(ERR.auth);}
+function logoutLocal(){if(window.RQBG)RQBG.stop();var ptk=window.RQPush&&RQPush.token();if(ptk)rpc('app_push_unregister',{token:ptk}).catch(function(){});T=null;store.del('rqd-token');DATA=null;showLogin();toast(ERR.auth);}
 setInterval(function(){if(document.visibilityState==='visible')refresh();},8000);
 setInterval(function(){if(DATA)render();},60000);
 

@@ -11,6 +11,7 @@
     "@capacitor/status-bar": "latest",
     "@capacitor/haptics": "latest",
     "@capacitor/local-notifications": "latest",
-    "rq-native": "file:../plugins/rq-native"
+    "rq-native": "file:../plugins/rq-native",
+    "@capacitor/push-notifications": "latest"
   }
 }

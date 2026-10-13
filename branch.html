@@ -262,7 +262,7 @@ function showLogin(){$('#loginV').hidden=false;$('#appV').hidden=true;stopRing()
 $('#lf').addEventListener('submit',function(e){e.preventDefault();var b=document.querySelector('[name=br]:checked'),p=$('#lpin').value.trim(),E=$('#lerr');E.textContent='';
   if(!b){E.textContent=ERR.no_branch;return;}if(!/^\d{4,8}$/.test(p)){E.textContent=ERR.bad_pin;return;}
   var btn=$('#lbtn');btn.disabled=true;rpc('app_staff_login',{branch_id:b.value,p:p}).then(function(r){if(r&&r.ok){AUTH={b:b.value,p:p};store.set('rqb-auth',AUTH);store.set('rqb-last',b.value);known=null;start();}else E.textContent=emsg(r&&r.error);}).catch(function(){E.textContent=ERR.net;}).finally(function(){btn.disabled=false;});});
-$('#logout').onclick=function(){confirmBox('خروج من شاشة الفرع','بتوقف التنبيهات على هالجهاز لين تدخل مرة ثانية.','',function(){AUTH=null;store.del('rqb-auth');showLogin();});};
+$('#logout').onclick=function(){confirmBox('خروج من شاشة الفرع','بتوقف التنبيهات على هالجهاز لين تدخل مرة ثانية.','',function(){var ptk=window.RQPush&&RQPush.token();if(ptk)rpc('app_push_unregister',{token:ptk}).catch(function(){});AUTH=null;store.del('rqb-auth');showLogin();});};
 
 /* ---------- sound ---------- */
 function unlock(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();soundOn=true;}catch(e){}var s=$('#sound');s.classList.remove('warn');s.textContent='الصوت شغّال';}
@@ -355,7 +355,7 @@ $('#hist').addEventListener('toggle',function(){if(this.open)loadHist();});
 function setLive(ok){var l=$('#live');l.classList.toggle('off',!ok);$('#liveT').textContent=ok?'متصل':'غير متصل، نحاول نرجع';}
 setInterval(function(){if(Date.now()-lastOk>20000)setLive(false);},5000);
 
-function start(){$('#loginV').hidden=true;$('#appV').hidden=false;var b=BR.find(function(x){return x.id===AUTH.b;});
+function start(){$('#loginV').hidden=true;$('#appV').hidden=false;if(window.RQPush&&AUTH)RQPush.register(function(tk){if(AUTH)rpc('app_branch_push_register',{bid:AUTH.b,p:AUTH.p,token:tk}).catch(function(){});});var b=BR.find(function(x){return x.id===AUTH.b;});
   $('#bName').textContent='فرع '+branchName(AUTH.b);$('#bOpen').textContent=b?(isOpen(b)?'الفرع مفتوح لين '+fmtT(b.close_time):'الفرع مغلق في التطبيق'):'';
   if(soundOn){$('#sound').classList.remove('warn');$('#sound').textContent='الصوت شغّال';}
   load();}
