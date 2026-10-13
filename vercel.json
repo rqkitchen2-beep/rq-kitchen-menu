@@ -16,5 +16,29 @@
     "deploymentEnabled": {
       "ios-status": false
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "menu.rqkitchen.app"
+        }
+      ],
+      "destination": "/app",
+      "permanent": false
+    },
+    {
+      "source": "/index",
+      "has": [
+        {
+          "type": "host",
+          "value": "menu.rqkitchen.app"
+        }
+      ],
+      "destination": "/app",
+      "permanent": false
+    }
+  ]
 }
