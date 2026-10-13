@@ -1,75 +1,63 @@
-android branch run: 1 rc: 1 Tue Oct 13 16:56:31 UTC 2026
+android branch run: 2 rc: 0 Tue Oct 13 16:59:07 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
 RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin" "classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin" "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin" "classpath": "com.rqkitchen.rqnative.RQNativePlugin" 
 STEP: icon + version
 STEP: gradle build
-ERROR: gradle failed
+RESULT: apk signed 3.2M versionCode 102
 ---- errors ----
-> Task :rq-native:compileReleaseJavaWithJavac FAILED
-/home/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/plugins/rq-native/android/src/main/java/com/rqkitchen/rqnative/RQNativePlugin.java:30: error: cannot access AppCompatActivity
-1 error
-FAILURE: Build failed with an exception.
-* What went wrong:
-Execution failed for task ':rq-native:compileReleaseJavaWithJavac'.
-> Compilation failed; see the compiler output below.
-  /home/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/plugins/rq-native/android/src/main/java/com/rqkitchen/rqnative/RQNativePlugin.java:30: error: cannot access AppCompatActivity
-  1 error
-> Check your code and dependencies to fix the compilation error(s)
-BUILD FAILED in 1m 38s
-ERROR: gradle failed
 ---- tail ----
-> Task :capacitor-local-notifications:generateReleaseRFile
-> Task :capacitor-splash-screen:parseReleaseLocalResources
-> Task :capacitor-haptics:compileReleaseJavaWithJavac
-> Task :capacitor-haptics:bundleLibRuntimeToDirRelease
-> Task :capacitor-splash-screen:javaPreCompileRelease
-> Task :capacitor-status-bar:generateReleaseResValues
-> Task :capacitor-status-bar:generateReleaseResources
-> Task :capacitor-splash-screen:generateReleaseRFile
-> Task :capacitor-status-bar:packageReleaseResources
-> Task :capacitor-splash-screen:compileReleaseJavaWithJavac
-> Task :capacitor-status-bar:processReleaseNavigationResources
-> Task :capacitor-status-bar:javaPreCompileRelease
-> Task :capacitor-splash-screen:bundleLibRuntimeToDirRelease
-> Task :rq-native:generateReleaseResValues
-> Task :capacitor-status-bar:parseReleaseLocalResources
-> Task :rq-native:generateReleaseResources
-> Task :capacitor-status-bar:generateReleaseRFile
-> Task :rq-native:packageReleaseResources
-> Task :capacitor-status-bar:compileReleaseJavaWithJavac
-> Task :rq-native:processReleaseNavigationResources
-> Task :capacitor-status-bar:bundleLibRuntimeToDirRelease
-> Task :rq-native:parseReleaseLocalResources
-> Task :rq-native:generateReleaseRFile
-> Task :rq-native:javaPreCompileRelease
-
-> Task :rq-native:compileReleaseJavaWithJavac FAILED
-/home/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/plugins/rq-native/android/src/main/java/com/rqkitchen/rqnative/RQNativePlugin.java:30: error: cannot access AppCompatActivity
-        getActivity().runOnUiThread(() -> {
-                   ^
-  class file for androidx.appcompat.app.AppCompatActivity not found
-1 error
-
-> Task :capacitor-local-notifications:compileReleaseKotlin
+> Task :capacitor-android:mapReleaseSourceSetPaths
+> Task :app:mergeReleaseJavaResource
+> Task :capacitor-android:mergeReleaseResources
+> Task :capacitor-cordova-android-plugins:bundleReleaseAar
+> Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
+> Task :capacitor-android:verifyReleaseResources
+> Task :capacitor-cordova-android-plugins:mergeReleaseResources
+> Task :capacitor-android:assembleRelease
+> Task :capacitor-haptics:bundleReleaseAar
+> Task :capacitor-haptics:mapReleaseSourceSetPaths
+> Task :capacitor-haptics:mergeReleaseResources
+> Task :capacitor-cordova-android-plugins:verifyReleaseResources
+> Task :capacitor-cordova-android-plugins:assembleRelease
+> Task :capacitor-local-notifications:bundleReleaseAar
+> Task :capacitor-local-notifications:mapReleaseSourceSetPaths
+> Task :capacitor-haptics:verifyReleaseResources
+> Task :capacitor-local-notifications:mergeReleaseResources
+> Task :capacitor-haptics:assembleRelease
+> Task :capacitor-splash-screen:bundleReleaseAar
+> Task :capacitor-splash-screen:mapReleaseSourceSetPaths
+> Task :capacitor-splash-screen:mergeReleaseResources
+> Task :capacitor-local-notifications:verifyReleaseResources
+> Task :capacitor-local-notifications:assembleRelease
+> Task :capacitor-status-bar:bundleReleaseAar
+> Task :capacitor-status-bar:mapReleaseSourceSetPaths
+> Task :capacitor-splash-screen:verifyReleaseResources
+> Task :capacitor-status-bar:mergeReleaseResources
+> Task :capacitor-splash-screen:assembleRelease
+> Task :rq-native:bundleReleaseAar
+> Task :rq-native:mapReleaseSourceSetPaths
+> Task :rq-native:mergeReleaseResources
+> Task :capacitor-status-bar:verifyReleaseResources
+> Task :capacitor-status-bar:assembleRelease
+> Task :rq-native:verifyReleaseResources
+> Task :rq-native:assembleRelease
+> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
+> Task :capacitor-haptics:lintVitalAnalyzeRelease
+> Task :capacitor-android:lintVitalAnalyzeRelease
+> Task :capacitor-splash-screen:lintVitalAnalyzeRelease
+> Task :capacitor-status-bar:lintVitalAnalyzeRelease
+> Task :rq-native:lintVitalAnalyzeRelease
+> Task :capacitor-local-notifications:lintVitalAnalyzeRelease
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
 
 [Incubating] Problems report is available at: file:///home/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/branch/android/build/reports/problems/problems-report.html
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':rq-native:compileReleaseJavaWithJavac'.
-> Compilation failed; see the compiler output below.
-  /home/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/plugins/rq-native/android/src/main/java/com/rqkitchen/rqnative/RQNativePlugin.java:30: error: cannot access AppCompatActivity
-          getActivity().runOnUiThread(() -> {
-                     ^
-    class file for androidx.appcompat.app.AppCompatActivity not found
-  1 error
-
-* Try:
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights.
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
 
@@ -77,6 +65,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 1m 38s
-67 actionable tasks: 67 executed
-ERROR: gradle failed
+BUILD SUCCESSFUL in 1m 49s
+324 actionable tasks: 324 executed
+RESULT: apk signed 3.2M versionCode 102
+RESULT: published
