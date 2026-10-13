@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     implementation project(':capacitor-android')
+    implementation "androidx.appcompat:appcompat:${project.hasProperty('androidxAppCompatVersion') ? rootProject.ext.androidxAppCompatVersion : '1.7.1'}"
     // Sunmi built-in receipt printer (V2/V2s/V3/T2...); harmless on other devices
     implementation 'com.sunmi:printerlibrary:1.+'
 }
