@@ -161,6 +161,20 @@ cat > "$APPDIR/App/App.entitlements" <<ENT
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict><key>aps-environment</key><string>production</string></dict></plist>
 ENT
+# Apple Pay: only when the profile carries merchant IDs (merchant linked to the app ID in
+# the developer portal); otherwise signing would fail, so the app builds without it.
+security cms -D -i "$RUNNER_TEMP/app.mobileprovision" > "$RUNNER_TEMP/prof.plist" 2>/dev/null
+MIDS=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:com.apple.developer.in-app-payments" "$RUNNER_TEMP/prof.plist" 2>/dev/null | grep -o 'merchant\.[A-Za-z0-9.-]*' | tr '\n' ' ')
+if [ -n "$MIDS" ]; then
+  /usr/libexec/PlistBuddy -c "Add :com.apple.developer.in-app-payments array" "$APPDIR/App/App.entitlements"
+  /usr/libexec/PlistBuddy -c "Add :RQMerchantIds array" "$PLIST" 2>/dev/null
+  i=0; for m in $MIDS; do
+    /usr/libexec/PlistBuddy -c "Add :com.apple.developer.in-app-payments:$i string $m" "$APPDIR/App/App.entitlements"
+    /usr/libexec/PlistBuddy -c "Add :RQMerchantIds:$i string $m" "$PLIST"; i=$((i+1)); done
+  echo "RESULT: Apple Pay enabled ($MIDS)"
+else
+  echo "RESULT: Apple Pay not in profile (link merchant ID to the app ID to enable)"
+fi
 sed -i '' "s#CODE_SIGN_STYLE = Automatic;#CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\"; CODE_SIGN_ENTITLEMENTS = App/App.entitlements;#g" "$PBX"
 sed -i '' -e 's/"iPhone Developer"/"Apple Distribution"/g' -e 's/"Apple Development"/"Apple Distribution"/g' -e 's/= "iPhone Developer";/= "Apple Distribution";/g' "$PBX"
 [ "$APP" = branch ] || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"

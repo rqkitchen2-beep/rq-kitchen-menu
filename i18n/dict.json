@@ -489,5 +489,9 @@
 "تم نسخ الكود": "Code copied:",
 "، أضف طلبك وبنطبقه في السلة": ", add your order and we'll apply it in the cart",
 "أضف طلبك وبنطبقه في السلة": "add your order and we'll apply it in the cart",
-"موقع العميل": "Customer location"
+"موقع العميل": "Customer location",
+"ادفع الحين": "Pay now",
+"ألغيت الدفع. طلبك ما انرسل.": "Payment cancelled. Your order wasn't sent.",
+"البنك رفض العملية. جرّب بطاقة ثانية.": "Your bank declined the payment. Try another card.",
+"ما تمت عملية الدفع. ما انخصم شي.": "Payment didn't go through. You weren't charged."
 }
