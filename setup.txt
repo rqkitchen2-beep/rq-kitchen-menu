@@ -1,40 +1,15 @@
-run: 15  Tue Oct 13 15:09:42 UTC 2026
+run: 16  Tue Oct 13 15:13:49 UTC 2026
 team: Z34R6L55G2 / Z34R6L55G2
 app_customer: 6822102459
 app_driver: 6822102915
 app_branch: 6822106188
-matrix: []
+matrix: ["customer"]
 ---- apple pay ----
 list-merchant 200 {"data": [{"type": "merchantIds", "id": "3MWDKN79PG", "attributes": {"isPlatformIntegrator": false, "identifier": "merchant.com.rqkitchen.app", "prefix": "Z34R6L55G2", "canEdit": true, "name": "RQ Kitchen", "canDelete": true, "isPSP": false}, "relationships": {"certificates": {"meta": {"paging": {"total": 0, "limit": 2147483647}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/relationships/certificates", "related": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/certificates"}}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/m
 merchant_id: 3MWDKN79PG
 caps: []
-enable-applepay 409 {"errors": [{"id": "d6a7327a-fd8d-4670-84e3-ed0d9af1be54", "status": "409", "code": "ENTITY_ERROR.RELATIONSHIP.UNKNOWN", "title": "The provided entity includes an unknown relationship", "detail": "'merchantIds' is not a relationship on the resource 'bundleIdCapabilities'", "source": {"pointer": "/data/relationships/merchantIds"}}]}
+enable-applepay 409 {"errors": [{"id": "2ab9289b-6989-48f1-88a8-7d5be7f632fe", "status": "409", "code": "ENTITY_ERROR.RELATIONSHIP.UNKNOWN", "title": "The provided entity includes an unknown relationship", "detail": "'merchantIds' is not a relationship on the resource 'bundleIdCapabilities'", "source": {"pointer": "/data/relationships/merchantIds"}}]}
 enable-applepay-plain 201 {"data": {"type": "bundleIdCapabilities", "id": "XDMXMQT8QU_APPLE_PAY", "attributes": {"settings": null, "capabilityType": "APPLE_PAY"}, "relationships": {"bundleId": {"data": {"type": "bundleIds", "id": "XDMXMQT8QU"}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/XDMXMQT8QU_APPLE_PAY/relationships/bundleId", "related": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/XDMXMQT8QU_APPLE_PAY/bundleId"}}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/XDMXMQT8QU_APPLE_PAY"}}, "links": {"self": "https://api.appstore
-merchant-bundles 404 {"errors": [{"id": "c2eb0710-5f39-48f3-ba5d-3d7dd923905b", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
-patch APPLE_PAY_MERCHANT_IDS 409 {"errors": [{"id": "6b06d87e-67ce-4def-ab48-68c14e4e30a7", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.TYPE", "title": "An attribute in the provided entity has the wrong type", "detail": "'APPLE_PAY_MERCHANT_IDS' is not a valid value for the attribute 'settings/0/key'. Expected one of: 'ICLOUD_VERSION', 'DATA_PROTECTION_PERMISSION_LEVEL', 'APPLE_ID_AUTH_APP_CONSENT'", "source": {"pointer": "/data/attributes/settings/0/key"}}, {"id": "860ff297-746f-484f-868c-7e8114301115", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.TYPE", "title": "An attribute in the provided entity has the wrong type", "detail": "'merchant.com.rqkitchen.app' is not a valid value for the attribute 'settings/0/opti
-patch MERCHANT_IDS 409 {"errors": [{"id": "9f4b24b9-9593-461c-aa63-960b034e9780", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.TYPE", "title": "An attribute in the provided entity has the wrong type", "detail": "'MERCHANT_IDS' is not a valid value for the attribute 'settings/0/key'. Expected one of: 'ICLOUD_VERSION', 'DATA_PROTECTION_PERMISSION_LEVEL', 'APPLE_ID_AUTH_APP_CONSENT'", "source": {"pointer": "/data/attributes/settings/0/key"}}, {"id": "d09419e9-8e94-476f-8800-16a03eb445d1", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.TYPE", "title": "An attribute in the provided entity has the wrong type", "detail": "'merchant.com.rqkitchen.app' is not a valid value for the attribute 'settings/0/options/0/key'
-patch APPLE_PAY_PAYMENT_PROCESSING 409 {"errors": [{"id": "b8ece6f4-e150-4dd5-a1cd-92590b3c3b64", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.TYPE", "title": "An attribute in the provided entity has the wrong type", "detail": "'APPLE_PAY_PAYMENT_PROCESSING' is not a valid value for the attribute 'settings/0/key'. Expected one of: 'ICLOUD_VERSION', 'DATA_PROTECTION_PERMISSION_LEVEL', 'APPLE_ID_AUTH_APP_CONSENT'", "source": {"pointer": "/data/attributes/settings/0/key"}}, {"id": "8a43546e-1156-4ab6-8295-3a85d3e53f87", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.TYPE", "title": "An attribute in the provided entity has the wrong type", "detail": "'merchant.com.rqkitchen.app' is not a valid value for the attribute 'settings/
-cap 403 {"errors": [{"id": "0c0c213c-3d10-4ac2-95de-6a2c9e41536f", "status": "403", "code": "FORBIDDEN_ERROR", "title": "The given operation is not allowed", "detail": "The resource 'bundleIdCapabilities' does not allow 'GET_INSTANCE'. Allowed operations are: CREATE, DELETE, UPDATE"}]}
-profile RQ AppStore com.rqkitchen.app INVALID 
-		<key>beta-reports-active</key>
-		<true/>
-				
-				<key>aps-environment</key>
-		<string>production</string>
-				
-				<key>application-identifier</key>
-		<string>Z34R6L55G2.com.rqkitchen.app</string>
-				
-				<key>keychain-access-groups</key>
-		<array>
-				<string>Z34R6L55G2.*</string>
-				<string>com.apple.token</string>
-		</array>
-				
-				<key>get-task-allow</key>
-		<false/>
-				
-				<key>com.apple.developer.team-identifier</key>
-		<string>Z34R6L55G2</string>
-		
-	
+merchant-bundles 404 {"errors": [{"id": "966ce017-3453-4dd8-baad-da845c327cd2", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
+revoked old cert H354S9ZK2Q
+cert: J265Z84V6N
