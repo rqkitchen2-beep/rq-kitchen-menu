@@ -536,5 +536,21 @@
 "شغّل \"نستقبل الطلبات\" فوق عشان توصلك الطلبات.": "Turn on \"Taking orders\" above to receive orders.",
 "أول ما يوصل طلب بتطلع شاشة الطلب وتسمع الصفارة.": "When an order arrives, the order screen opens and the alarm rings.",
 "شغّل استقبال الطلبات من فوق عشان توصلك الطلبات": "Turn on Taking orders above to receive orders",
-"أول ما يوصل طلب بتطلع شاشة الطلب وتسمع الصفارة": "When an order arrives, the order screen opens and the alarm rings"
+"أول ما يوصل طلب بتطلع شاشة الطلب وتسمع الصفارة": "When an order arrives, the order screen opens and the alarm rings",
+"تقرير المبيعات": "Sales report",
+"تقرير المبيعات: اليوم، أمس، وتواريخ محددة ›": "Sales report: today, yesterday and custom dates ›",
+"أمس": "Yesterday",
+"آخر ٧ أيام": "Last 7 days",
+"هذا الشهر": "This month",
+"تاريخ محدد": "Custom dates",
+"عرض": "Show",
+"نجيب الأرقام…": "Loading…",
+"اختر فترة أقصاها ٣ شهور": "Choose a range of up to 3 months",
+"طلب مكتمل": "completed orders",
+"متوسط الطلب": "average order",
+"ملغية ومرفوضة": "Cancelled & rejected",
+"خصومات الكوبونات": "Coupon discounts",
+"حسب اليوم": "By day",
+"الأكثر مبيعاً": "Best sellers",
+"ما فيه مبيعات في هالفترة": "No sales in this period"
 }
