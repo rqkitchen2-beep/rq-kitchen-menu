@@ -449,5 +449,20 @@
 "النوع واللون": "type and color",
 "رقم اللوحة": "Plate number",
 "هوندا ويف · أسود": "Honda Wave · Black",
-"تقييم": "ratings"
+"تقييم": "ratings",
+"كوبون خصم": "Discount code",
+"اكتب الكود": "Enter code",
+"تطبيق": "Apply",
+"إزالة": "Remove",
+"خصم": "Discount",
+"تم تطبيق الكود": "Code applied",
+"كود الخصم غير صحيح": "Invalid discount code",
+"انتهت صلاحية كود الخصم": "This code has expired",
+"كود الخصم خلص": "This code is used up",
+"استخدمت هالكود من قبل": "You've already used this code",
+"الكود يحتاج طلب بقيمة أعلى": "This code needs a higher order total",
+"الكود يحتاج طلب بقيمة": "This code needs an order of",
+"درهم أو أكثر": "AED or more",
+"كوبون": "Coupon",
+"محسوب في الإجمالي": "included in total"
 }
