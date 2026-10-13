@@ -1,8 +1,14 @@
-run: 13  Tue Oct 13 11:50:52 UTC 2026
+run: 14  Tue Oct 13 15:07:40 UTC 2026
 team: Z34R6L55G2 / Z34R6L55G2
 app_customer: 6822102459
 app_driver: 6822102915
 app_branch: 6822106188
-matrix: ["driver","branch"]
-revoked old cert V7GKKV5U5V
-cert: H354S9ZK2Q
+matrix: []
+---- apple pay ----
+list-merchant 200 {"data": [], "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds?filter%5Bidentifier%5D=merchant.com.rqkitchen.app&limit=5"}, "meta": {"paging": {"total": 0, "limit": 5}}}
+create-merchant 201 {"data": {"type": "merchantIds", "id": "3MWDKN79PG", "attributes": {"name": "RQ Kitchen", "identifier": "merchant.com.rqkitchen.app", "prefix": "Z34R6L55G2"}, "relationships": {"certificates": {"meta": {"paging": {"total": 0, "limit": 2147483647}}, "data": [], "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/relationships/certificates", "related": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/certificates"}}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG"}}, "links": {"self": "https://api.appstoreconnect
+merchant_id: 3MWDKN79PG
+caps: []
+enable-applepay 409 {"errors": [{"id": "3916c0a6-bbf6-41fd-bcba-5fc6f26ca0b4", "status": "409", "code": "ENTITY_ERROR.RELATIONSHIP.UNKNOWN", "title": "The provided entity includes an unknown relationship", "detail": "'merchantIds' is not a relationship on the resource 'bundleIdCapabilities'", "source": {"pointer": "/data/relationships/merchantIds"}}]}
+enable-applepay-plain 201 {"data": {"type": "bundleIdCapabilities", "id": "XDMXMQT8QU_APPLE_PAY", "attributes": {"settings": null, "capabilityType": "APPLE_PAY"}, "relationships": {"bundleId": {"data": {"type": "bundleIds", "id": "XDMXMQT8QU"}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/XDMXMQT8QU_APPLE_PAY/relationships/bundleId", "related": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/XDMXMQT8QU_APPLE_PAY/bundleId"}}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/XDMXMQT8QU_APPLE_PAY"}}, "links": {"self": "https://api.appstore
+merchant-bundles 404 {"errors": [{"id": "20112beb-7205-44cb-94b4-192858a5c903", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
