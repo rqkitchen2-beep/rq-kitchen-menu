@@ -103,7 +103,7 @@
   window.alert=function(m){return oa.call(window,tr(String(m)));};
 })();
 </script><!--i18n:end-->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#F29835">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="RQ Kitchen">
@@ -581,6 +581,9 @@ html.lang-en .hcn{text-align:left}
 .rq-pin.br img{width:30px}
 .rq-pin.drv{background:var(--brand);box-shadow:0 0 0 6px rgba(243,154,43,.25),0 4px 10px rgba(0,0,0,.25)}
 .cpnf{display:flex;gap:8px}.cpnf .f{flex:1;text-transform:uppercase;letter-spacing:1px}.cpn{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--ok-bg);color:var(--ok);border-radius:14px;padding:10px 12px;font-weight:600}.sum.disc{color:var(--ok)}
+
+/* no zoom on double-tap or input focus (iOS) */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}input,select,textarea{font-size:max(16px,1em)!important}
 </style>
 </head>
 <body>

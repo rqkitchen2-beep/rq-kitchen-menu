@@ -103,7 +103,7 @@
   window.alert=function(m){return oa.call(window,tr(String(m)));};
 })();
 </script><!--i18n:end-->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#1C1410">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -233,6 +233,9 @@ button{cursor:pointer}
 .modal p{margin:0 0 16px;color:var(--muted)}
 .modal .big{font-family:var(--display);font-size:34px;font-weight:800;direction:ltr;text-align:center;margin:6px 0 16px}
 .hint{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 0 30px}
+
+/* no zoom on double-tap or input focus (iOS) */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}input,select,textarea{font-size:max(16px,1em)!important}
 </style>
 </head>
 <body>

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>لوحة تحكم التطبيق — RQ Kitchen</title>
 <link rel="icon" href="logo.png">
@@ -128,6 +128,9 @@ td.num{font-family:var(--display);direction:ltr;text-align:left;white-space:nowr
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 40px)}
 .toast.show{opacity:1}
 @media(max-width:760px){.grid2,.bnrow{grid-template-columns:1fr}.g3{grid-template-columns:1fr}.ord{grid-template-columns:1fr auto}.ord .no{grid-column:1/-1}.links .btn span{display:none}}
+
+/* no zoom on double-tap or input focus (iOS) */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}input,select,textarea{font-size:max(16px,1em)!important}
 </style>
 </head>
 <body>
