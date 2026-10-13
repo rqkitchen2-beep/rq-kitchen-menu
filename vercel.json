@@ -40,5 +40,20 @@
       "destination": "/app",
       "permanent": false
     }
+  ],
+  "headers": [
+    {
+      "source": "/(app|driver|branch|app.html|driver.html|branch.html)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
   ]
 }
