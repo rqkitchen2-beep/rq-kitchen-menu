@@ -483,6 +483,7 @@ function loadMenu(){
       if(preview){DEMO=true;$('#demo').hidden=false;var s=JSON.parse($('#snap').textContent);applyMenu(s.categories,s.items,s.branches);return;}
       var c=store.get('rqa-menu',null);
       if(c){applyMenu(c.c,c.i,c.b);setTimeout(function(){toast('ما فيه اتصال. نعرض آخر نسخة من المنيو.');},2600);return;}
+      if(window.RQ_NATIVE){try{var sn=JSON.parse($('#snap').textContent);applyMenu(sn.categories,sn.items,sn.branches);setTimeout(function(){toast('ما فيه اتصال. نعرض المنيو المحفوظ.');},2600);return;}catch(e){}}
       OFFLINE=true;
     });
 }

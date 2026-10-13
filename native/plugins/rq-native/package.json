@@ -1,0 +1,10 @@
+{
+  "name": "rq-native",
+  "version": "1.0.0",
+  "description": "RQ Kitchen native helpers: background driver location and keep-awake",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "files": ["ios/", "Package.swift", "index.js"],
+  "capacitor": { "ios": { "src": "ios" } },
+  "peerDependencies": { "@capacitor/core": ">=7.0.0" }
+}

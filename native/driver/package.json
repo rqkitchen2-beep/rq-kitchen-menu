@@ -10,6 +10,7 @@
     "@capacitor/splash-screen": "latest",
     "@capacitor/status-bar": "latest",
     "@capacitor/haptics": "latest",
-    "@capacitor/local-notifications": "latest"
+    "@capacitor/local-notifications": "latest",
+    "rq-native": "file:../plugins/rq-native"
   }
 }

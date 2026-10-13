@@ -3,13 +3,20 @@
   "appName": "RQ Driver",
   "webDir": "www",
   "backgroundColor": "#1a1a1a",
-  "server": {
-    "url": "https://menu.rqkitchen.app/driver",
-    "allowNavigation": ["menu.rqkitchen.app"]
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Driver",
+    "webContentsDebuggingEnabled": false
   },
-  "ios": { "contentInset": "never", "scheme": "RQ Driver" },
   "plugins": {
-    "SplashScreen": { "launchShowDuration": 1000, "backgroundColor": "#1a1a1a", "showSpinner": false },
-    "StatusBar": { "style": "DARK", "overlaysWebView": true }
+    "SplashScreen": {
+      "launchShowDuration": 1000,
+      "backgroundColor": "#1a1a1a",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "overlaysWebView": true
+    }
   }
 }

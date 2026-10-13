@@ -285,14 +285,14 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')$('#modal').
 $('#onl').onclick=function(){var want=!(DATA&&DATA.driver.online);unlockSound();
   rpc('app_driver_set_online',{t:T,on_:want}).then(function(r){if(r&&r.ok){DATA.driver.online=want;if(want){startGps();tab='avail';toast('أنت متصل، بنرسل لك الطلبات');}else{stopGps();toast('أنت غير متصل');}render();refresh();}else toast(emsg(r&&r.error));}).catch(function(){toast(ERR.net);});};
 function gpsState(c,t){var g=$('#gps');g.className='gps '+c;$('#gpsT').textContent=t;}
-function startGps(){if(watchId!=null)return;keepAwake();if(!navigator.geolocation){gpsState('bad','جوالك ما يدعم تحديد الموقع');return;}
+function startGps(){if(watchId!=null)return;keepAwake();if(window.RQBG)RQBG.start({url:SB,key:KEY,token:T});if(!navigator.geolocation){gpsState('bad','جوالك ما يدعم تحديد الموقع');return;}
   gpsState('','نحدد موقعك…');
   watchId=navigator.geolocation.watchPosition(function(p){var c={lat:p.coords.latitude,lng:p.coords.longitude};var moved=!lastPos||km(lastPos.lat,lastPos.lng,c.lat,c.lng)>0.03;lastPos=c;
       gpsState('ok','موقعك يوصل للعميل · دقة '+Math.round(p.coords.accuracy)+' م');
-      if(Date.now()-lastSent>(moved?8000:25000)){lastSent=Date.now();if(!DEMO)rpc('app_driver_location',{t:T,lat:c.lat,lng:c.lng}).catch(function(){});}},
+      if(!window.RQBG&&Date.now()-lastSent>(moved?8000:25000)){lastSent=Date.now();if(!DEMO)rpc('app_driver_location',{t:T,lat:c.lat,lng:c.lng}).catch(function(){});}},
     function(err){gpsState('bad',err.code===1?'اسمح للمتصفح بالوصول لموقعك من الإعدادات':'ما قدرنا نحدد موقعك');},
     {enableHighAccuracy:true,maximumAge:5000,timeout:20000});}
-function stopGps(){if(watchId!=null&&navigator.geolocation)navigator.geolocation.clearWatch(watchId);watchId=null;gpsState('','الموقع متوقف');if(wake){try{wake.release();}catch(e){}wake=null;}}
+function stopGps(){if(window.RQBG)RQBG.stop();if(watchId!=null&&navigator.geolocation)navigator.geolocation.clearWatch(watchId);watchId=null;gpsState('','الموقع متوقف');if(wake){try{wake.release();}catch(e){}wake=null;}}
 function keepAwake(){if('wakeLock' in navigator){navigator.wakeLock.request('screen').then(function(w){wake=w;}).catch(function(){});}}
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){if(DATA&&DATA.driver.online&&watchId!=null)keepAwake();refresh();}});
 
@@ -310,7 +310,7 @@ function refresh(){if(!T||busy)return Promise.resolve();busy=true;
     (r.available||[]).forEach(function(o){seenAvail[o.id]=1;});
     DATA=r;showApp();if(r.driver.online)startGps();else stopGps();render();
   }).catch(function(){}).finally(function(){busy=false;});}
-function logoutLocal(){T=null;store.del('rqd-token');DATA=null;showLogin();toast(ERR.auth);}
+function logoutLocal(){if(window.RQBG)RQBG.stop();T=null;store.del('rqd-token');DATA=null;showLogin();toast(ERR.auth);}
 setInterval(function(){if(document.visibilityState==='visible')refresh();},8000);
 setInterval(function(){if(DATA)render();},60000);
 

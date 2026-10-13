@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RQ</title>
+<style>html,body{margin:0;height:100%;background:__BG__}</style>
+</head>
+<body>
+<script>
+/* RQ native loader: runs the newest copy of the page — the one downloaded from the
+   site if it is newer than the copy bundled in this build — so the app opens
+   instantly and offline while still picking up site changes automatically. */
+(function(){
+  var PAGE='__PAGE__', REMOTE='__REMOTE__', BUILD=__BUILD__, SITE='https://menu.rqkitchen.app/';
+  var KEY='rq-live:'+PAGE;
+  function get(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;}}
+  function put(v){try{localStorage.setItem(KEY,JSON.stringify(v));}catch(e){}}
+
+  var SHIM='<scr'+'ipt>('+shim.toString()+')('+JSON.stringify(SITE)+');</scr'+'ipt>'+
+    '<style>html.native *{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}'+
+    'html.native input,html.native textarea,html.native [contenteditable]{-webkit-user-select:text;user-select:text}'+
+    'html.native,html.native body{overscroll-behavior:none}</style>';
+
+  function run(html){
+    html=html.replace(/<head([^>]*)>/i,function(m){return m+SHIM;});
+    document.open();document.write(html);document.close();
+  }
+
+  var cached=get(), running=null;
+  function start(bundled){
+    var use=(cached&&cached.html&&cached.at>BUILD)?cached.html:bundled;
+    if(!use&&cached)use=cached.html;
+    if(!use){document.body.innerHTML='<p style="font-family:system-ui;text-align:center;margin-top:40vh">تعذر فتح التطبيق</p>';return;}
+    running=use;run(use);
+  }
+  var x=new XMLHttpRequest();
+  x.open('GET',PAGE,true);
+  x.onload=function(){start(x.status===200||x.status===0?x.responseText:'');};
+  x.onerror=function(){start('');};
+  x.send();
+
+  /* fetch the live page in the background; it is used from the next launch */
+  setTimeout(function(){
+    var r=new XMLHttpRequest();
+    r.open('GET',REMOTE+(REMOTE.indexOf('?')<0?'?':'&')+'v='+Date.now(),true);
+    r.timeout=15000;
+    r.onload=function(){
+      var h=r.responseText||'';
+      if(r.status===200&&h.length>2000&&/<\/html>/i.test(h)){
+        var prev=get();
+        if(!prev||prev.html!==h)put({html:h,at:Date.now()});
+      }
+    };
+    r.send();
+  },2500);
+
+  /* runs inside the page: native polish + bridges to native plugins */
+  function shim(SITE){
+    window.RQ_NATIVE=true;
+    document.documentElement.classList.add('native');
+    var C=window.Capacitor;
+    function plug(n){try{return C&&C.isNativePlatform&&C.isNativePlatform()?(C.Plugins&&C.Plugins[n])||C.registerPlugin(n):null;}catch(e){return null;}}
+    var Hap=plug('Haptics'), Geo=plug('Geolocation'), RQ=plug('RQNative');
+    window.RQPlug=plug;
+
+    /* images that are not bundled load from the site */
+    document.addEventListener('error',function(e){var t=e.target;
+      if(t&&t.tagName==='IMG'&&!t.getAttribute('data-rf')){var s=t.getAttribute('src')||'';
+        if(s&&!/^(https?:|data:|blob:)/.test(s)){t.setAttribute('data-rf','1');t.src=SITE+s.replace(/^\.?\//,'');}}},true);
+
+    /* light haptic tap on buttons */
+    if(Hap)document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('button,.btn,a[href]');
+      if(b&&!b.disabled){try{Hap.impact({style:'LIGHT'});}catch(_){}}},true);
+
+    /* native location permission + updates instead of the web view's */
+    if(Geo&&navigator.geolocation){
+      var ids={},n=0;
+      function err(cb,e){if(cb)cb({code:/denied|permission/i.test(String(e&&e.message))?1:2,message:String(e&&e.message||e)});}
+      navigator.geolocation.getCurrentPosition=function(ok,bad,o){Geo.getCurrentPosition({enableHighAccuracy:!o||o.enableHighAccuracy!==false,timeout:(o&&o.timeout)||20000,maximumAge:(o&&o.maximumAge)||0}).then(ok,function(e){err(bad,e);});};
+      navigator.geolocation.watchPosition=function(ok,bad,o){var id=++n;
+        Geo.watchPosition({enableHighAccuracy:!o||o.enableHighAccuracy!==false,timeout:(o&&o.timeout)||20000,maximumAge:(o&&o.maximumAge)||0},function(p,e){if(e)err(bad,e);else if(p)ok(p);})
+          .then(function(cid){if(ids[id]===null){Geo.clearWatch({id:cid});}else ids[id]=cid;});
+        return id;};
+      navigator.geolocation.clearWatch=function(id){var c=ids[id];if(c)Geo.clearWatch({id:c});ids[id]=null;};
+    }
+
+    /* keep the screen on (driver and branch) */
+    if(RQ){
+      var held=false;
+      try{Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:function(){
+        held=true;RQ.keepAwake({on:true});
+        var lock={released:false,_l:[],addEventListener:function(t,f){if(t==='release')this._l.push(f);},
+          release:function(){if(!this.released){this.released=true;held=false;RQ.keepAwake({on:false});this._l.forEach(function(f){try{f();}catch(_){}});}return Promise.resolve();}};
+        return Promise.resolve(lock);}}});}catch(_){}
+      /* background driver location, sent natively even when the screen is locked */
+      window.RQBG={start:function(o){try{RQ.startTracking(o);}catch(_){}},stop:function(){try{RQ.stopTracking();}catch(_){}}};
+    }
+  }
+})();
+</script>
+</body>
+</html>

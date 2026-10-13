@@ -20,6 +20,10 @@ cd "$DIR" || die "no dir $DIR"
 npm install --no-audit --no-fund || die "npm install failed"
 npx cap --version
 
+step "prepare www"
+python3 "$ROOT/native/scripts/prepare-www.py" "$APP" || die "prepare www failed"
+ls www | head -50
+
 step "cap add ios"
 rm -rf ios
 npx cap add ios || die "cap add ios failed"
@@ -30,7 +34,7 @@ PLIST="$APPDIR/App/Info.plist"
 PB=/usr/libexec/PlistBuddy
 step "patch Info.plist"
 setp(){ $PB -c "Delete :$1" "$PLIST" >/dev/null 2>&1; $PB -c "Add :$1 $2 $3" "$PLIST"; }
-if [ "$APP" = customer ]; then NAME="RQ Kitchen"; else NAME="RQ Driver"; fi
+NAME=$(python3 -c "import json;print(json.load(open('$DIR/capacitor.config.json'))['appName'])")
 setp CFBundleDisplayName string "$NAME"
 setp ITSAppUsesNonExemptEncryption bool false
 setp CFBundleDevelopmentRegion string ar
@@ -39,12 +43,20 @@ $PB -c "Add :CFBundleLocalizations array" -c "Add :CFBundleLocalizations:0 strin
 $PB -c "Delete :UISupportedInterfaceOrientations" "$PLIST" >/dev/null 2>&1
 $PB -c "Add :UISupportedInterfaceOrientations array" -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" "$PLIST"
 $PB -c "Delete :UISupportedInterfaceOrientations~ipad" "$PLIST" >/dev/null 2>&1
+if [ "$APP" = branch ]; then
+  $PB -c "Add :UISupportedInterfaceOrientations~ipad array" -c "Add :UISupportedInterfaceOrientations~ipad:0 string UIInterfaceOrientationPortrait" -c "Add :UISupportedInterfaceOrientations~ipad:1 string UIInterfaceOrientationPortraitUpsideDown" -c "Add :UISupportedInterfaceOrientations~ipad:2 string UIInterfaceOrientationLandscapeLeft" -c "Add :UISupportedInterfaceOrientations~ipad:3 string UIInterfaceOrientationLandscapeRight" "$PLIST"
+  $PB -c "Add :UISupportedInterfaceOrientations:1 string UIInterfaceOrientationLandscapeLeft" -c "Add :UISupportedInterfaceOrientations:2 string UIInterfaceOrientationLandscapeRight" "$PLIST"
+fi
 if [ "$APP" = customer ]; then
   setp NSLocationWhenInUseUsageDescription string "نستخدم موقعك لتحديد عنوان التوصيل بدقة على الخريطة."
+elif [ "$APP" = branch ]; then
+  setp NSLocationWhenInUseUsageDescription string "لا يستخدم التطبيق موقعك."
 else
   setp NSLocationWhenInUseUsageDescription string "نستخدم موقعك لإرسال موقع السائق للعميل أثناء توصيل الطلب."
   setp NSLocationAlwaysAndWhenInUseUsageDescription string "نستخدم موقعك أثناء التوصيل حتى لو كانت الشاشة مقفلة، ليتابع العميل وصول طلبه."
   setp NSLocationAlwaysUsageDescription string "نستخدم موقعك أثناء التوصيل حتى لو كانت الشاشة مقفلة، ليتابع العميل وصول طلبه."
+  $PB -c "Delete :UIBackgroundModes" "$PLIST" >/dev/null 2>&1
+  $PB -c "Add :UIBackgroundModes array" -c "Add :UIBackgroundModes:0 string location" "$PLIST"
 fi
 
 step "icons"
@@ -77,7 +89,7 @@ cp "$RUNNER_TEMP/app.mobileprovision" "$HOME/Library/MobileDevice/Provisioning P
 PBX="$APPDIR/App.xcodeproj/project.pbxproj"
 sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\";/g" "$PBX"
 sed -i '' -e 's/"iPhone Developer"/"Apple Distribution"/g' -e 's/"Apple Development"/"Apple Distribution"/g' -e 's/= "iPhone Developer";/= "Apple Distribution";/g' "$PBX"
-sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
+[ "$APP" = branch ] || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
 grep -E "CODE_SIGN|PROVISIONING|DEVELOPMENT_TEAM" "$PBX" | sort | uniq -c
 
 if [ -d "$APPDIR/App.xcworkspace" ]; then CONT=(-workspace "$APPDIR/App.xcworkspace"); else CONT=(-project "$APPDIR/App.xcodeproj"); fi

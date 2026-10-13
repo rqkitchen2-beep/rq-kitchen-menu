@@ -3,17 +3,21 @@
   "appName": "RQ Kitchen",
   "webDir": "www",
   "backgroundColor": "#ffffff",
-  "server": {
-    "url": "https://menu.rqkitchen.app/app",
-    "allowNavigation": ["menu.rqkitchen.app", "app.rqkitchen.app"]
-  },
   "ios": {
     "contentInset": "never",
     "scheme": "RQ Kitchen",
-    "limitsNavigationsToAppBoundDomains": false
+    "webContentsDebuggingEnabled": false
   },
   "plugins": {
-    "SplashScreen": { "launchShowDuration": 1200, "backgroundColor": "#ffffff", "showSpinner": false, "launchAutoHide": true },
-    "StatusBar": { "style": "LIGHT", "overlaysWebView": true }
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false,
+      "launchAutoHide": true
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "overlaysWebView": true
+    }
   }
 }

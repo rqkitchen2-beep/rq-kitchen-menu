@@ -1,0 +1,22 @@
+{
+  "appId": "com.rqkitchen.branch",
+  "appName": "RQ Branch",
+  "webDir": "www",
+  "backgroundColor": "#EFE9E3",
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Branch",
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1000,
+      "backgroundColor": "#EFE9E3",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "overlaysWebView": true
+    }
+  }
+}

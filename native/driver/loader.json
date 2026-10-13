@@ -1,0 +1,9 @@
+{
+  "page": "driver.html",
+  "remote": "https://menu.rqkitchen.app/driver",
+  "bg": "#1a1a1a",
+  "files": [
+    "driver.html",
+    "logo.png"
+  ]
+}
