@@ -294,12 +294,12 @@ function apply(br,cats,items){
 }
 apply(SNAP.branches,SNAP.categories,SNAP.items);
 function load(){
-  Promise.all([api('menu_branches?select=*'),api('menu_categories?select=*'),api('menu_items?select=*&active=eq.true')])
+  Promise.all([api('menu_branches?select=id,name,name_ar,address,whatsapp,open_time,close_time,manual_closed,sort,delivery_enabled,pickup_enabled,delivery_fee,min_order,delivery_minutes,pickup_minutes,lat,lng'),api('menu_categories?select=*'),api('menu_items?select=*&active=eq.true')])
     .then(function(r){store.set('rq-snap',{b:r[0],c:r[1],i:r[2]});apply(r[0],r[1],r[2]);})
     .catch(function(){var s=store.get('rq-snap',null);if(s)apply(s.b,s.c,s.i);});
 }
 var cached=store.get('rq-snap',null); if(cached)apply(cached.b,cached.c,cached.i);
-load(); setInterval(renderBranches,60000); setInterval(function(){api('menu_branches?select=*').then(function(b){BR=b.sort(function(x,y){return x.sort-y.sort;});renderBranches();}).catch(function(){});},120000);
+load(); setInterval(renderBranches,60000); setInterval(function(){api('menu_branches?select=id,name,name_ar,address,whatsapp,open_time,close_time,manual_closed,sort,delivery_enabled,pickup_enabled,delivery_fee,min_order,delivery_minutes,pickup_minutes,lat,lng').then(function(b){BR=b.sort(function(x,y){return x.sort-y.sort;});renderBranches();}).catch(function(){});},120000);
 })();
 </script>
 </body>

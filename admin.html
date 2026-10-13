@@ -152,7 +152,7 @@ document.getElementById('t-branches').addEventListener('click',function(e){var s
   c.querySelectorAll('[data-k]').forEach(function(i){body[i.dataset.k]=i.type==='checkbox'?i.checked:i.value.trim();});
   body.whatsapp=body.whatsapp.replace(/\D/g,''); if(body.whatsapp.indexOf('05')===0)body.whatsapp='971'+body.whatsapp.slice(1);
   if(body.whatsapp.length<11){toast('رقم الواتساب غير صحيح');return;}
-  s.disabled=true; rpc('menu_admin_save_branch',{p:PIN,b:body}).then(guard).then(function(){return rest('menu_branches?select=*&order=sort');}).then(function(b){BR=b;renderBranches();toast('تم الحفظ');}).catch(function(err){toast(msg(err.message));}).finally(function(){s.disabled=false;});});
+  s.disabled=true; rpc('menu_admin_save_branch',{p:PIN,b:body}).then(guard).then(function(){return rest('menu_branches?select=id,name,name_ar,address,whatsapp,open_time,close_time,manual_closed,sort,delivery_enabled,pickup_enabled,delivery_fee,min_order,delivery_minutes,pickup_minutes,lat,lng&order=sort');}).then(function(b){BR=b;renderBranches();toast('تم الحفظ');}).catch(function(err){toast(msg(err.message));}).finally(function(){s.disabled=false;});});
 
 // ---- items ----
 var catF=document.getElementById('catFilter'),q=document.getElementById('q');
@@ -199,7 +199,7 @@ document.getElementById('savePin').onclick=function(){var a=document.getElementB
 // ---- start ----
 function start(){
   document.getElementById('loginView').hidden=true;document.getElementById('appView').hidden=false;
-  Promise.all([rest('menu_branches?select=*&order=sort'),rest('menu_categories?select=*&order=sort')]).then(function(r){BR=r[0];CATS=r[1];
+  Promise.all([rest('menu_branches?select=id,name,name_ar,address,whatsapp,open_time,close_time,manual_closed,sort,delivery_enabled,pickup_enabled,delivery_fee,min_order,delivery_minutes,pickup_minutes,lat,lng&order=sort'),rest('menu_categories?select=*&order=sort')]).then(function(r){BR=r[0];CATS=r[1];
     catF.innerHTML='<option value="">كل الأقسام</option>'+CATS.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name_ar)+'</option>';}).join('');
     renderBranches();return loadItems();}).catch(function(err){toast(msg(err.message));});
   setInterval(function(){document.querySelectorAll('.card[data-b]').forEach(function(c){var b=BR.find(function(x){return x.id===c.dataset.b;});if(!b)return;var op=isOpen(b),p=c.querySelector('.pill');p.className='pill '+(op?'on':'off');p.textContent=b.manual_closed?'مغلق مؤقتاً':op?'مفتوح الحين':'مغلق الحين';});},60000);
