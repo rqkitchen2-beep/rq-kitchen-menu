@@ -69,7 +69,7 @@ jobs:
           ASC_KEY: ${{ secrets.ASC_KEY }}
         run: |
           export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
-          { echo "---- apple pay ----"; python3 native/scripts/applepay.py 2>&1; } >> "$RUNNER_TEMP/st/setup.txt"
+          { echo "---- apple pay ----"; python3 native/scripts/applepay.py 2>&1; python3 native/scripts/applepay2.py 2>&1; } >> "$RUNNER_TEMP/st/setup.txt"
       - name: Distribution certificate
         id: cert
         if: steps.reg.outputs.matrix != '[]'
