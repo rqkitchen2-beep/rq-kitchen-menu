@@ -70,6 +70,7 @@ header.top h1{font-size:19px;margin:0;flex:1}
 .pinrow .f{letter-spacing:5px;font-family:var(--display)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 40px)}
 .toast.show{opacity:1}
+.rt{color:#C98A00;font-weight:700}.plate{font-family:ui-monospace,Menlo,monospace;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 6px;direction:ltr;display:inline-block}.stars span{color:var(--line);font-size:16px}.stars span.on{color:#F5B301}.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.rtile{background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px}.rtile small{display:block;color:var(--muted)}.rtile b{display:block;font-size:22px;margin:4px 0;color:#C98A00}.rtile span{font-size:12px;color:var(--muted)}.rnote{margin:8px 0 0;background:var(--surface);border-radius:10px;padding:8px 10px;font-size:14px}
 </style>
 </head>
 <body>
@@ -84,7 +85,8 @@ header.top h1{font-size:19px;margin:0;flex:1}
 
 <div id="appView" hidden>
   <header class="top wrap"><img src="logo.png" alt=""><h1>إدارة التطبيق</h1><button class="btn ghost" id="logout">خروج</button></header>
-  <nav class="tabs wrap" role="tablist"><button type="button" role="tab" aria-selected="true" data-tab="drivers">السواقين</button><button type="button" role="tab" aria-selected="false" data-tab="branches">الفروع والتوصيل</button></nav>
+  <nav class="tabs wrap" role="tablist"><button type="button" role="tab" aria-selected="true" data-tab="drivers">السواقين</button><button type="button" role="tab" aria-selected="false" data-tab="branches">الفروع والتوصيل</button><button type="button" role="tab" aria-selected="false" data-tab="ratings">التقييمات</button></nav>
+  <main class="wrap" id="t-ratings" hidden><div id="rsum" style="margin-top:14px"></div><div id="rlist" style="margin-top:12px"></div></main>
   <main class="wrap" id="t-branches" hidden>
     <div class="share" style="margin-top:14px">شاشة الفرع: <code id="brLink"></code> · كل فرع يدخل برقمه السري، وتقدر تدخل أي فرع برقم لوحة التحكم.</div>
     <div id="blist" style="margin-top:12px"></div>
@@ -101,6 +103,7 @@ header.top h1{font-size:19px;margin:0;flex:1}
   <div class="field"><label class="lbl" for="eName">الاسم</label><input class="f" id="eName" maxlength="60"></div>
   <div class="field"><label class="lbl" for="ePhone">رقم الجوال</label><div class="phone"><span>+971</span><input id="ePhone" type="tel" inputmode="tel" placeholder="5X XXX XXXX" maxlength="13"></div></div>
   <div class="field"><label class="lbl" for="eBranch">الفرع</label><select class="f" id="eBranch"></select><p class="hint">السائق يشوف طلبات فرعه بس، أو كل الفروع لو اخترت "كل الفروع".</p></div>
+  <div class="g2"><div class="field"><label class="lbl" for="eVeh">المركبة (النوع واللون)</label><input class="f" id="eVeh" maxlength="60" placeholder="مثلاً: هوندا ويف · أسود"></div><div class="field"><label class="lbl" for="ePlate">رقم اللوحة</label><input class="f" id="ePlate" maxlength="20" placeholder="مثلاً: AD 12345" style="direction:ltr;text-align:right"></div></div>
   <div class="field"><label class="lbl" for="ePin" id="ePinL">الرقم السري (4 أرقام)</label><input class="f" id="ePin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" style="letter-spacing:6px"></div>
   <label class="switch"><input type="checkbox" id="eActive" checked> <span>الحساب مفعّل (إيقافه يطلّع السائق فوراً)</span></label>
   <div style="display:flex;gap:8px"><button class="btn pri" id="eSave">حفظ</button><button class="btn ghost" id="eCancel">إلغاء</button></div>
@@ -121,7 +124,7 @@ function msg(e){return ERR[e]||ERR.net;}
 var tt;function toast(s){var t=$('#toast');t.textContent=s;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2200);}
 var PIN=null;try{PIN=sessionStorage.getItem('rq-admin-pin');}catch(e){}
 var BR=[],DR=[],cur=null,BS={};
-document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){document.querySelectorAll('[data-tab]').forEach(function(x){x.setAttribute('aria-selected',x===b);});$('#t-drivers').hidden=b.dataset.tab!=='drivers';$('#t-branches').hidden=b.dataset.tab!=='branches';if(b.dataset.tab==='branches')loadBranches();};});
+document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){document.querySelectorAll('[data-tab]').forEach(function(x){x.setAttribute('aria-selected',x===b);});$('#t-drivers').hidden=b.dataset.tab!=='drivers';$('#t-branches').hidden=b.dataset.tab!=='branches';$('#t-ratings').hidden=b.dataset.tab!=='ratings';if(b.dataset.tab==='branches')loadBranches();if(b.dataset.tab==='ratings')loadRatings();};});
 $('#brLink').textContent=location.origin.replace(/^https?:\/\//,'')+'/branch';
 function num(v){return v==null?'':Number(v);}
 function loadBranches(){return Promise.all([rpc('app_branches',{}),rpc('app_admin_branch_settings',{p:PIN})]).then(function(r){var list=r[0]||[];BS={};((r[1]&&r[1].branches)||[]).forEach(function(x){BS[x.id]=x;});
@@ -139,6 +142,13 @@ document.addEventListener('click',function(e){var s=e.target.closest('[data-save
   if(p){var v=c.querySelector('[data-pin]').value.trim();if(!/^\d{4,8}$/.test(v)){toast('الرقم السري من 4 إلى 8 أرقام');return;}
     p.disabled=true;rpc('app_admin_set_staff_pin',{p:PIN,branch_id:id,new_pin:v}).then(function(r){if(!r.ok)throw new Error(r.error);toast('تم حفظ الرقم السري للفرع');return loadBranches();}).catch(function(err){toast(msg(err.message));}).finally(function(){p.disabled=false;});}
 });
+function stars(n){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=n?'on':'')+'">★</span>';return '<span class="stars">'+h+'</span>';}
+function loadRatings(){return rpc('app_admin_ratings',{p:PIN}).then(function(r){if(!r.ok)throw new Error(r.error);
+  var sm=r.summary||{},bm={};(r.branches||[]).forEach(function(x){bm[x.branch_id]=x;});
+  $('#rsum').innerHTML='<div class="rgrid"><div class="rtile"><small>كل الفروع</small><b>'+(sm.count?'★ '+sm.avg:'—')+'</b><span>'+(sm.count||0)+' تقييم</span></div>'+BR.map(function(b){var x=bm[b.id];return '<div class="rtile"><small>'+esc(b.name_ar)+'</small><b>'+(x?'★ '+x.avg:'—')+'</b><span>'+(x?x.count:0)+' تقييم</span></div>';}).join('')+'</div>';
+  var L=r.recent||[];
+  $('#rlist').innerHTML=L.length?L.map(function(x){return '<div class="card"><div><b>#'+x.order_no+'</b> '+stars(x.rating)+'<div class="meta"><span>'+esc(bname(x.branch_id))+'</span><span>'+(x.kind==='delivery'?'توصيل':'استلام')+'</span>'+(x.driver?'<span>السائق: '+esc(x.driver)+'</span>':'')+'<span>'+esc(x.name||'')+'</span><span>'+new Date(x.rated_at).toLocaleString(window.RQLANG==='en'?'en-AE':'ar-AE',{timeZone:'Asia/Dubai',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})+'</span></div>'+(x.note?'<p class="rnote">'+esc(x.note)+'</p>':'')+'</div></div>';}).join(''):'<p class="hint">ما فيه تقييمات للحين. العملاء يقيّمون بعد استلام طلباتهم.</p>';
+}).catch(function(e){toast(msg(e.message));});}
 $('#drvLink').textContent=location.origin.replace(/^https?:\/\//,'')+'/driver';
 
 $('#loginForm').addEventListener('submit',function(e){e.preventDefault();var p=$('#pin').value.trim(),b=$('#loginBtn');b.disabled=true;
@@ -148,7 +158,7 @@ $('#logout').onclick=function(){try{sessionStorage.removeItem('rq-admin-pin');}c
 function since(s){if(!s)return 'ما شاركت موقع للحين';var m=Math.round((Date.now()-new Date(s).getTime())/60000);return m<2?'آخر موقع الحين':m<60?'آخر موقع قبل '+m+' د':m<1440?'آخر موقع قبل '+Math.floor(m/60)+' س':'آخر موقع قبل أيام';}
 function bname(id){var b=BR.find(function(x){return x.id===id;});return b?b.name_ar:'كل الفروع';}
 function render(){$('#list').innerHTML=DR.length?DR.map(function(d){var st=!d.active?'<span class="pill off">موقوف</span>':d.online?'<span class="pill on">متصل</span>':'<span class="pill idle">غير متصل</span>';
-  return '<div class="card'+(d.active?'':' off')+'"><div><b>'+esc(d.name)+'</b> '+st+'<div><span class="ph">+'+esc(d.phone)+'</span></div><div class="meta"><span>'+esc(bname(d.branch_id))+'</span><span>طلبات معه: '+d.open+'</span><span>توصيلات اليوم: '+d.today+'</span><span>'+since(d.last_at)+'</span></div></div><button class="btn ghost" data-edit="'+esc(d.id)+'">تعديل</button></div>';}).join(''):'<p class="hint">ما فيه سواقين. أضف أول سائق.</p>';}
+  return '<div class="card'+(d.active?'':' off')+'"><div><b>'+esc(d.name)+'</b> '+st+'<div><span class="ph">+'+esc(d.phone)+'</span></div><div class="meta"><span>'+esc(bname(d.branch_id))+'</span><span>طلبات معه: '+d.open+'</span><span>توصيلات اليوم: '+d.today+'</span>'+(d.rating&&d.rating.count?'<span class="rt">★ '+d.rating.avg+' ('+d.rating.count+')</span>':'')+(d.vehicle||d.plate?'<span>'+esc(d.vehicle||'')+(d.plate?' · <b class="plate">'+esc(d.plate)+'</b>':'')+'</span>':'')+'<span>'+since(d.last_at)+'</span></div></div><button class="btn ghost" data-edit="'+esc(d.id)+'">تعديل</button></div>';}).join(''):'<p class="hint">ما فيه سواقين. أضف أول سائق.</p>';}
 function load(){return rpc('app_admin_drivers',{p:PIN}).then(function(r){if(!r.ok){if(r.error==='bad_pin'||r.error==='locked'){toast(msg(r.error));setTimeout(function(){$('#logout').click();},1200);}throw new Error(r.error);}DR=r.drivers;render();});}
 function start(){$('#loginView').hidden=true;$('#appView').hidden=false;rest('menu_branches?select=id,name_ar,sort&order=sort').then(function(b){BR=b;
   $('#eBranch').innerHTML='<option value="">كل الفروع</option>'+BR.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.name_ar)+'</option>';}).join('');return load();}).catch(function(e){toast(msg(e.message));});
@@ -156,13 +166,13 @@ function start(){$('#loginView').hidden=true;$('#appView').hidden=false;rest('me
 
 var modal=$('#modal');
 function open(d){cur=d||null;$('#mTitle').textContent=d?'تعديل سائق':'سائق جديد';$('#eName').value=d?d.name:'';$('#ePhone').value=d?String(d.phone).replace(/^971/,''):'';
-  $('#eBranch').value=d&&d.branch_id?d.branch_id:'';$('#ePin').value='';$('#ePinL').textContent=d?'رقم سري جديد (اتركه فاضي إذا ما تبي تغيّره)':'الرقم السري (4 أرقام)';$('#eActive').checked=d?d.active:true;$('#eErr').textContent='';
+  $('#eBranch').value=d&&d.branch_id?d.branch_id:'';$('#eVeh').value=d&&d.vehicle?d.vehicle:'';$('#ePlate').value=d&&d.plate?d.plate:'';$('#ePin').value='';$('#ePinL').textContent=d?'رقم سري جديد (اتركه فاضي إذا ما تبي تغيّره)':'الرقم السري (4 أرقام)';$('#eActive').checked=d?d.active:true;$('#eErr').textContent='';
   modal.classList.add('open');$('#eName').focus();}
 function close(){modal.classList.remove('open');}
 $('#add').onclick=function(){open(null);};$('#eCancel').onclick=close;$('#mScrim').onclick=close;
 document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
 $('#list').addEventListener('click',function(e){var b=e.target.closest('[data-edit]');if(b)open(DR.find(function(d){return d.id===b.dataset.edit;}));});
-$('#eSave').onclick=function(){var b=this,d={id:cur?cur.id:null,name:$('#eName').value.trim(),phone:$('#ePhone').value,branch_id:$('#eBranch').value,pin:$('#ePin').value.trim(),active:$('#eActive').checked};
+$('#eSave').onclick=function(){var b=this,d={id:cur?cur.id:null,name:$('#eName').value.trim(),phone:$('#ePhone').value,branch_id:$('#eBranch').value,pin:$('#ePin').value.trim(),active:$('#eActive').checked,vehicle:$('#eVeh').value.trim(),plate:$('#ePlate').value.trim()};
   b.disabled=true;rpc('app_admin_save_driver',{p:PIN,d:d}).then(function(r){if(!r.ok)throw new Error(r.error);return load().then(function(){close();toast(cur?'تم الحفظ':'تمت إضافة السائق');});}).catch(function(err){$('#eErr').textContent=msg(err.message);}).finally(function(){b.disabled=false;});};
 
 if(PIN){rpc('menu_admin_login',{p:PIN}).then(function(s){if(s==='ok')start();}).catch(function(){});}
