@@ -38,7 +38,9 @@ async function apnsJwt() {
 }
 
 async function sendOne(token: string, app: string, title: string, body: string, data: Record<string, unknown> = {}) {
-  const payload = { aps: { alert: { title, body }, sound: 'default', 'interruption-level': app === 'branch' ? 'time-sensitive' : 'active' }, ...data };
+  // urgent alerts (new order for a branch, new delivery for a driver) use the bundled loud alarm
+  const loud = data.loud === true; const rest = { ...data }; delete rest.loud;
+  const payload = { aps: { alert: { title, body }, sound: loud ? 'rq_alert.wav' : 'default', 'interruption-level': loud || app === 'branch' ? 'time-sensitive' : 'active' }, ...rest };
   const r = await fetch('https://api.push.apple.com/3/device/' + token, {
     method: 'POST',
     headers: { authorization: 'bearer ' + await apnsJwt(), 'apns-topic': TOPIC[app], 'apns-push-type': 'alert', 'apns-priority': '10', 'content-type': 'application/json' },
@@ -72,7 +74,7 @@ async function handle(ev: any) {
     out.branch = await sendTo(branchF, {
       ar: ['طلب جديد ' + n + ' 🔔', k.ar + ' · ' + o.total + ' درهم' + (o.name ? ' · ' + o.name : '')],
       en: ['New order ' + n + ' 🔔', k.en + ' · AED ' + o.total + (o.name ? ' · ' + o.name : '')],
-    });
+    }, { loud: true });
     return out;
   }
   if (ev.old_status !== o.status) {
@@ -108,7 +110,7 @@ async function handle(ev: any) {
       if (Array.isArray(drivers) && drivers.length) {
         out.drivers = await sendTo('app=eq.driver&driver_id=in.(' + drivers.map((d: any) => d.id).join(',') + ')', {
           ar: ['طلب توصيل جديد ' + n + ' 🛵', 'اضغط عشان تقبله قبل غيرك'],
-          en: ['New delivery order ' + n + ' 🛵', 'Tap to accept it before anyone else'] }, { url: '#' });
+          en: ['New delivery order ' + n + ' 🛵', 'Tap to accept it before anyone else'] }, { url: '#', loud: true });
       }
     }
   }
@@ -132,7 +134,7 @@ Deno.serve(async (req) => {
       const res = await sendTo('app=eq.customer', { ar: [ev.title_ar, ev.body_ar || ''], en: [ev.title_en || ev.title_ar, ev.body_en || ev.body_ar || ''] }, { url: '#/home' });
       out = { broadcast: tally(res) };
     } else if (ev.test) {
-      out = { test: await sendTo(ev.filter || 'app=eq.' + (ev.app || 'customer'), { ar: [ev.title || 'RQ Kitchen', ev.body || 'إشعار تجريبي ✅'], en: [ev.title || 'RQ Kitchen', ev.body || 'Test notification ✅'] }) };
+      out = { test: await sendTo(ev.filter || 'app=eq.' + (ev.app || 'customer'), { ar: [ev.title || 'RQ Kitchen', ev.body || 'إشعار تجريبي ✅'], en: [ev.title || 'RQ Kitchen', ev.body || 'Test notification ✅'] }, ev.loud ? { loud: true } : {}) };
     } else out = await handle(ev);
     return new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json' } });
   } catch (e) {

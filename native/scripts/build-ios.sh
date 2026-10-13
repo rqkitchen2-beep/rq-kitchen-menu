@@ -95,6 +95,19 @@ p.save
 RB
 ruby "$RUNNER_TEMP/loc.rb" "$APPDIR/App.xcodeproj" && echo "RESULT: localized InfoPlist en/ar" || echo "RESULT: WARNING localization skipped"
 
+step "alert sound"
+cp "$ROOT/native/sounds/rq_alert.wav" "$APPDIR/App/rq_alert.wav"
+cat > "$RUNNER_TEMP/snd.rb" <<'RB'
+require 'xcodeproj'
+p = Xcodeproj::Project.open(ARGV[0])
+t = p.targets.find { |x| x.name == 'App' }
+g = p.main_group.find_subpath('App', false)
+r = g.new_reference('rq_alert.wav')
+t.resources_build_phase.add_file_reference(r)
+p.save
+RB
+ruby "$RUNNER_TEMP/snd.rb" "$APPDIR/App.xcodeproj" && echo "RESULT: alert sound bundled" || echo "RESULT: WARNING alert sound skipped"
+
 step "push delegate"
 python3 - "$APPDIR/App/AppDelegate.swift" <<'PY' || die "AppDelegate patch failed"
 import sys

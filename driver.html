@@ -379,7 +379,8 @@ function mineCard(o){var b=o.branch||{},a=o.address||{},onway=o.status==='on_way
   }
   return h+'</article>';}
 
-document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){tab=b.dataset.tab;if(tab==='avail')setTimeout(function(){hl={};render();},4000);render();};});
+document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){tab=b.dataset.tab;if(tab==='avail')ackAll();if(tab==='avail')setTimeout(function(){hl={};render();},4000);render();};});
+$('#list').addEventListener('pointerdown',function(){if(ringT)ackAll();});
 $('#list').addEventListener('click',function(e){var b=e.target.closest('[data-act]');if(!b)return;var id=b.dataset.id,act=b.dataset.act,o=(DATA.mine.concat(DATA.available)).find(function(x){return x.id===id;});
   if(act==='accept')return doAct('app_driver_accept',id,b,'قبلت الطلب #'+o.order_no,function(){tab='mine';});
   if(act==='pickup')return confirmBox('استلمت الطلب؟','تأكد إن الأصناف كاملة. العميل بيشوف إنك في الطريق وموقعك على الخريطة.',itemsHTML(o),function(){doAct('app_driver_pickup',id,b,'بالتوفيق، العميل يشوفك الحين');});
@@ -406,8 +407,20 @@ function keepAwake(){if('wakeLock' in navigator){navigator.wakeLock.request('scr
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){if(DATA&&DATA.driver.online&&watchId!=null)keepAwake();refresh();}});
 
 /* ---------- alert sound for new orders ---------- */
+document.addEventListener('pointerdown',function(){unlockSound();},{passive:true});
 function unlockSound(){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();}catch(e){}}
-function ding(){try{if(!audio)return;[0,0.18,0.36].forEach(function(t,i){var o=audio.createOscillator(),g=audio.createGain();o.frequency.value=i===2?1175:880;o.connect(g);g.connect(audio.destination);g.gain.setValueAtTime(0.0001,audio.currentTime+t);g.gain.exponentialRampToValueAtTime(0.35,audio.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+t+0.16);o.start(audio.currentTime+t);o.stop(audio.currentTime+t+0.18);});}catch(e){}if(navigator.vibrate)navigator.vibrate([200,100,200]);}
+function siren(vol){try{if(!audio)return;var t0=audio.currentTime,o=audio.createOscillator(),o2=audio.createOscillator(),g=audio.createGain();o.type='square';o2.type='sawtooth';
+  for(var i=0;i<3;i++){var s=t0+i*0.8;o.frequency.setValueAtTime(700,s);o.frequency.linearRampToValueAtTime(1500,s+0.4);o.frequency.linearRampToValueAtTime(700,s+0.8);o2.frequency.setValueAtTime(705,s);o2.frequency.linearRampToValueAtTime(1505,s+0.4);o2.frequency.linearRampToValueAtTime(705,s+0.8);}
+  o.connect(g);o2.connect(g);g.connect(audio.destination);g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol||0.6,t0+0.03);g.gain.setValueAtTime(vol||0.6,t0+2.3);g.gain.exponentialRampToValueAtTime(0.0001,t0+2.4);
+  o.start(t0);o2.start(t0);o.stop(t0+2.45);o2.stop(t0+2.45);}catch(e){}
+  try{var H=window.RQPlug&&RQPlug('Haptics');if(H){H.notification({type:'WARNING'});setTimeout(function(){H.vibrate&&H.vibrate({duration:600});},700);}else if(navigator.vibrate)navigator.vibrate([500,200,500,200,500]);}catch(e){}}
+/* play through the ringer switch on iPhone */
+try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+function ding(){siren(0.6);}
+var ringT=null;function wantRing(){return DATA&&DATA.driver.online&&DATA.available.some(function(o){return !ack[o.id];});}
+var ack={};function startRing(){if(ringT)return;ding();ringT=setInterval(function(){if(wantRing())ding();else stopRing();},4500);}
+function stopRing(){clearInterval(ringT);ringT=null;}
+function ackAll(){if(DATA)DATA.available.forEach(function(o){ack[o.id]=1;});stopRing();}
 
 /* ---------- polling ---------- */
 var busy=false;
@@ -415,7 +428,7 @@ function refresh(){if(!T||busy)return Promise.resolve();busy=true;
   return rpc('app_driver_orders',{t:T}).then(function(r){
     if(!r||!r.ok){if(r&&r.error==='auth')logoutLocal();return;}
     var fresh=(r.available||[]).filter(function(o){return !seenAvail[o.id];});
-    if(DATA&&fresh.length&&r.driver.online){ding();toast(fresh.length===1?'طلب توصيل جديد #'+fresh[0].order_no:fresh.length+' طلبات توصيل جديدة');fresh.forEach(function(o){hl[o.id]=1;});}
+    if(DATA&&fresh.length&&r.driver.online){startRing();toast(fresh.length===1?'طلب توصيل جديد #'+fresh[0].order_no:fresh.length+' طلبات توصيل جديدة');fresh.forEach(function(o){hl[o.id]=1;});}
     (r.available||[]).forEach(function(o){seenAvail[o.id]=1;});
     if(!DATA&&window.RQPush)RQPush.register(function(tk){if(T)rpc('app_driver_push_register',{t:T,token:tk}).then(function(){return rpc('app_push_lang',{token:tk,lang:window.RQLANG||'ar'});}).catch(function(){});});
     DATA=r;showApp();if(r.driver.online)startGps();else stopGps();render();
