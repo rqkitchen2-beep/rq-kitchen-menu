@@ -1,8 +1,8 @@
-run: 9  Tue Oct 13 00:18:55 UTC 2026
+run: 10  Tue Oct 13 00:51:00 UTC 2026
 team: Z34R6L55G2 / Z34R6L55G2
 app_customer: 6822102459
 app_driver: 6822102915
 app_branch: 6822106188
 matrix: ["customer","driver","branch"]
-revoked old cert V2Q2F27698
-cert: PHVRKUC974
+revoked old cert PHVRKUC974
+cert: UHFD8ZDN5T
