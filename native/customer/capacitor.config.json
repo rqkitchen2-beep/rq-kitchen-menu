@@ -2,7 +2,7 @@
   "appId": "com.rqkitchen.app",
   "appName": "RQ Kitchen",
   "webDir": "www",
-  "backgroundColor": "#1C1410",
+  "backgroundColor": "#FAF6F1",
   "ios": {
     "contentInset": "never",
     "scheme": "RQ Kitchen",
@@ -11,7 +11,7 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 1200,
-      "backgroundColor": "#1C1410",
+      "backgroundColor": "#FAF6F1",
       "showSpinner": false,
       "launchAutoHide": true
     },

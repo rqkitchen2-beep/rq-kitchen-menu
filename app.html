@@ -152,23 +152,20 @@ button{cursor:pointer}
 /* demo banner */
 .demo{background:var(--ink);color:var(--bg);font-size:12.5px;text-align:center;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px))}
 
-/* splash */
-#splash{position:fixed;inset:0;z-index:100;background:#1C1410;color:#FFF4E6;--hub:#1C1410;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;transition:opacity .45s ease, visibility .45s}
+/* splash: light = cream (A), dark = night (C) */
+#splash{position:fixed;inset:0;z-index:100;background:#FAF6F1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;transition:opacity .45s ease, visibility .45s}
 #splash.out{opacity:0;visibility:hidden}
-#splash::before{content:"";position:absolute;width:140vmax;height:140vmax;border-radius:50%;left:50%;top:100%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(243,154,43,.22),rgba(243,154,43,0) 55%)}
-.sp-ride{position:relative;width:min(70vw,280px);height:150px}
-.sp-ride .sc{position:absolute;inset:0;width:100%;transform:translateX(-130vw);animation:spRide 1s cubic-bezier(.2,.75,.25,1) .15s forwards}
-.sp-ride .sc .spd{opacity:0;animation:spFade .3s ease .3s forwards,spGone .4s ease 1.15s forwards}
-.sp-road{position:relative;width:min(80vw,320px);height:2px;margin-top:6px;background:repeating-linear-gradient(90deg,rgba(255,244,230,.35) 0 18px,transparent 18px 32px);animation:spRoad .6s linear infinite}
-.sp-brand{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:34px;opacity:0;transform:translateY(10px);animation:spUp .6s ease 1s forwards}
-.sp-brand img{width:132px}
-.sp-brand p{margin:0;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,244,230,.7);font-weight:600}
-@keyframes spRide{to{transform:translateX(0)}}
-@keyframes spFade{to{opacity:1}}
-@keyframes spGone{to{opacity:0}}
-@keyframes spUp{to{opacity:1;transform:none}}
-@keyframes spRoad{to{background-position:-32px 0}}
-@media (prefers-reduced-motion:reduce){.sp-ride .sc,.sp-brand{animation:none;transform:none;opacity:1}.sp-road{animation:none}}
+#splash::before{content:"";position:absolute;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(238,138,31,.14),rgba(238,138,31,0) 65%);left:50%;top:50%;transform:translate(-50%,-50%)}
+.sp-logo{position:relative;width:168px;opacity:0;transform:scale(.94);animation:spIn .7s cubic-bezier(.2,.8,.2,1) .1s forwards}
+.sp-logo .lo-d{display:none}
+.sp-flag{direction:ltr;position:relative;margin-top:26px;width:44px;height:18px;border-radius:5px;overflow:hidden;display:flex;box-shadow:0 0 0 1.5px #EDE3D8;opacity:0;animation:spFade .5s ease .55s forwards}
+.sp-flag i{width:11px;background:#EF3340}.sp-flag b{flex:1;background:linear-gradient(#00843D 0 33.3%,#fff 33.3% 66.6%,#111 66.6%)}
+.sp-tag{position:absolute;bottom:calc(56px + env(safe-area-inset-bottom,0px));margin:0;font-size:12px;letter-spacing:3px;color:#8A7B70;font-weight:600;opacity:0;animation:spFade .5s ease .7s forwards}
+@keyframes spIn{to{opacity:1;transform:none}}@keyframes spFade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.sp-logo,.sp-flag,.sp-tag{animation:none;opacity:1;transform:none}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #splash{background:#17110D}:root:not([data-theme="light"]) .sp-logo .lo-l{display:none}:root:not([data-theme="light"]) .sp-logo .lo-d{display:block}:root:not([data-theme="light"]) .sp-tag{color:rgba(255,244,230,.6)}:root:not([data-theme="light"]) .sp-flag{box-shadow:none}}
+:root[data-theme="dark"] #splash{background:#17110D}:root[data-theme="dark"] .sp-logo .lo-l{display:none}:root[data-theme="dark"] .sp-logo .lo-d{display:block}:root[data-theme="dark"] .sp-tag{color:rgba(255,244,230,.6)}:root[data-theme="dark"] .sp-flag{box-shadow:none}
+.sp-logo img{width:100%;display:block}
 
 /* top hero header (home) */
 .top{position:relative;background:var(--brand);color:var(--brand-ink);padding:calc(14px + env(safe-area-inset-top,0px)) 18px 74px;border-radius:0 0 34px 34px;overflow:hidden}
@@ -602,14 +599,58 @@ html.lang-en .lbrowse svg{transform:scaleX(-1)}
 
 /* no zoom on double-tap or input focus (iOS) */
 html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}input,select,textarea{font-size:max(16px,1em)!important}
+
+/* ===== Direction A (light) + C (dark) ===== */
+:root{--bg:#FAF6F1;--page:#F2ECE5;--surface:#F0E9E1;--card:#FFFFFF;--line:#EDE3D8;--ink:#1E1611;--muted:#75675C;--brand:#EE8A1F;--brand-deep:#D97414;--brand-text:#B5600F;--disc:#F4EDE5;--shadow:0 2px 12px rgba(30,22,17,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17110D;--page:#0F0B09;--surface:#241B16;--card:#221A15;--line:#3A2C23;--ink:#FFF4E6;--muted:#B9A999;--brand:#F07E1A;--brand-text:#F6B56B;--disc:#2C211A;--shadow:0 2px 12px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#17110D;--page:#0F0B09;--surface:#241B16;--card:#221A15;--line:#3A2C23;--ink:#FFF4E6;--muted:#B9A999;--brand:#F07E1A;--brand-text:#F6B56B;--disc:#2C211A;--shadow:0 2px 12px rgba(0,0,0,.35)}
+.btn.pri{background:var(--brand-deep);color:#fff}
+.hh{background:var(--bg)}
+.hsearch{background:var(--card);border:1px solid var(--line)}
+.hmode button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.cat .ci,.catbar .cat .ci{width:62px;height:62px;border-radius:50%;background:var(--card);border:1px solid var(--line);padding:8px}
+.hc{border:0;box-shadow:var(--shadow);padding:10px;border-radius:20px}
+.hci{border-radius:14px;background:var(--disc)}
+.hcb{padding:10px 2px 2px}
+.qplus{background:var(--ink);color:var(--bg)}
+.qstep{background:var(--ink);color:var(--bg)}
+.tabbar{background:var(--card)}
+.tabbar a.on::before{display:none}
+.cartbar a{background:var(--ink);color:var(--bg)}
+.bn.photo{background:#2A1F18;color:#FFF6EC;padding:0;min-height:172px}
+.bn.photo .bph{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:cover;filter:none;inset-inline-end:0;bottom:0}
+.bn.photo .bov{position:absolute;inset:0;background:linear-gradient(270deg,rgba(20,14,10,.88) 0%,rgba(20,14,10,.4) 60%,rgba(20,14,10,0) 100%)}
+html.lang-en .bn.photo .bov{background:linear-gradient(90deg,rgba(20,14,10,.88) 0%,rgba(20,14,10,.4) 60%,rgba(20,14,10,0) 100%)}
+.bn.photo .btx{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:22px 20px;max-width:64%}
+.bn.photo small{font-size:12px;font-weight:700;color:#F6B56B}
+.bn.photo h3{font-size:21px;max-width:none}
+.bn.photo .cta{margin-top:8px;background:var(--brand-deep);color:#fff}
+.bn.ink{background:#1E1611}
+.bn.ink .cta{background:var(--brand-deep);color:#fff}
+/* sign-in (A) */
+.la{min-height:100vh;min-height:100dvh;background:var(--bg);padding:calc(18px + env(safe-area-inset-top,0px)) 24px 28px;display:flex;flex-direction:column}
+.latop{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.latop img{width:72px}
+.la .lo-d{display:none}
+.latop .langlink{background:var(--card);border:1px solid var(--line);color:var(--ink);padding:6px 14px;font-size:13px;opacity:1}
+.la h2{margin:0 0 6px;font-size:27px;font-weight:800}
+.la p.sub{margin:0 0 24px;color:var(--muted);font-size:14.5px}
+.la .ltabs{background:var(--surface)}
+.la .ltabs button[aria-selected="true"]{background:var(--card)}
+.la .phone{background:var(--card)}
+.la .phone input,.la .f{background:var(--card)}
+.la .lbrowse{margin-top:8px}
+.la .or{margin:16px 0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .latop img{content:url(logo-light.png)}}
+:root[data-theme="dark"] .latop img{content:url(logo-light.png)}
 </style>
 </head>
 <body>
 
 <div id="splash" aria-hidden="true">
-  <div class="sp-ride"><svg class="sc" viewBox="0 0 260 170" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="spd" stroke="#F39A2B" stroke-width="5"><path d="M6 96h30"/><path d="M0 112h22"/><path d="M12 128h18"/></g><rect x="34" y="40" width="72" height="56" rx="12" fill="#FFF4E6" stroke="currentColor" stroke-width="4"/><path d="M34 58h72" stroke="currentColor" stroke-width="3" opacity=".25"/><text x="70" y="86" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" font-size="26" fill="#E8862A">RQ</text><path d="M44 126c0-22 16-34 40-34h66l20 34z" fill="#F39A2B" stroke="currentColor" stroke-width="4"/><path d="M150 92l26-46h14" stroke="currentColor" stroke-width="6"/><path d="M172 126l-4-30" stroke="currentColor" stroke-width="5"/><path d="M118 92c-4-18 2-34 12-44" stroke="currentColor" stroke-width="15"/><path d="M128 56l40-4" stroke="currentColor" stroke-width="9"/><path d="M118 92l26 6" stroke="currentColor" stroke-width="11"/><circle cx="134" cy="32" r="17" fill="currentColor"/><path d="M128 30h22" stroke="#F39A2B" stroke-width="7"/><circle cx="70" cy="132" r="22" fill="currentColor"/><circle cx="70" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><circle cx="200" cy="132" r="22" fill="currentColor"/><circle cx="200" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><path d="M176 52l24 80" stroke="currentColor" stroke-width="6"/></svg></div>
-  <div class="sp-road"></div>
-  <div class="sp-brand"><img src="logo-light.png" alt=""><p>Good Food · Bigger Mood</p></div>
+  <div class="sp-logo"><img class="lo-l" src="logo.png" alt=""><img class="lo-d" src="logo-light.png" alt=""></div>
+  <div class="sp-flag"><i></i><b></b></div>
+  <p class="sp-tag">GOOD FOOD · BIGGER MOOD</p>
 </div>
 
 <div id="app">
@@ -797,9 +838,8 @@ V.home=function(){
   var combos=S.items.filter(function(i){return i.category_id==='combo';});
   var fresh=S.items.filter(function(i){return i.created_at&&(Date.now()-new Date(i.created_at).getTime())<14*864e5;}).slice(0,10);
   var banners=[
-    '<button type="button" class="bn ink" data-go="#/menu"><div><h3>توصيل سريع لين بابك</h3><p>برجر وسوشي وهوت دوق من أقرب فرع لك</p></div><span class="cta">اطلب الحين</span><img src="'+esc(IMG('app_hero.webp'))+'" alt=""></button>',
-    combo?'<button type="button" class="bn org" data-item="'+esc(combo.id)+'"><div><h3>بوكس الواغيو</h3><p>ساندويتش واغيو مع بطاطس وصوص RQ ومشروب، كله بـ <b class="lat">'+money(combo.price)+'</b> درهم</p></div><span class="cta">أضفه للسلة</span><img class="photo" src="'+esc(IMG(combo.image))+'" alt=""></button>':'',
-    hd?'<button type="button" class="bn wht" data-go="#/menu/hotdog"><div><h3>هوت دوق RQ</h3><p>بصل مقرمش، بيف بيكن، هالبينو وصوص مدخّن</p></div><span class="cta">شوف الهوت دوق</span><img src="'+esc(IMG('app_hotdog.webp'))+'" alt=""></button>':''
+    combo?'<button type="button" class="bn photo" data-item="'+esc(combo.id)+'"><img class="bph" src="'+esc(IMG('combo_photo.webp'))+'" alt=""><span class="bov"></span><span class="btx"><small>عرض الكومبو</small><h3>بوكس الواغيو مع بطاطس ومشروب</h3><span class="cta">'+money(combo.price)+' درهم</span></span></button>':'',
+    '<button type="button" class="bn ink" data-go="#/menu"><div><h3>توصيل سريع لين بابك</h3><p>برجر وسوشي وهوت دوق من أقرب فرع لك</p></div><span class="cta">اطلب الحين</span></button>'
   ].filter(Boolean);
   var dbb=S.banners||store.get('rqa-banners',null);
   if(dbb&&dbb.length)banners=dbb.map(function(x){var act=x.link_type==='item'?'data-item="'+esc(x.link_value)+'"':x.link_type==='category'?'data-go="#/menu/'+esc(x.link_value)+'"':x.link_type==='none'?'':'data-go="#/menu"';
@@ -1138,10 +1178,8 @@ V.account.after=function(){
 V.login=function(){
   var su=V.login.mode==='signup';
   var tick='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
-  return '<section class="lw"><div class="lwtop"><img class="lg" src="logo.png" alt="RQ Kitchen"><button type="button" class="langlink" data-lang-toggle><span class="l-en">English</span><span class="l-ar" data-no-tr>عربي</span></button></div>'+
-    '<div class="lwbody"><div class="lwtxt"><h1>أطيب برجر وسوشي<br><em>لين باب بيتك</em></h1><p>اطلب من أقرب فرع، وتابع طلبك لحظة بلحظة</p></div>'+
-    '<div class="lwart"><svg class="sc" viewBox="0 0 260 170" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="spd" stroke="#F39A2B" stroke-width="5"><path d="M6 96h30"/><path d="M0 112h22"/><path d="M12 128h18"/></g><rect x="34" y="40" width="72" height="56" rx="12" fill="#FFF4E6" stroke="currentColor" stroke-width="4"/><path d="M34 58h72" stroke="currentColor" stroke-width="3" opacity=".25"/><text x="70" y="86" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-style="italic" font-weight="700" font-size="26" fill="#E8862A">RQ</text><path d="M44 126c0-22 16-34 40-34h66l20 34z" fill="#F39A2B" stroke="currentColor" stroke-width="4"/><path d="M150 92l26-46h14" stroke="currentColor" stroke-width="6"/><path d="M172 126l-4-30" stroke="currentColor" stroke-width="5"/><path d="M118 92c-4-18 2-34 12-44" stroke="currentColor" stroke-width="15"/><path d="M128 56l40-4" stroke="currentColor" stroke-width="9"/><path d="M118 92l26 6" stroke="currentColor" stroke-width="11"/><circle cx="134" cy="32" r="17" fill="currentColor"/><path d="M128 30h22" stroke="#F39A2B" stroke-width="7"/><circle cx="70" cy="132" r="22" fill="currentColor"/><circle cx="70" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><circle cx="200" cy="132" r="22" fill="currentColor"/><circle cx="200" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><path d="M176 52l24 80" stroke="currentColor" stroke-width="6"/></svg></div>'+'</div></section>'+
-'<div class="lform lcard"><div class="grab" aria-hidden="true"></div><h2>'+(su?'حساب جديد':'أهلاً فيك')+'</h2><p class="sub">'+(su?'سجّل برقم جوالك واختر رقم سري من 4 أرقام.':'سجّل دخول برقم جوالك والرقم السري.')+'</p>'+
+  return '<div class="la"><div class="latop"><img src="logo.png" alt="RQ Kitchen"><button type="button" class="langlink" data-lang-toggle><span class="l-en">English</span><span class="l-ar" data-no-tr>عربي</span></button></div>'+
+'<h2>'+(su?'حساب جديد':'أهلاً فيك')+'</h2><p class="sub">'+(su?'سجّل برقم جوالك واختر رقم سري من 4 أرقام.':'سجّل دخول برقم جوالك والرقم السري.')+'</p>'+
   '<div class="ltabs" role="tablist"><button type="button" role="tab" aria-selected="'+(!su)+'" data-lmode="login">دخول</button><button type="button" role="tab" aria-selected="'+su+'" data-lmode="signup">حساب جديد</button></div>'+
   '<form id="lf" novalidate>'+(su?'<div class="fgroup"><label class="lbl" for="lname">الاسم</label><input class="f" id="lname" autocomplete="name" maxlength="60" placeholder="اسمك"></div>':'')+
   '<div class="fgroup"><label class="lbl" for="lphone">رقم الجوال</label><div class="phone"><span>+971</span><input id="lphone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="5X XXX XXXX" maxlength="13"></div></div>'+
@@ -1264,7 +1302,7 @@ window.addEventListener('hashchange',function(){if(sheet.classList.contains('ope
 /* ---------------- boot ---------------- */
 var splash=$('#splash'),t0=Date.now(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,seen=false;
 try{seen=sessionStorage.getItem('rqa-splash')==='1';}catch(e){}
-var minSplash=seen?250:(reduce?600:2000);
+var minSplash=seen?250:(reduce?500:1400);
 function hideSplash(){splash.classList.add('out');try{sessionStorage.setItem('rqa-splash','1');}catch(e){}setTimeout(function(){splash.remove();},500);}
 splash.addEventListener('click',function(){minSplash=0;});
 loadMenu().then(loadMe).then(function(){

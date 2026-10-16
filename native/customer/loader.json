@@ -1,7 +1,7 @@
 {
   "page": "app.html",
   "remote": "https://menu.rqkitchen.app/app",
-  "bg": "#1C1410",
+  "bg": "#FAF6F1",
   "files": [
     "app.html",
     "logo.png",
