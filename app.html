@@ -413,24 +413,22 @@ html.lang-en .hcn{text-align:left}
 .sticky-cta{position:sticky;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 75%,transparent);padding:16px 18px calc(16px + env(safe-area-inset-bottom,0px));margin-top:10px;z-index:5}
 
 /* login */
-.lw{position:relative;background:#FBF5EE;color:#1C1410;--hub:#FBF5EE;padding:calc(12px + env(safe-area-inset-top,0px)) 22px 62px;overflow:hidden}
-.lw::before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(243,154,43,.16),rgba(243,154,43,0) 62%);left:50%;top:40px;transform:translateX(-50%)}
+.lw{position:relative;background:#FBF5EE;color:#1C1410;--hub:#FBF5EE;padding:calc(10px + env(safe-area-inset-top,0px)) 20px 46px;overflow:hidden}
+.lw::before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(243,154,43,.16),rgba(243,154,43,0) 62%);inset-inline-end:-90px;top:-30px}
 .lwtop{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between}
-.lwtop .lg{width:78px}
-.lwtop .langlink{color:#1C1410;border-color:rgba(28,20,16,.2);background:#fff}
-.lwart{position:relative;z-index:1;width:200px;margin:10px auto 0;color:#1C1410}
+.lwtop .lg{width:64px}
+.lwtop .langlink{color:#1C1410;border-color:rgba(28,20,16,.2);background:#fff;padding:5px 12px;font-size:12.5px}
+.lwbody{position:relative;z-index:2;display:flex;align-items:center;gap:10px;margin-top:8px}
+.lwtxt{flex:1;min-width:0}
+.lwtxt h1{margin:0;font-size:22px;line-height:1.3;font-weight:900}
+.lwtxt h1 em{font-style:normal;color:#D9771A}
+.lwtxt p{margin:4px 0 0;font-size:13px;color:#6B5B50}
+.lwart{flex:none;width:118px;color:#1C1410}
 .lwart svg{width:100%;display:block}
 .lwart .sc{animation:lwBob 3s ease-in-out infinite}
-@keyframes lwBob{50%{transform:translateY(-4px)}}
+@keyframes lwBob{50%{transform:translateY(-3px)}}
 @media (prefers-reduced-motion:reduce){.lwart .sc{animation:none}}
-.lwtxt{position:relative;z-index:2;text-align:center;margin-top:10px}
-.lwtxt h1{margin:0;font-size:28px;line-height:1.3;font-weight:900}
-.lwtxt h1 em{font-style:normal;color:#D9771A}
-.lwtxt p{margin:8px auto 0;font-size:14.5px;max-width:300px;color:#6B5B50}
-.lwperks{position:relative;z-index:2;display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap}
-.lwperks span{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EFE4D8;border-radius:99px;padding:6px 12px;font-size:12.5px;font-weight:700;color:#3A2E26}
-.lwperks svg{width:15px;height:15px;color:#D9771A}
-.lform.lcard{position:relative;z-index:3;margin-top:-36px;background:var(--bg);border-radius:30px 30px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
+.lform.lcard{position:relative;z-index:3;margin-top:-28px;background:var(--bg);border-radius:30px 30px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
 .lform.lcard .grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:-10px auto 16px}
 .lbrowse{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:800;padding:14px;border-radius:14px;background:var(--surface)}
 .lbrowse svg{width:18px;height:18px}
@@ -1141,9 +1139,8 @@ V.login=function(){
   var su=V.login.mode==='signup';
   var tick='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
   return '<section class="lw"><div class="lwtop"><img class="lg" src="logo.png" alt="RQ Kitchen"><button type="button" class="langlink" data-lang-toggle><span class="l-en">English</span><span class="l-ar" data-no-tr>عربي</span></button></div>'+
-    '<div class="lwart"><svg class="sc" viewBox="0 0 260 170" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="spd" stroke="#F39A2B" stroke-width="5"><path d="M6 96h30"/><path d="M0 112h22"/><path d="M12 128h18"/></g><rect x="34" y="40" width="72" height="56" rx="12" fill="#FFF4E6" stroke="currentColor" stroke-width="4"/><path d="M34 58h72" stroke="currentColor" stroke-width="3" opacity=".25"/><text x="70" y="86" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-style="italic" font-weight="700" font-size="26" fill="#E8862A">RQ</text><path d="M44 126c0-22 16-34 40-34h66l20 34z" fill="#F39A2B" stroke="currentColor" stroke-width="4"/><path d="M150 92l26-46h14" stroke="currentColor" stroke-width="6"/><path d="M172 126l-4-30" stroke="currentColor" stroke-width="5"/><path d="M118 92c-4-18 2-34 12-44" stroke="currentColor" stroke-width="15"/><path d="M128 56l40-4" stroke="currentColor" stroke-width="9"/><path d="M118 92l26 6" stroke="currentColor" stroke-width="11"/><circle cx="134" cy="32" r="17" fill="currentColor"/><path d="M128 30h22" stroke="#F39A2B" stroke-width="7"/><circle cx="70" cy="132" r="22" fill="currentColor"/><circle cx="70" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><circle cx="200" cy="132" r="22" fill="currentColor"/><circle cx="200" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><path d="M176 52l24 80" stroke="currentColor" stroke-width="6"/></svg></div>'+
-    '<div class="lwtxt"><h1>أطيب برجر وسوشي<br><em>لين باب بيتك</em></h1><p>اطلب من أقرب فرع، وتابع طلبك لحظة بلحظة</p></div>'+
-    '<div class="lwperks"><span>'+tick+'توصيل سريع</span><span>'+tick+'تتبّع السائق</span><span>'+tick+'عروض حصرية</span></div></section>'+
+    '<div class="lwbody"><div class="lwtxt"><h1>أطيب برجر وسوشي<br><em>لين باب بيتك</em></h1><p>اطلب من أقرب فرع، وتابع طلبك لحظة بلحظة</p></div>'+
+    '<div class="lwart"><svg class="sc" viewBox="0 0 260 170" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="spd" stroke="#F39A2B" stroke-width="5"><path d="M6 96h30"/><path d="M0 112h22"/><path d="M12 128h18"/></g><rect x="34" y="40" width="72" height="56" rx="12" fill="#FFF4E6" stroke="currentColor" stroke-width="4"/><path d="M34 58h72" stroke="currentColor" stroke-width="3" opacity=".25"/><text x="70" y="86" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-style="italic" font-weight="700" font-size="26" fill="#E8862A">RQ</text><path d="M44 126c0-22 16-34 40-34h66l20 34z" fill="#F39A2B" stroke="currentColor" stroke-width="4"/><path d="M150 92l26-46h14" stroke="currentColor" stroke-width="6"/><path d="M172 126l-4-30" stroke="currentColor" stroke-width="5"/><path d="M118 92c-4-18 2-34 12-44" stroke="currentColor" stroke-width="15"/><path d="M128 56l40-4" stroke="currentColor" stroke-width="9"/><path d="M118 92l26 6" stroke="currentColor" stroke-width="11"/><circle cx="134" cy="32" r="17" fill="currentColor"/><path d="M128 30h22" stroke="#F39A2B" stroke-width="7"/><circle cx="70" cy="132" r="22" fill="currentColor"/><circle cx="70" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><circle cx="200" cy="132" r="22" fill="currentColor"/><circle cx="200" cy="132" r="8" style="fill:var(--hub,#FFF4E6)"/><path d="M176 52l24 80" stroke="currentColor" stroke-width="6"/></svg></div>'+'</div></section>'+
 '<div class="lform lcard"><div class="grab" aria-hidden="true"></div><h2>'+(su?'حساب جديد':'أهلاً فيك')+'</h2><p class="sub">'+(su?'سجّل برقم جوالك واختر رقم سري من 4 أرقام.':'سجّل دخول برقم جوالك والرقم السري.')+'</p>'+
   '<div class="ltabs" role="tablist"><button type="button" role="tab" aria-selected="'+(!su)+'" data-lmode="login">دخول</button><button type="button" role="tab" aria-selected="'+su+'" data-lmode="signup">حساب جديد</button></div>'+
   '<form id="lf" novalidate>'+(su?'<div class="fgroup"><label class="lbl" for="lname">الاسم</label><input class="f" id="lname" autocomplete="name" maxlength="60" placeholder="اسمك"></div>':'')+
