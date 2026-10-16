@@ -1,10 +1,11 @@
 {
   "page": "app.html",
   "remote": "https://menu.rqkitchen.app/app",
-  "bg": "#F39A2B",
+  "bg": "#1C1410",
   "files": [
     "app.html",
     "logo.png",
+    "logo-light.png",
     "*.webp"
   ]
 }
