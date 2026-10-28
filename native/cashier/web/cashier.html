@@ -155,13 +155,28 @@ main{flex:1;min-height:0;position:relative}
 .pbtn.cash{background:var(--green);color:#04210f}
 .pbtn.visa{background:var(--blue);color:#fff}
 .mbar{display:none}
+.chan{margin-bottom:10px}
+.tbApps{flex-shrink:0;height:44px;padding:0 16px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:700;font-size:14px;white-space:nowrap}
+.tbApps.on{background:var(--or);border-color:var(--or);color:#fff}
+.appsel{display:flex;align-items:center;gap:8px;background:var(--orbg);border:1px solid var(--or);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}
+.appsel b{flex:1;font-size:17px;color:var(--or2)}
+.pbtn.later{height:50px;font-size:15px;background:var(--panel2);border:1px solid var(--line)}
+.pbtn.appb{background:var(--or);color:#fff}
+#payLaterRow{margin-top:-6px}
+.tag.unpaid{background:var(--redbg);color:var(--red)} .tag.appt{background:var(--orbg);color:var(--or2)}
+.oc.unpaid-o{border-color:rgba(239,68,68,.45)}
+.apl{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:10px}
+.apl .r{display:flex;align-items:center;gap:8px;background:var(--panel2);border-radius:10px;padding:6px 10px}
+.apl .r .n{flex:1;direction:ltr;text-align:right;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apl .r .b{color:var(--dim);font-size:12px;width:44px;text-align:center}
+.apl .r input{width:84px;padding:6px 8px;text-align:center}
 
 .page{flex-direction:column;width:100%;overflow-y:auto;padding:16px 20px 40px}
 .page-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .page-h h2{margin:0;font-size:20px}
 .page-h .sp{flex:1}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
-.olist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.olist{display:grid;align-items:start;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .oc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .oc.cancelled{opacity:.5}
 .oc-top{display:flex;align-items:center;gap:10px}
@@ -337,6 +352,7 @@ main{flex:1;min-height:0;position:relative}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <input id="q" placeholder="ابحث عن صنف…" autocomplete="off">
           </div>
+          <button class="tbApps" id="tbApps">🛵 <span id="tbAppsTxt">التطبيقات</span></button>
         </div>
         <div class="mbody">
           <div class="cats" id="cats"></div>
@@ -350,6 +366,12 @@ main{flex:1;min-height:0;position:relative}
         </div>
         <div class="lines" id="lines"></div>
         <div class="ident">
+          <div class="seg chan" id="chanBar"><button id="chanDirect" class="on">🏪 طلب مباشر</button><button id="chanApps">🛵 التطبيقات</button></div>
+          <div id="appBox" hidden>
+            <div class="appsel"><span>طلب عن طريق</span><b id="appName"></b><button class="link" id="appClear">✕ إلغاء</button></div>
+            <input id="appRef" class="plate-in num" dir="ltr" placeholder="رقم طلب التطبيق (اختياري)" autocomplete="off">
+          </div>
+          <div id="directBox">
           <div class="seg" id="modeSeg">
             <button data-m="car" class="on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-6h12l2 6v4H4z"/></svg>رقم السيارة</button>
             <button data-m="phone"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>رقم الهاتف</button>
@@ -357,12 +379,12 @@ main{flex:1;min-height:0;position:relative}
           <div id="carBox">
             <div class="row">
               <select id="emirate" style="flex:0 0 105px"><option>أبوظبي</option><option>دبي</option><option>الشارقة</option><option>عجمان</option><option>رأس الخيمة</option><option>الفجيرة</option><option>أم القيوين</option></select>
-              <input id="pcode" class="plate-in" placeholder="الكود" maxlength="3" style="flex:0 0 72px" autocomplete="off">
               <input id="pnum" class="plate-in num" placeholder="الرقم" inputmode="numeric" maxlength="6" autocomplete="off">
             </div>
             <div class="colors" id="colors"></div>
           </div>
           <div id="phoneBox" hidden><input id="phone" class="plate-in num" placeholder="05X XXX XXXX" inputmode="tel" maxlength="14" dir="ltr" autocomplete="off"></div>
+          </div>
           <input id="note" class="note" placeholder="ملاحظة على الطلب (اختياري)" autocomplete="off">
           <div class="err" id="identErr"></div>
         </div>
@@ -371,10 +393,12 @@ main{flex:1;min-height:0;position:relative}
           <div class="tr"><span>ضريبة القيمة المضافة 5%</span><span class="num" id="tVat">0.00</span></div>
           <div class="tr big"><span>الإجمالي</span><span class="num" id="tTot">0.00 د.إ</span></div>
         </div>
-        <div class="pay">
+        <div class="pay" id="payDirect">
           <button class="pbtn cash" id="payCash" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>كاش</button>
           <button class="pbtn visa" id="payVisa" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>فيزا</button>
         </div>
+        <div class="pay" id="payLaterRow"><button class="pbtn later" id="payLater" disabled>🖨 حفظ وطباعة — الدفع عند الاستلام</button></div>
+        <div class="pay" id="payAppRow" hidden><button class="pbtn appb" id="payApp" disabled>تأكيد الطلب</button></div>
       </aside>
       <button class="mbar hide" id="mbar"><span id="mbarCount"></span><span>عرض الطلب ←</span><span class="num" id="mbarTot"></span></button>
     </section>
@@ -430,6 +454,12 @@ main{flex:1;min-height:0;position:relative}
       </div>
       <div style="color:var(--dim);font-size:13px;margin:-6px 0 14px">أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. الأسعار والأصناف الجديدة تتعدل من لوحة المنيو وتوصل هنا تلقائيًا.</div>
       <div class="avl" id="avl"></div>
+      <div class="box" id="appsAdmin" style="margin-top:16px" hidden>
+        <h3>🛵 أسعار التطبيقات (المدير)</h3>
+        <div style="color:var(--dim);font-size:13px;margin:-6px 0 12px">اختر التطبيق، حط نسبة الزيادة على أسعار المنيو، أو اكتب سعر خاص لأي صنف. لما الكاشير يختار التطبيق تتحول الأسعار تلقائيًا.</div>
+        <div class="filters" id="appTabs"></div>
+        <div id="appEdit" style="margin-top:12px"></div>
+      </div>
     </section>
   </main>
 </div>
@@ -590,7 +620,7 @@ function renderCats(){
 }
 function tile(i){
   const c=cart.find(x=>x.id===i.id);
-  return `<button class="item ${c?"in":""}" data-i="${esc(i.id)}">${c?`<span class="q num">${c.qty}</span>`:""}<div class="ph">${photo(i)}</div><div class="bd"><span class="nm">${esc(i.name)}</span><span class="pr num">${money(i.price)} <small>د.إ</small></span></div></button>`;
+  return `<button class="item ${c?"in":""}" data-i="${esc(i.id)}">${c?`<span class="q num">${c.qty}</span>`:""}<div class="ph">${photo(i)}</div><div class="bd"><span class="nm">${esc(i.name)}</span><span class="pr num">${money(priceNow(i))} <small>د.إ</small></span></div></button>`;
 }
 function renderGrid(){
   const g=$("#grid");
@@ -613,6 +643,38 @@ $("#avl").addEventListener("click", e=>{
   cart=cart.filter(c=>!offItems.has(c.id)); renderCart();
 });
 $("#reloadMenu").addEventListener("click", ()=>loadMenu(true));
+let editApps=null, editAppId=null;
+function renderAppsAdmin(){
+  const box=$("#appsAdmin"); const admin=ctx&&ctx.role==="admin"; box.hidden=!admin; if(!admin) return;
+  if(!editApps) editApps=clone(appsList());
+  if(!editAppId && editApps[0]) editAppId=editApps[0].id;
+  $("#appTabs").innerHTML=editApps.map(a=>`<button class="cat ${a.id===editAppId?"on":""}" data-ap="${esc(a.id)}">${esc(a.name)}</button>`).join("")+`<button class="cat" data-ap="+">+ تطبيق</button>`;
+  const a=editApps.find(x=>x.id===editAppId);
+  if(!a){ $("#appEdit").innerHTML=""; return; }
+  a.prices=a.prices||{};
+  $("#appEdit").innerHTML=`<div class="row" style="flex-wrap:wrap;align-items:center">
+      <label style="font-size:13px;color:var(--mute)">الاسم</label><input id="apName" value="${esc(a.name)}" style="width:160px">
+      <label style="font-size:13px;color:var(--mute)">زيادة على كل الأسعار %</label><input id="apPct" class="num" inputmode="decimal" value="${esc(a.pct||0)}" style="width:90px">
+      <button class="abtn pri" id="apSave">💾 حفظ</button><button class="abtn ghost" id="apDel">حذف التطبيق</button></div>
+    <div class="apl">${menu.items.map(i=>{ const def=+money(i.price*(1+(+a.pct||0)/100)); const ov=a.prices[i.id]; return `<div class="r"><span class="n">${esc(i.name)}</span><span class="b num" title="سعر المحل">${money(i.price)}</span><input class="num" inputmode="decimal" data-pi="${esc(i.id)}" placeholder="${money(def)}" value="${ov!=null?esc(ov):""}"></div>`; }).join("")}</div>
+    <div style="color:var(--dim);font-size:12px;margin-top:8px">الخانة الفاضية = سعر المحل + النسبة (الرقم الرمادي داخلها). اكتب سعر لو التطبيق له سعر خاص للصنف.</div>`;
+  $("#apName").oninput=e=>{ a.name=e.target.value; };
+  $("#apPct").oninput=e=>{ a.pct=parseFloat(e.target.value)||0; document.querySelectorAll("#appEdit [data-pi]").forEach(inp=>{ const it=menu.items.find(i=>i.id===inp.dataset.pi); if(it) inp.placeholder=money(it.price*(1+a.pct/100)); }); };
+  $("#appEdit .apl").oninput=e=>{ const inp=e.target.closest("[data-pi]"); if(!inp) return; const v=inp.value.trim(); if(v===""||isNaN(+v)) delete a.prices[inp.dataset.pi]; else a.prices[inp.dataset.pi]=+v; };
+  $("#apSave").onclick=saveApps;
+  $("#apDel").onclick=()=>{ editApps=editApps.filter(x=>x!==a); editAppId=editApps[0]&&editApps[0].id; renderAppsAdmin(); toast("اضغط حفظ لتأكيد الحذف"); };
+}
+async function saveApps(){
+  const clean=editApps.filter(a=>a.name&&a.name.trim()).map(a=>({id:a.id,name:a.name.trim(),pct:+a.pct||0,prices:a.prices||{}}));
+  try{ await rpc("pos_save_apps",{p_token:token,p_apps:clean}); ctx.settings=ctx.settings||{}; ctx.settings.apps=JSON.stringify(clean); LS.set("pos.ctx",ctx); editApps=clone(clean); toast("تم حفظ أسعار التطبيقات ✓"); renderAppsAdmin(); }
+  catch(e){ toast("تعذّر الحفظ — تأكد من الإنترنت"); }
+}
+$("#appTabs").addEventListener("click", e=>{
+  const b=e.target.closest("[data-ap]"); if(!b) return;
+  if(b.dataset.ap==="+"){ const id="app"+Math.random().toString(36).slice(2,8); editApps.push({id,name:"تطبيق جديد",pct:0,prices:{}}); editAppId=id; }
+  else editAppId=b.dataset.ap;
+  renderAppsAdmin();
+});
 
 // ---------- orders storage & sync ----------
 function saveLocal(){ if(!LS.set(okey(), orders)) toast("ذاكرة الجهاز ممتلئة!"); }
@@ -666,6 +728,40 @@ addEventListener("online", ()=>{ online=true; updSync(); sync(); });
 addEventListener("offline", ()=>{ online=false; updSync(); });
 setInterval(()=>{ if(!$("#app").hidden) sync(); }, 12000);
 
+// ---------- delivery apps (channels) ----------
+let channel=null;
+function appsList(){ let a=ctx&&ctx.settings&&ctx.settings.apps; if(typeof a==="string"){ try{ a=JSON.parse(a); }catch(e){ a=[]; } } return Array.isArray(a)?a:[]; }
+function appById(id){ return appsList().find(a=>a.id===id); }
+function appPrice(itemId, base){ const a=appById(channel); if(!a) return base; const ov=a.prices&&a.prices[itemId]; if(ov!=null && ov!=="" && !isNaN(+ov)) return +ov; return +money(base*(1+(+a.pct||0)/100)); }
+const priceNow = it => channel ? appPrice(it.id, +it.price) : +it.price;
+function payLabel(o){ if(o.pay==="cash") return "كاش"; if(o.pay==="visa") return "فيزا"; if(o.pay==="unpaid") return "غير مدفوع"; const a=appById(o.channel||o.pay); return a?a.name:(o.pay||""); }
+const payCls = o => o.pay==="cash"||o.pay==="visa"||o.pay==="unpaid" ? o.pay : "appt";
+function setChannel(id){
+  channel=id||null;
+  cart.forEach(c=>{ const it=menu.items.find(i=>i.id===c.id); const base=it?+it.price:(c.base||c.price); c.base=base; c.price=channel?appPrice(c.id,base):base; });
+  const a=appById(channel);
+  $("#chanDirect").classList.toggle("on",!channel); $("#chanApps").classList.toggle("on",!!channel);
+  $("#appBox").hidden=!channel; $("#directBox").hidden=!!channel;
+  $("#payDirect").hidden=!!channel; $("#payLaterRow").hidden=!!channel; $("#payAppRow").hidden=!channel;
+  $("#appName").textContent=a?a.name:"";
+  $("#tbApps").classList.toggle("on",!!channel); $("#tbAppsTxt").textContent=a?a.name+" ✕":"التطبيقات"; $("#payApp").textContent=a?"✓ تأكيد طلب "+a.name:"تأكيد الطلب";
+  $("#identErr").textContent="";
+  renderCart(); renderGrid();
+}
+function pickApp(){
+  const list=appsList();
+  if(!list.length){ toast("ما فيه تطبيقات — المدير يضيفها من تبويب الأصناف"); return; }
+  modal(`<h3>🛵 اختر التطبيق</h3><div class="sub">الأسعار تتحول لأسعار التطبيق، وطريقة الدفع تكون باسم التطبيق.</div>
+    <div class="pr-list">${list.map(a=>`<button class="pr-opt" data-app="${esc(a.id)}"><span class="pi">🛵</span><span class="pt"><b>${esc(a.name)}</b><small>${a.pct?("الأسعار +"+esc(a.pct)+"%"):"أسعار التطبيق"}${a.prices&&Object.keys(a.prices).length?(" · "+Object.keys(a.prices).length+" سعر خاص"):""}</small></span></button>`).join("")}</div>
+    <div class="mact"><button class="b-cancel" data-x>رجوع</button></div>`);
+  $("#modal .pr-list").onclick=e=>{ const b=e.target.closest("[data-app]"); if(!b) return; closeModal(); setChannel(b.dataset.app); };
+  $("#modal [data-x]").onclick=closeModal;
+}
+$("#chanApps").addEventListener("click", pickApp);
+$("#tbApps").addEventListener("click", ()=>{ if(channel) setChannel(null); else pickApp(); });
+$("#chanDirect").addEventListener("click", ()=>setChannel(null));
+$("#appClear").addEventListener("click", ()=>setChannel(null));
+
 // ---------- cart ----------
 function totals(){ const tot=cart.reduce((s,c)=>s+c.price*c.qty,0); const vat=tot-tot/(1+VAT); return {tot, vat, sub:tot-vat, count:cart.reduce((s,c)=>s+c.qty,0)}; }
 function nextNo(){ return orders.reduce((m,o)=>Math.max(m,o.no||0),0)+1; }
@@ -674,7 +770,7 @@ function renderCart(){
   $("#lines").innerHTML = cart.length ? cart.map(c=>`<div class="line"><div class="info"><div class="n">${esc(c.name)}</div><div class="p num">${money(c.price)}</div></div><div class="step"><button data-d="-1" data-id="${esc(c.id)}">−</button><span class="num">${c.qty}</span><button data-d="1" data-id="${esc(c.id)}">+</button></div><div class="t num">${money(c.price*c.qty)}</div></div>`).join("") : `<div class="cart-empty">اضغط على الأصناف لإضافتها للطلب</div>`;
   const t=totals();
   $("#tSub").textContent=money(t.sub); $("#tVat").textContent=money(t.vat); $("#tTot").textContent=money(t.tot)+" د.إ";
-  $("#payCash").disabled=$("#payVisa").disabled=!cart.length;
+  $("#payCash").disabled=$("#payVisa").disabled=$("#payLater").disabled=$("#payApp").disabled=!cart.length;
   $("#mbarCount").textContent=t.count+" "+(t.count===1?"صنف":"أصناف"); $("#mbarTot").textContent=money(t.tot)+" د.إ";
   $("#mbar").classList.toggle("hide",!cart.length);
 }
@@ -686,7 +782,7 @@ $("#q").addEventListener("input", e=>{ q=e.target.value; renderGrid(); });
 $("#grid").addEventListener("click", e=>{
   const b=e.target.closest("[data-i]"); if(!b) return;
   const it=menu.items.find(i=>i.id===b.dataset.i); if(!it) return;
-  const c=cart.find(x=>x.id===it.id); if(c) c.qty++; else cart.push({id:it.id,name:it.name,price:+it.price,qty:1});
+  const c=cart.find(x=>x.id===it.id); if(c) c.qty++; else cart.push({id:it.id,name:it.name,base:+it.price,price:priceNow(it),qty:1});
   if(navigator.vibrate) try{navigator.vibrate(10)}catch(e){}
   renderCart(); renderGrid();
 });
@@ -695,52 +791,73 @@ $("#clearCart").addEventListener("click", ()=>{ cart=[]; renderCart(); renderGri
 $("#modeSeg").addEventListener("click", e=>{ const b=e.target.closest("[data-m]"); if(b) setMode(b.dataset.m); });
 $("#colors").addEventListener("click", e=>{ const b=e.target.closest("[data-col]"); if(!b) return; carColor=carColor===b.dataset.col?"":b.dataset.col; renderColors(); });
 $("#pnum").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[^\d٠-٩]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)); $("#identErr").textContent=""; });
-$("#pcode").addEventListener("input", e=>{ e.target.value=e.target.value.toUpperCase().replace(/[^0-9A-Z]/g,""); $("#identErr").textContent=""; });
 $("#phone").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d+ ]/g,""); $("#identErr").textContent=""; });
 $("#mbar").addEventListener("click", ()=>$("#cart").classList.add("open"));
 $("#closeCart").addEventListener("click", ()=>$("#cart").classList.remove("open"));
 
 function readIdent(){
+  if(channel){ return {mode:"app", channel, app_ref:$("#appRef").value.trim()}; }
   if(mode==="car"){
     const num=$("#pnum").value.trim();
     if(!num){ $("#identErr").textContent="اكتب رقم السيارة (أو اختر رقم الهاتف)"; return null; }
-    return {mode:"car", car:{em:$("#emirate").value, code:$("#pcode").value.trim(), num, color:carColor}};
+    return {mode:"car", car:{em:$("#emirate").value, num, color:carColor}};
   }
   const ph=$("#phone").value.replace(/\s/g,"");
   if(ph.replace(/\D/g,"").length<9){ $("#identErr").textContent="اكتب رقم هاتف صحيح"; return null; }
   return {mode:"phone", phone:ph};
 }
-const identText = o => o.mode==="car"&&o.car ? [o.car.code,o.car.num].filter(Boolean).join(" ") : (o.phone||"");
-const identSub = o => o.mode==="car"&&o.car ? "🚗 "+[o.car.em,o.car.color].filter(Boolean).join(" · ") : "📱 هاتف";
+const identText = o => o.mode==="app" ? (payLabel(o)+(o.app_ref?" #"+o.app_ref:"")) : o.mode==="car"&&o.car ? [o.car.code,o.car.num].filter(Boolean).join(" ") : (o.phone||"");
+const identSub = o => o.mode==="app" ? "🛵 تطبيق توصيل" : o.mode==="car"&&o.car ? "🚗 "+[o.car.em,o.car.color].filter(Boolean).join(" · ") : "📱 هاتف";
 
 // ---------- payment ----------
 $("#payCash").addEventListener("click", ()=>startPay("cash"));
 $("#payVisa").addEventListener("click", ()=>startPay("visa"));
-function startPay(method){
-  if(!cart.length) return;
-  const id=readIdent(); if(!id){ $("#cart").classList.add("open"); (mode==="car"?$("#pnum"):$("#phone")).focus(); return; }
-  const t=totals();
+function payModal(total, method, onPaid){
   if(method==="visa"){
     modal(`<h3>الدفع بالفيزا</h3><div class="sub">مرّر البطاقة على جهاز البنك ثم أكّد هنا</div>
-      <div class="due"><div class="l">المبلغ المطلوب</div><div class="v num">${money(t.tot)} <small style="font-size:16px">د.إ</small></div></div>
+      <div class="due"><div class="l">المبلغ المطلوب</div><div class="v num">${money(total)} <small style="font-size:16px">د.إ</small></div></div>
       <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok bl" id="okPay">تمّ الدفع ✓</button></div>`);
-    $("#modal [data-x]").onclick=closeModal; $("#okPay").onclick=()=>finish("visa",id,{}); return;
+    $("#modal [data-x]").onclick=closeModal; $("#okPay").onclick=()=>onPaid("visa",{}); return;
   }
-  const opts=[...new Set([t.tot,Math.ceil(t.tot/5)*5,Math.ceil(t.tot/10)*10,Math.ceil(t.tot/50)*50,Math.ceil(t.tot/100)*100,200,500].filter(v=>v>=t.tot-1e-9))].sort((a,b)=>a-b).slice(0,6);
+  const opts=[...new Set([total,Math.ceil(total/5)*5,Math.ceil(total/10)*10,Math.ceil(total/50)*50,Math.ceil(total/100)*100,200,500].filter(v=>v>=total-1e-9))].sort((a,b)=>a-b).slice(0,6);
   modal(`<h3>الدفع كاش</h3><div class="sub">اختر المبلغ المستلم أو اكتبه</div>
-    <div class="due"><div class="l">المبلغ المطلوب</div><div class="v num">${money(t.tot)} <small style="font-size:16px">د.إ</small></div></div>
+    <div class="due"><div class="l">المبلغ المطلوب</div><div class="v num">${money(total)} <small style="font-size:16px">د.إ</small></div></div>
     <div class="quick">${opts.map((v,i)=>`<button data-v="${v}" class="num">${i===0?"بالضبط":money(v).replace(".00","")}</button>`).join("")}</div>
     <input id="recv" class="recv num" inputmode="decimal" placeholder="المبلغ المستلم (فاضي = بالضبط)">
     <div class="change" id="chg"><span>الباقي للزبون</span><span class="v num" id="chgV">—</span></div>
     <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok g" id="okPay">تأكيد الدفع</button></div>`);
   const recv=$("#recv");
-  const upd=()=>{ const v=parseFloat(recv.value), box=$("#chg"); if(!recv.value){ $("#chgV").textContent="—"; box.classList.remove("bad"); return; } if(isNaN(v)||v<t.tot-1e-9){ box.classList.add("bad"); $("#chgV").textContent="المبلغ ناقص"; } else { box.classList.remove("bad"); $("#chgV").textContent=money(v-t.tot)+" د.إ"; } };
+  const upd=()=>{ const v=parseFloat(recv.value), box=$("#chg"); if(!recv.value){ $("#chgV").textContent="—"; box.classList.remove("bad"); return; } if(isNaN(v)||v<total-1e-9){ box.classList.add("bad"); $("#chgV").textContent="المبلغ ناقص"; } else { box.classList.remove("bad"); $("#chgV").textContent=money(v-total)+" د.إ"; } };
   recv.addEventListener("input", upd);
   recv.addEventListener("keydown", e=>{ if(e.key==="Enter") $("#okPay").click(); });
   $("#modal .quick").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; recv.value=money(+b.dataset.v); upd(); };
   $("#modal [data-x]").onclick=closeModal;
-  $("#okPay").onclick=()=>{ let v=recv.value?parseFloat(recv.value):t.tot; if(isNaN(v)||v<t.tot-1e-9){ upd(); return; } finish("cash",id,{received:+money(v),change:+money(v-t.tot)}); };
+  $("#okPay").onclick=()=>{ let v=recv.value?parseFloat(recv.value):total; if(isNaN(v)||v<total-1e-9){ upd(); return; } onPaid("cash",{received:+money(v),change:+money(v-total)}); };
   if(matchMedia("(min-width:821px)").matches) setTimeout(()=>recv.focus(),50);
+}
+function needIdent(){ const id=readIdent(); if(!id){ $("#cart").classList.add("open"); (mode==="car"?$("#pnum"):$("#phone")).focus(); } return id; }
+function startPay(method){
+  if(!cart.length) return;
+  const id=needIdent(); if(!id) return;
+  payModal(totals().tot, method, (m,extra)=>finish(m,id,extra));
+}
+$("#payLater").addEventListener("click", ()=>{ if(!cart.length) return; const id=needIdent(); if(!id) return; finish("unpaid", id, {}); });
+$("#payApp").addEventListener("click", ()=>{ if(!cart.length||!channel) return; const id=readIdent(); finish(channel, id, {}); });
+function kickDrawer(){ if(prefs.drawer && prefs.printer && (prefs.printer.type==="lan"||prefs.printer.type==="bt"||prefs.printer.type==="usb"||prefs.printer.type==="serial")){ reconnect().then(ok=>{ if(ok) rawSend(new Uint8Array([0x1b,0x40,0x1b,0x70,0,25,250])).catch(()=>{}); }); } }
+function collect(o, after){
+  modal(`<h3>تحصيل الطلب #${o.no}</h3><div class="sub">${esc(identText(o))} — المبلغ <b class="num">${money(o.total)}</b> د.إ</div>
+    <div class="pay" style="padding:0"><button class="pbtn cash" id="cC">كاش</button><button class="pbtn visa" id="cV">فيزا</button></div>
+    <div class="mact"><button class="b-cancel" data-x>رجوع</button></div>`);
+  $("#modal [data-x]").onclick=closeModal;
+  const go=m=>payModal(o.total, m, (method,extra)=>{
+    o.pay=method; Object.assign(o, extra); saveLocal(); const s=clone(o); delete s._local; enqueue(s);
+    if(method==="cash") kickDrawer();
+    if(after) after(); else renderAll();
+    modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم تحصيل الطلب</div><div class="big-no num">#${o.no}</div><div class="mt">${method==="cash"?"كاش":"فيزا"} · <span class="num">${money(o.total)}</span> د.إ</div>${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}</div>
+      <div class="mact"><button class="b-cancel" id="rePrint">🖨 طباعة فاتورة</button><button class="b-ok" data-x>تم</button></div>`);
+    $("#modal [data-x]").onclick=closeModal; $("#rePrint").onclick=()=>printOrder(o);
+  });
+  $("#cC").onclick=()=>go("cash"); $("#cV").onclick=()=>go("visa");
 }
 let finishing=false;
 function finish(method,id,extra){
@@ -749,13 +866,16 @@ function finish(method,id,extra){
     const t=totals();
     const o=Object.assign({id:uid(), no:nextNo(), ts:Date.now(), day, branch_id:branch, items:cart.map(c=>({id:c.id,name:c.name,price:c.price,qty:c.qty})),
       total:+money(t.tot), vat:+money(t.vat), pay:method, note:$("#note").value.trim(), status:"new", device:DEVICE, _local:true}, id, extra);
+    if(channel){ o.channel=channel; }
     orders.push(o); saveLocal();
     const send=clone(o); delete send._local; enqueue(send);
-    cart=[]; $("#pnum").value=""; $("#pcode").value=""; $("#phone").value=""; $("#note").value=""; carColor=""; renderColors();
+    cart=[]; $("#pnum").value=""; $("#phone").value=""; $("#note").value=""; $("#appRef").value=""; carColor=""; renderColors();
+    if(channel) setChannel(null);
     $("#cart").classList.remove("open"); renderAll();
     modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div>
       <div class="mt">رقم الطلب</div><div class="big-no num">${o.no}</div><div class="id num" dir="auto">${esc(identText(o))}</div>
-      <div class="mt">${esc(identSub(o))} · ${method==="cash"?"كاش":"فيزا"} · <span class="num">${money(o.total)}</span> د.إ</div>
+      <div class="mt">${esc(identSub(o))} · ${esc(payLabel(o))} · <span class="num">${money(o.total)}</span> د.إ</div>
+      ${method==="unpaid"?`<div class="chg" style="background:var(--redbg);color:var(--red)">غير مدفوع — يظهر في الطلبات النشطة لين يتم التحصيل</div>`:""}
       ${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}</div>
       <div class="mact"><button class="b-cancel" id="rePrint">🖨 طباعة</button><button class="b-ok" id="newOrder">طلب جديد</button></div>`);
     $("#newOrder").onclick=closeModal;
@@ -784,7 +904,7 @@ function receiptHTML(o, kitchen){
     <div class="t"><span>ضريبة القيمة المضافة 5%</span><span class="num">${money(vat)}</span></div>
     <div class="t b"><span>الإجمالي</span><span class="num">${money(t)} د.إ</span></div>
     <hr>
-    <div class="t"><span>طريقة الدفع</span><span>${o.pay==="cash"?"كاش":"فيزا"}</span></div>
+    <div class="t ${o.pay==="unpaid"?"b":""}"><span>طريقة الدفع</span><span>${esc(payLabel(o))}</span></div>
     ${o.pay==="cash"&&o.received!=null?`<div class="t"><span>المستلم</span><span class="num">${money(o.received)}</span></div><div class="t"><span>الباقي</span><span class="num">${money(o.change)}</span></div>`:""}
     ${o.note?`<hr><div>ملاحظة: ${esc(o.note)}</div>`:""}
     ${o.status==="cancelled"?`<hr><div class="c hd">*** ملغي ***</div>`:""}
@@ -883,7 +1003,8 @@ async function receiptCanvas(o, kitchen){
   if(kitchen){ if(o.note){ hr(); x.font=F(26*sc,true); x.direction="rtl"; x.textAlign="right"; wrap("ملاحظة: "+o.note,W-2*PAD).forEach(l=>{ x.fillText(l,W-PAD,y); y+=34*sc; }); } }
   else{
     hr(); lr("المجموع قبل الضريبة",money(t-vat),21); lr("ضريبة القيمة المضافة 5%",money(vat),21); lr("الإجمالي",money(t)+" AED",30,true); hr();
-    lr("طريقة الدفع",o.pay==="cash"?"Cash":"Visa",21);
+    lr("طريقة الدفع", o.pay==="cash"?"Cash":o.pay==="visa"?"Visa":"", o.pay==="unpaid"?24:21, o.pay==="unpaid");
+    if(o.pay!=="cash"&&o.pay!=="visa"){ y-=21*sc*1.4; x.font=F(21*sc,true); x.direction="rtl"; x.textAlign="left"; x.fillText(payLabel(o),PAD,y); y+=21*sc*1.4; }
     if(o.pay==="cash"&&o.received!=null){ lr("المستلم",money(o.received),21); lr("الباقي",money(o.change),21); }
     if(o.note){ hr(); x.font=F(21*sc,false); x.direction="rtl"; x.textAlign="right"; wrap("ملاحظة: "+o.note,W-2*PAD).forEach(l=>{ x.fillText(l,W-PAD,y); y+=28*sc; }); }
     if(o.status==="cancelled"){ hr(); center("*** ملغي ***",28,true); }
@@ -1010,22 +1131,24 @@ function testOrder(){ return {no:0,ts:Date.now(),branch_id:branch,mode:"car",car
 
 // ---------- orders view ----------
 const STATUS={new:"قيد التحضير",ready:"جاهز",done:"تم التسليم",cancelled:"ملغي"};
-const OF=[["active","النشطة"],["new","قيد التحضير"],["ready","جاهز"],["done","تم التسليم"],["all","الكل"]];
+const OF=[["active","النشطة"],["unpaid","غير مدفوع"],["new","قيد التحضير"],["ready","جاهز"],["done","تم التسليم"],["all","الكل"]];
 function renderOrders(){
-  const act=orders.filter(o=>o.status==="new"||o.status==="ready").length;
+  const isAct=o=>o.status==="new"||o.status==="ready"||(o.pay==="unpaid"&&o.status!=="cancelled");
+  const act=orders.filter(isAct).length;
   $("#badge").hidden=!act; $("#badge").textContent=act;
   $("#ofilters").innerHTML=OF.map(([k,n])=>`<button class="cat ${ofilter===k?"on":""}" data-f="${k}">${n}</button>`).join("");
   const qq=oq.trim(); const pend=new Set(queue.map(x=>x.id));
-  let list=orders.filter(o=>ofilter==="all"?true:ofilter==="active"?(o.status==="new"||o.status==="ready"):o.status===ofilter);
+  let list=orders.filter(o=>ofilter==="all"?true:ofilter==="active"?isAct(o):ofilter==="unpaid"?(o.pay==="unpaid"&&o.status!=="cancelled"):o.status===ofilter);
   if(qq) list=list.filter(o=>String(o.no)===qq||identText(o).includes(qq)||(o.phone||"").includes(qq));
   list=list.slice().sort((a,b)=>b.no-a.no);
-  $("#olist").innerHTML = list.length ? list.map(o=>`<div class="oc ${o.status}">
+  $("#olist").innerHTML = list.length ? list.map(o=>`<div class="oc ${o.status} ${o.pay==="unpaid"&&o.status!=="cancelled"?"unpaid-o":""}">
     <div class="oc-top"><div class="ono num">#${o.no}</div>
       <div class="oid"><div class="a num" dir="auto">${esc(identText(o))}</div><div class="b">${esc(identSub(o))} · <span class="num">${hm(o.ts)}</span> ${pend.has(o.id)?`<span class="unsync">· لم يُرفع بعد</span>`:""}</div></div>
       <span class="st ${o.status}">${STATUS[o.status]||o.status}</span></div>
     <div class="oitems">${o.items.map(i=>`${esc(i.name)} <b class="num">×${i.qty}</b>`).join(" · ")}${o.note?`<div style="color:var(--yellow);direction:rtl;text-align:right">ملاحظة: ${esc(o.note)}</div>`:""}</div>
-    <div class="oc-b"><div class="tot num">${money(o.total)} د.إ <span class="tag ${o.pay}">${o.pay==="cash"?"كاش":"فيزا"}</span></div>
+    <div class="oc-b"><div class="tot num">${money(o.total)} د.إ <span class="tag ${payCls(o)}">${esc(payLabel(o))}</span></div>
       <button class="abtn" data-act="print" data-id="${esc(o.id)}">🖨</button>
+      ${o.pay==="unpaid"&&o.status!=="cancelled"?`<button class="abtn pri" style="background:var(--green);border-color:var(--green);color:#04210f" data-act="collect" data-id="${esc(o.id)}">💰 تحصيل</button>`:""}
       ${o.status==="new"?`<button class="abtn pri" data-act="ready" data-id="${esc(o.id)}">جاهز</button>`:""}
       ${o.status==="ready"?`<button class="abtn pri" data-act="done" data-id="${esc(o.id)}">تم التسليم</button>`:""}
       ${o.status==="new"||o.status==="ready"?`<button class="abtn ghost" data-act="cancel" data-id="${esc(o.id)}">إلغاء</button>`:""}
@@ -1039,6 +1162,8 @@ $("#olist").addEventListener("click", e=>{
   const o=orders.find(x=>x.id===b.dataset.id); if(!o) return;
   const a=b.dataset.act;
   if(a==="print") return printOrder(o);
+  if(a==="collect") return collect(o);
+  if(a==="done" && o.pay==="unpaid"){ toast("حصّل المبلغ أولًا"); return collect(o, ()=>setStatus(o,"done")); }
   if(a==="cancel"){
     modal(`<h3>إلغاء الطلب #${o.no}؟</h3><div class="sub">سيُستبعد من مبيعات اليوم ويبقى ظاهرًا كطلب ملغي.</div><div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok rd" id="okC">نعم، إلغاء</button></div>`);
     $("#modal [data-x]").onclick=closeModal; $("#okC").onclick=()=>{ setStatus(o,"cancelled"); closeModal(); toast("تم إلغاء الطلب #"+o.no); };
@@ -1053,7 +1178,9 @@ function stats(list){
   const ok=list.filter(o=>o.status!=="cancelled");
   const sum=f=>ok.filter(f).reduce((s,o)=>s+(+o.total),0);
   const items={}; ok.forEach(o=>o.items.forEach(i=>{ items[i.name]=(items[i.name]||0)+i.qty; }));
+  const apps={}; ok.filter(o=>o.channel||(o.pay!=="cash"&&o.pay!=="visa"&&o.pay!=="unpaid")).forEach(o=>{ const n=payLabel(o); apps[n]=apps[n]||{n:0,t:0}; apps[n].n++; apps[n].t+=+o.total; });
   return {count:ok.length,total:sum(()=>1),cash:sum(o=>o.pay==="cash"),visa:sum(o=>o.pay==="visa"),vat:ok.reduce((s,o)=>s+(+o.vat||0),0),
+    unpaid:sum(o=>o.pay==="unpaid"),unpaidN:ok.filter(o=>o.pay==="unpaid").length,apps,appsT:Object.values(apps).reduce((s,a)=>s+a.t,0),
     cashN:ok.filter(o=>o.pay==="cash").length,visaN:ok.filter(o=>o.pay==="visa").length,cancelled:list.length-ok.length,
     avg:ok.length?sum(()=>1)/ok.length:0,top:Object.entries(items).sort((a,b)=>b[1]-a[1])};
 }
@@ -1068,7 +1195,7 @@ async function renderReport(){
   }
   const s=stats(repList());
   const k=(l,v,sm)=>`<div class="kpi"><div class="l">${l}</div><div class="v num">${v} ${sm?`<small>${sm}</small>`:""}</div></div>`;
-  $("#kpis").innerHTML=k("إجمالي المبيعات",money(s.total),"د.إ")+k("عدد الطلبات",s.count,"")+k("كاش",money(s.cash),s.cashN+" طلب")+k("فيزا",money(s.visa),s.visaN+" طلب")+k("متوسط الطلب",money(s.avg),"د.إ")+k("الضريبة",money(s.vat),"د.إ")+k("ملغاة",s.cancelled,"");
+  $("#kpis").innerHTML=k("إجمالي المبيعات",money(s.total),"د.إ")+k("عدد الطلبات",s.count,"")+k("كاش",money(s.cash),s.cashN+" طلب")+k("فيزا",money(s.visa),s.visaN+" طلب")+Object.entries(s.apps).map(([n,a])=>k("🛵 "+esc(n),money(a.t),a.n+" طلب")).join("")+(s.unpaidN?k('<span style="color:var(--red)">غير محصّل</span>',money(s.unpaid),s.unpaidN+" طلب"):"")+k("متوسط الطلب",money(s.avg),"د.إ")+k("الضريبة",money(s.vat),"د.إ")+k("ملغاة",s.cancelled,"");
   const top=s.top.slice(0,10), mx=top.length?top[0][1]:1;
   $("#top").innerHTML=top.length?top.map(([n,q])=>`<div class="bar-row"><span class="bn">${esc(n)}</span><span class="bt"><i style="width:${q/mx*100}%"></i></span><span class="bq num">${q}</span></div>`).join(""):`<div style="color:var(--dim);font-size:13px">لا مبيعات</div>`;
   $("#expCash").textContent=money(s.cash)+" د.إ"; updDiff();
@@ -1082,7 +1209,7 @@ function updDiff(){
   el.textContent=Math.abs(d)<.01?"✓ الدرج مطابق":d<0?"نقص: "+money(-d)+" د.إ":"زيادة: "+money(d)+" د.إ";
 }
 $("#counted").addEventListener("input", updDiff);
-function summaryText(){ const s=stats(repList()); return `RQ Kitchen — ${branchName()} — ${repDay||day}\nإجمالي المبيعات: ${money(s.total)} د.إ\nعدد الطلبات: ${s.count}\nكاش: ${money(s.cash)} د.إ (${s.cashN})\nفيزا: ${money(s.visa)} د.إ (${s.visaN})\nالضريبة: ${money(s.vat)} د.إ\nملغاة: ${s.cancelled}`; }
+function summaryText(){ const s=stats(repList()); return `RQ Kitchen — ${branchName()} — ${repDay||day}\nإجمالي المبيعات: ${money(s.total)} د.إ\nعدد الطلبات: ${s.count}\nكاش: ${money(s.cash)} د.إ (${s.cashN})\nفيزا: ${money(s.visa)} د.إ (${s.visaN})${Object.entries(s.apps).map(([n,a])=>`\n${n}: ${money(a.t)} د.إ (${a.n})`).join("")}${s.unpaidN?`\nغير محصّل: ${money(s.unpaid)} د.إ (${s.unpaidN})`:""}\nالضريبة: ${money(s.vat)} د.إ\nملغاة: ${s.cancelled}`; }
 $("#copyRep").addEventListener("click", async ()=>{ try{ await navigator.clipboard.writeText(summaryText()); toast("تم النسخ — الصقه في واتساب"); }catch(e){ toast("تعذّر النسخ"); } });
 $("#printRep").addEventListener("click", ()=>{
   const s=stats(repList());
@@ -1091,6 +1218,8 @@ $("#printRep").addEventListener("click", ()=>{
    <div class="t"><span>عدد الطلبات</span><span class="num">${s.count}</span></div>
    <div class="t"><span>كاش (${s.cashN})</span><span class="num">${money(s.cash)}</span></div>
    <div class="t"><span>فيزا (${s.visaN})</span><span class="num">${money(s.visa)}</span></div>
+   ${Object.entries(s.apps).map(([n,a])=>`<div class="t"><span>${esc(n)} (${a.n})</span><span class="num">${money(a.t)}</span></div>`).join("")}
+   ${s.unpaidN?`<div class="t"><span>غير محصّل (${s.unpaidN})</span><span class="num">${money(s.unpaid)}</span></div>`:""}
    <div class="t"><span>الضريبة</span><span class="num">${money(s.vat)}</span></div>
    <div class="t"><span>ملغاة</span><span class="num">${s.cancelled}</span></div><hr>
    <table>${s.top.map(([n,q])=>`<tr><td class="q num">${q}</td><td class="n">${esc(n)}</td></tr>`).join("")}</table>
@@ -1098,7 +1227,7 @@ $("#printRep").addEventListener("click", ()=>{
 });
 function csv(list){
   const rows=[["رقم الطلب","التاريخ","الوقت","الفرع","النوع","رقم السيارة/الهاتف","الإمارة","اللون","الأصناف","الإجمالي","الضريبة","الدفع","المستلم","الباقي","الحالة","ملاحظة"]];
-  list.slice().sort((a,b)=>a.no-b.no).forEach(o=>rows.push([o.no,o.day,hm(o.ts),branchName(o.branch_id),o.mode==="car"?"سيارة":"هاتف",identText(o),o.car?o.car.em:"",o.car?o.car.color:"",o.items.map(i=>i.qty+"x "+i.name).join(" | "),money(o.total),money(o.vat),o.pay==="cash"?"كاش":"فيزا",o.received!=null?money(o.received):"",o.change!=null?money(o.change):"",STATUS[o.status],o.note||""]));
+  list.slice().sort((a,b)=>a.no-b.no).forEach(o=>rows.push([o.no,o.day,hm(o.ts),branchName(o.branch_id),o.mode==="app"?"تطبيق":o.mode==="car"?"سيارة":"هاتف",identText(o),o.car?o.car.em:"",o.car?o.car.color:"",o.items.map(i=>i.qty+"x "+i.name).join(" | "),money(o.total),money(o.vat),payLabel(o),o.received!=null?money(o.received):"",o.change!=null?money(o.change):"",STATUS[o.status],o.note||""]));
   return "﻿"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
 }
 function download(name, text){
@@ -1112,7 +1241,8 @@ $("#rGo").addEventListener("click", async ()=>{
     const r=await rpc("pos_report",{p_token:token,p_branch:br,p_d1:d1,p_d2:d2});
     const tot=r.days.reduce((a,d)=>({t:a.t+ +d.total,c:a.c+ +d.cash,v:a.v+ +d.visa,n:a.n+ +d.orders,x:a.x+ +d.vat}),{t:0,c:0,v:0,n:0,x:0});
     out.innerHTML=`<div class="kpis"><div class="kpi"><div class="l">الإجمالي</div><div class="v num">${money(tot.t)}</div></div><div class="kpi"><div class="l">الطلبات</div><div class="v num">${tot.n}</div></div><div class="kpi"><div class="l">كاش</div><div class="v num">${money(tot.c)}</div></div><div class="kpi"><div class="l">فيزا</div><div class="v num">${money(tot.v)}</div></div><div class="kpi"><div class="l">الضريبة</div><div class="v num">${money(tot.x)}</div></div></div>
-      <div class="cards2"><div><table class="tbl"><tr><th>اليوم</th><th>الفرع</th><th>طلبات</th><th>كاش</th><th>فيزا</th><th>الإجمالي</th></tr>${r.days.map(d=>`<tr><td class="num">${d.day}</td><td>${esc(branchName(d.branch_id))}</td><td class="num">${d.orders}</td><td class="num">${money(d.cash)}</td><td class="num">${money(d.visa)}</td><td class="num"><b>${money(d.total)}</b></td></tr>`).join("")||`<tr><td colspan="6">لا مبيعات</td></tr>`}</table></div>
+      <div class="cards2"><div><table class="tbl"><tr><th>اليوم</th><th>الفرع</th><th>طلبات</th><th>كاش</th><th>فيزا</th><th>تطبيقات</th><th>غير محصّل</th><th>الإجمالي</th></tr>${r.days.map(d=>`<tr><td class="num">${d.day}</td><td>${esc(branchName(d.branch_id))}</td><td class="num">${d.orders}</td><td class="num">${money(d.cash)}</td><td class="num">${money(d.visa)}</td><td class="num">${money(d.apps||0)}</td><td class="num">${money(d.unpaid||0)}</td><td class="num"><b>${money(d.total)}</b></td></tr>`).join("")||`<tr><td colspan="8">لا مبيعات</td></tr>`}</table>
+      <table class="tbl" style="margin-top:10px"><tr><th>طريقة الدفع</th><th>طلبات</th><th>المبلغ</th></tr>${(r.pays||[]).map(x=>`<tr><td>${esc(payLabel({pay:x.pay,channel:x.pay}))}</td><td class="num">${x.n}</td><td class="num">${money(x.total)}</td></tr>`).join("")}</table></div>
       <div><table class="tbl"><tr><th>الصنف</th><th>الكمية</th><th>المبيعات</th></tr>${r.products.map(p=>`<tr><td style="direction:ltr;text-align:right">${esc(p.name)}</td><td class="num">${+p.qty}</td><td class="num">${money(p.sales)}</td></tr>`).join("")}</table></div></div>`;
   }catch(e){ out.innerHTML=`<div style="color:var(--red)">تعذّر التحميل</div>`; }
 });
@@ -1191,7 +1321,7 @@ async function keepAwake(){ try{ if("wakeLock" in navigator && document.visibili
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible"){ keepAwake(); if(token && !$("#app").hidden){ tick(); sync(); } } });
 document.addEventListener("click", keepAwake, {once:true});
 
-function renderAll(){ renderCart(); renderOrders(); if(curView==="pos") renderMenuSide(); if(curView==="report") renderReport(); if(curView==="menu") renderAvail(); updSync(); }
+function renderAll(){ renderCart(); renderOrders(); if(curView==="pos") renderMenuSide(); if(curView==="report") renderReport(); if(curView==="menu"){ renderAvail(); renderAppsAdmin(); } updSync(); }
 
 function startApp(){
   $("#login").hidden=true; $("#app").hidden=false;
