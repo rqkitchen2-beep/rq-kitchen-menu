@@ -406,6 +406,7 @@ main{flex:1;min-height:0;position:relative}
           <span style="color:var(--mute);font-size:13px">إلى</span><input type="date" id="rd2" style="width:auto">
           <select id="rbr" style="width:auto"></select>
           <button class="abtn pri" id="rGo">عرض</button>
+          <button class="abtn" id="rSync" title="يعيد حساب استهلاك المواد في تطبيق الجرد بعد تعديل الوصفات">تحديث الجرد</button>
         </div>
         <div id="rangeOut" style="margin-top:12px"></div>
       </div>
@@ -899,6 +900,10 @@ $("#rGo").addEventListener("click", async ()=>{
   }catch(e){ out.innerHTML=`<div style="color:var(--red)">تعذّر التحميل</div>`; }
 });
 
+$("#rSync").addEventListener("click", async ()=>{
+  const d1=$("#rd1").value, d2=$("#rd2").value; if(!d1||!d2){ toast("اختر التاريخين"); return; }
+  try{ const n=await rpc("pos_resync_inv",{p_token:token,p_d1:d1,p_d2:d2}); toast("تم تحديث "+n+" تقرير يومي في الجرد ✓"); }catch(e){ toast("تعذّر التحديث"); }
+});
 // ---------- settings ----------
 function openSettings(){
   const s=(ctx&&ctx.settings)||{}, admin=ctx&&ctx.role==="admin";
