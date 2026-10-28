@@ -1,11 +1,11 @@
-android branch run: 14 rc: 0 Wed Oct 28 23:37:31 UTC 2026
+android branch run: 15 rc: 0 Wed Oct 28 23:43:17 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
 RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin" "classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin" "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin" "classpath": "com.rqkitchen.rqnative.RQNativePlugin" 
 STEP: icon + version
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 114
+RESULT: apk signed 3.2M versionCode 115
 ---- errors ----
 ---- tail ----
 > Task :capacitor-android:mapReleaseSourceSetPaths
@@ -29,21 +29,21 @@ RESULT: apk signed 3.2M versionCode 114
 > Task :capacitor-splash-screen:bundleReleaseAar
 > Task :capacitor-splash-screen:mapReleaseSourceSetPaths
 > Task :capacitor-splash-screen:mergeReleaseResources
-> Task :capacitor-local-notifications:verifyReleaseResources
-> Task :capacitor-local-notifications:assembleRelease
+> Task :capacitor-splash-screen:verifyReleaseResources
+> Task :capacitor-splash-screen:assembleRelease
 > Task :capacitor-status-bar:bundleReleaseAar
 > Task :capacitor-status-bar:mapReleaseSourceSetPaths
-> Task :capacitor-splash-screen:verifyReleaseResources
+> Task :capacitor-local-notifications:verifyReleaseResources
 > Task :capacitor-status-bar:mergeReleaseResources
-> Task :capacitor-splash-screen:assembleRelease
+> Task :capacitor-local-notifications:assembleRelease
 > Task :rq-native:bundleReleaseAar
 > Task :rq-native:mapReleaseSourceSetPaths
 > Task :rq-native:mergeReleaseResources
+> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-status-bar:verifyReleaseResources
 > Task :capacitor-status-bar:assembleRelease
 > Task :rq-native:verifyReleaseResources
 > Task :rq-native:assembleRelease
-> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-haptics:lintVitalAnalyzeRelease
 > Task :capacitor-android:lintVitalAnalyzeRelease
 > Task :capacitor-splash-screen:lintVitalAnalyzeRelease
@@ -65,7 +65,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 51s
+BUILD SUCCESSFUL in 2m 24s
 324 actionable tasks: 324 executed
-RESULT: apk signed 3.2M versionCode 114
+RESULT: apk signed 3.2M versionCode 115
 RESULT: published
