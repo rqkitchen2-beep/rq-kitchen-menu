@@ -21,6 +21,21 @@
   --green:#22c55e; --greenbg:rgba(34,197,94,.12); --blue:#3b82f6; --bluebg:rgba(59,130,246,.13); --red:#ef4444; --redbg:rgba(239,68,68,.12); --yellow:#eab308; --yellowbg:rgba(234,179,8,.13);
   --r:14px;
 }
+html.light{--bg:#f3f3f5;--panel:#ffffff;--panel2:#f0f0f3;--line:#e2e2e8;--text:#17171a;--mute:#4b4b55;--dim:#7a7a86;--or:#f47a20;--or2:#d9600a;--orbg:rgba(244,122,32,.12);--yellow:#a16207;--yellowbg:rgba(234,179,8,.16)}
+html.light #login{background:radial-gradient(circle at 50% 0%,#ffe9d6 0%,var(--bg) 60%)}
+html.light .toast{background:#17171a;color:#fff}
+html.light .hint-b{color:#854d0e}
+html.light .logo .k{color:#17171a}
+html.light .item .ph .ini{color:#fff}
+html.light .modal{box-shadow:0 20px 60px rgba(0,0,0,.18)}
+html.light .ov{background:rgba(0,0,0,.35)}
+html.light .tag.visa,html.light .st.ready{color:#1d4ed8}
+html.light .chg,html.light .change{color:#15803d}
+html.light .pbtn.later{color:var(--text)}
+[dir=ltr] .line .info .n,[dir=ltr] .oitems,[dir=ltr] .bar-row .bn,[dir=ltr] .avl .r .n,[dir=ltr] .apl .r .n{text-align:left}
+.qnotes{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px;margin-top:8px}.qnotes::-webkit-scrollbar{display:none}.qnotes button{white-space:nowrap;flex-shrink:0}
+.qnotes button{padding:5px 10px;border-radius:99px;font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--mute);direction:ltr}
+.qnotes button:active{border-color:var(--or);color:var(--or2)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;font-size:15px;overscroll-behavior:none}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none}
@@ -129,6 +144,7 @@ main{flex:1;min-height:0;position:relative}
 .cart-h .next b{color:var(--or2)}
 .link{color:var(--mute);font-size:13px;padding:6px 10px;border-radius:8px}
 .lines{flex:1;overflow-y:auto;padding:6px 10px;min-height:70px}
+@media (max-width:820px){ .lines{flex:0 0 auto;max-height:none;overflow:visible} }
 .line{display:flex;align-items:center;gap:10px;padding:10px 6px;border-bottom:1px dashed var(--line)}
 .line .info{flex:1;min-width:0}
 .line .info .n{direction:ltr;text-align:right;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -283,7 +299,7 @@ main{flex:1;min-height:0;position:relative}
   .grid{padding:12px 12px 110px;grid-template-columns:repeat(2,1fr);gap:10px}
   .cats{padding:10px 12px 0}
   .item .nm{font-size:13px}
-  .cart{position:fixed;inset:0;width:auto;z-index:40;transform:translateY(100%);transition:transform .22s ease;border:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  .cart{overflow-y:auto;position:fixed;inset:0;width:auto;z-index:40;transform:translateY(100%);transition:transform .22s ease;border:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
   .cart.open{transform:none}
   .mbar{display:flex;position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:30;background:var(--or);color:#fff;border-radius:16px;padding:14px 18px;align-items:center;justify-content:space-between;font-weight:700;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
   .mbar.hide{display:none}
@@ -322,6 +338,7 @@ main{flex:1;min-height:0;position:relative}
 <body>
 <!-- LOGIN -->
 <div id="login" hidden>
+  <div style="position:absolute;top:calc(14px + env(safe-area-inset-top));inset-inline-end:14px;display:flex;gap:8px"><button class="gear themeBtn">☀️</button><button class="gear langBtn" style="font-weight:700;font-size:14px">EN</button></div>
   <div class="lbox">
     <div class="logo"><span class="rq">RQ</span><span class="k">KITCHEN</span></div>
     <div id="stepBranch">
@@ -357,6 +374,8 @@ main{flex:1;min-height:0;position:relative}
     <button class="who" id="whoBtn" title="تبديل الكاشير">👤 <span id="whoName"></span></button>
     <div class="sync"><span class="dot" id="dot"></span><span id="syncTxt"></span></div>
     <div class="clock num" id="clock"></div>
+    <button class="gear themeBtn" aria-label="theme">☀️</button>
+    <button class="gear langBtn" aria-label="language" style="font-weight:700;font-size:14px">EN</button>
     <button class="gear" id="prBtn" aria-label="الطابعة"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><rect x="6" y="14" width="12" height="8"/></svg><i></i></button>
     <button class="gear" id="gear" aria-label="الإعدادات"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
@@ -404,6 +423,7 @@ main{flex:1;min-height:0;position:relative}
           <div id="phoneBox" hidden><input id="phone" class="plate-in num" placeholder="05X XXX XXXX" inputmode="tel" maxlength="14" dir="ltr" autocomplete="off"></div>
           </div>
           <input id="note" class="note" placeholder="ملاحظة على الطلب (اختياري)" autocomplete="off">
+          <div class="qnotes notr" id="qnotes"></div>
           <div class="err" id="identErr"></div>
         </div>
         <div class="totals">
@@ -563,6 +583,37 @@ const okey = () => "pos.o."+branch+"."+day;
 const offKey = () => "pos.off."+branch;
 let offItems = new Set();
 function branchName(id){ const b=(ctx&&ctx.branches||[]).find(x=>x.id===(id||branch)); return b?b.name:(id||branch||""); }
+
+// ---------- language (Arabic / English) ----------
+const EN_DICT = {"اختر التطبيق، حط نسبة الزيادة على أسعار المنيو، أو اكتب سعر خاص لأي صنف. لما الكاشير يختار التطبيق تتحول الأسعار تلقائيًا": "Pick an app, set a % increase on menu prices, or type a special price for any item. When the cashier picks the app, prices switch automatically", "أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. الأسعار والأصناف الجديدة تتعدل من لوحة المنيو وتوصل هنا تلقائيًا": "Switch off any item that ran out and it disappears from the sales screen. Prices and new items are edited in the menu admin and arrive here automatically", "ما قدرت أوصل للطابعة. تأكد إن الجوال على نفس واي فاي الطابعة، وإنك سويت الخطوة ١ وقبلت الشهادة، ثم جرّب مرة ثانية": "Couldn't reach the printer. Make sure this device is on the printer's Wi-Fi and that you did step 1 and accepted the certificate, then try again", "على الآيفون والآيباد البلوتوث وUSB ما يشتغلون من المتصفح — استخدم «طابعة Epson على الشبكة» فوق": "On iPhone/iPad, Bluetooth and USB don't work from the browser — use “Epson network printer” above", "لا يوجد إنترنت — الكاشير شغّال والطلبات محفوظة على الجهاز وتُرفع تلقائيًا لما يرجع النت": "No internet — the cashier keeps working; orders are saved on this device and upload automatically when back online", "طابعات الإيصالات المحمولة والمكتبية (أندرويد وكمبيوتر بمتصفح Chrome)": "Portable & desktop receipt printers (Android & computer, Chrome)", "النسبة (الرقم الرمادي داخلها). اكتب سعر لو التطبيق له سعر خاص للصنف": "percentage (grey number inside). Type a price if the app has a special price for the item", "تأكد إن الطابعة شغّالة وموصولة بنفس الراوتر، أو اكتب الـ IP يدويًا": "Make sure the printer is on and connected to the same router, or type the IP manually", "طابعة إيصالات موصولة بالسلك (أندرويد وكمبيوتر بمتصفح Chrome)": "Cable-connected receipt printer (Android & computer, Chrome)", "الأسعار تتحول لأسعار التطبيق، وطريقة الدفع تكون باسم التطبيق": "Prices switch to the app's prices and the payment method is the app", "افتح الكاشير من متصفح Chrome عشان تقدر تربط طابعة بلوتوث أو": "Open the cashier in Chrome to connect a Bluetooth or", "يعيد حساب استهلاك المواد في تطبيق الجرد بعد تعديل الوصفات": "Recalculates ingredient usage in the inventory app after editing recipes", "الطابعة والجهاز لازم يكونون على نفس واي فاي/راوتر الفرع": "The printer and this device must be on the same branch Wi-Fi/router", "كل كاشير يدخل باختيار الفرع ثم رقمه السري (٤–٨ أرقام)": "Each cashier signs in by picking the branch, then their PIN (4–8 digits)", "الطابعة ما ترد — تأكد إنها شغّالة وعلى نفس الواي فاي": "Printer not responding — make sure it's on and on the same Wi-Fi", "إضافة كاشير لكل فرع، تغيير الرقم السري، إيقاف كاشير": "Add cashiers per branch, change PINs, deactivate cashiers", "غير مدفوع — يظهر في الطلبات النشطة لين يتم التحصيل": "Unpaid — stays in active orders until collected", "تعذّر رفع طلب للسيرفر — سيُعاد المحاولة تلقائيًا": "Couldn't upload an order — retrying automatically", "طابعة Epson على الشبكة (الأفضل للآيفون والآيباد)": "Epson network printer (best for iPhone & iPad)", "سيُستبعد من مبيعات اليوم ويبقى ظاهرًا كطلب ملغي": "It will be excluded from today's sales and kept as a cancelled order.", "أدخل رمز المدير (نفس رمز المدير في تطبيق الجرد)": "Enter the manager PIN (same as in the inventory app)", "ما فيه تطبيقات — المدير يضيفها من تبويب الأصناف": "No apps yet — the manager adds them in the control panel", "ما تعرف IP الطابعة؟ اطفِ طابعة Epson، اضغط زر": "Don't know the printer IP? Turn the Epson off, hold the", "افتح صفحة الطابعة واقبل الشهادة (مرة وحدة بس)": "Open the printer page and accept the certificate (one time only)", "الطابعة ما تدعم الطباعة عبر البلوتوث المباشر": "This printer doesn't support direct Bluetooth printing", "ورقة إضافية فيها الأصناف بخط كبير بدون أسعار": "An extra slip with the items in large text, no prices", "رقم سري جديد (اتركه فاضي إذا ما تبي تغيّره)": "New PIN (leave empty to keep it)", "الرقم السري مستخدم لكاشير ثاني في نفس الفرع": "This PIN is already used by another cashier in the branch", "وشغّلها وأنت ضاغط عليه — تطبع ورقة فيها الـ": "button while turning it on — it prints a sheet with the", "تأكد إن خاصية ePOS-Print مفعّلة في الطابعة": "Make sure ePOS-Print is enabled on the printer", "آيفون وآيباد، أو أي طابعة معرّفة في الجهاز": "iPhone & iPad, or any printer set up on the device", "للطابعات المعرّفة كمنفذ تسلسلي على ويندوز": "For printers set up as a serial port on Windows", "الطلبات تبقى محفوظة وتظهر للكاشير الجديد": "Orders stay saved and show for the next cashier", "تم الربط — طلعت ورقة التجربة من الطابعة": "Connected — the test slip printed", "نافذة الطباعة (AirPrint / طابعة النظام)": "Print dialog (AirPrint / system printer)", "مرّر البطاقة على جهاز البنك ثم أكّد هنا": "Charge the card on the bank terminal, then confirm here", "انتهت الجلسة — أدخل رمز الفرع مرة ثانية": "Session expired — sign in again", "اكتب رقم السيارة (أو اختر رقم الهاتف)": "Enter the car number (or choose phone number)", "تعذّر تحميل المنيو — تأكد من الإنترنت": "Couldn't load the menu — check the internet", "تعذّر التحديث — يعمل بآخر نسخة محفوظة": "Couldn't refresh — using the last saved copy", "تعذّر تحميل الفروع — تأكد من الإنترنت": "Couldn't load branches — check the internet", "لم يتم العثور على منفذ طباعة في جهاز": "No printer port found on the", "تفتح نافذة الطباعة مباشرة بعد الدفع": "Prints right after payment", "بحث برقم الطلب / السيارة / الهاتف": "Search order / car / phone", "أجهزة POS اللي فيها طابعة (Sunmi)": "POS devices with a built-in printer (Sunmi)", "فشلت الطباعة — جرّب نافذة الطباعة": "Printing failed — try the print dialog", "منفذ COM / بلوتوث مقترن (كمبيوتر)": "COM port / paired Bluetooth (computer)", "تعذّر التحميل — تأكد من الإنترنت": "Couldn't load — check the internet", "طابعة على الشبكة — اضغط للاختيار": "Network printer — tap to select", "الطباعة غير متاحة على هذا الجهاز": "Printing isn't available on this device", "تعذّر الاتصال — تأكد من الإنترنت": "Couldn't connect — check the internet", "طلب تعذّر رفعه — تواصل مع المدير": "order(s) failed to upload — contact the manager", "حفظ وطباعة — الدفع عند الاستلام": "Save & print — pay on pickup", "اضغط على الأصناف لإضافتها للطلب": "Tap items to add them to the order", "محاولات كثيرة — انتظر ١٥ دقيقة": "Too many attempts — wait 15 minutes", "هذا الرمز ما له صلاحية الكاشير": "This PIN has no cashier access", "الرقم السري لازم ٤ إلى ٨ أرقام": "PIN must be 4 to 8 digits", "لو طلع «الاتصال غير خاص»: اضغط": "If you see “This connection is not private”: tap", "أندرويد/كمبيوتر: قائمة المتصفح": "Android/computer: browser menu", "تعذّر الحفظ — تأكد من الإنترنت": "Couldn't save — check the internet", "والجهاز على نفس واي فاي الفرع": "and the device is on the branch Wi-Fi", "طباعة تلقائية عند تأكيد الطلب": "Auto-print when the order is confirmed", "اختر المبلغ المستلم أو اكتبه": "Pick or type the amount received", "تعذّر التحميل — يحتاج إنترنت": "Couldn't load — needs internet", "بيانات الفاتورة (لكل الفروع)": "Receipt details (all branches)", "كم الموجود فعليًا في الدرج؟": "How much is actually in the drawer?", "فتح درج الكاش عند الدفع كاش": "Open cash drawer on cash payment", "الرقم الضريبي TRN (اختياري)": "Tax number TRN (optional)", "نسخة المطبخ على نفس الطابعة": "Kitchen copy on the same printer", "تم النسخ — الصقه في واتساب": "Copied — paste it in WhatsApp", "لا يوجد كاشير — أضف من فوق": "No cashiers — add one above", "الفرع اللي تشتغل فيه اليوم": "The branch you're working at today", "ملاحظة على الطلب (اختياري)": "Order note (optional)", "أدخل الرقم السري الخاص فيك": "Enter your PIN", "سيتم استخدام نافذة الطباعة": "The print dialog will be used", "الجهاز غير متصل بالواي فاي": "This device isn't on Wi-Fi", "البحث متاح في التطبيق فقط": "Search is available in the app only", "الكاشيرية وأرقامهم السرية": "Cashiers and their PINs", "طابعة شبكة (Epson وغيرها)": "Network printer (Epson etc.)", "تثبيت على الشاشة الرئيسية": "Add to home screen", "إضافة إلى الشاشة الرئيسية": "Add to Home Screen", "الأصناف المتوفرة في الفرع": "Items available in this branch", "إغلاق الوردية — عدّ الدرج": "Shift close — count the drawer", "رقم طلب التطبيق (اختياري)": "App order number (optional)", "دخول المدير — لوحة التحكم": "Manager sign-in — Control panel", "ما لقيت طابعة على الشبكة": "No printer found on the network", "اربط الطابعة أولًا من زر": "Connect the printer first from the button", "أسعار التطبيقات (المدير)": "App prices (manager)", "آيفون/آيباد: زر المشاركة": "iPhone/iPad: Share button", "، ثم اضغط إعادة المحاولة": ", then tap Retry", "ربط الطابعة وطباعة تجربة": "Connect printer & print test", "الرقم السري (٤–٨ أرقام)": "PIN (4–8 digits)", "تم اختيار طابعة الجهاز": "Built-in printer selected", "تم حفظ أسعار التطبيقات": "App prices saved", "طابعة المطبخ غير متصلة": "Kitchen printer not connected", "طابعة المطبخ (اختياري)": "Kitchen printer (optional)", "الكاش المتوقع في الدرج": "Expected cash in drawer", "بحث تلقائي عن الطابعات": "Search for printers", "أو اكتب IP الطابعة مثل": "or type the printer IP e.g.", "تم تعديل رقم الطلب إلى": "Order number changed to", "للدرج الموصول بالطابعة": "For a drawer connected to the printer", "جارِ الاتصال بالطابعة": "Connecting to the printer…", "اضغط حفظ لتأكيد الحذف": "Tap Save to confirm deletion", "اكتب IP الطابعة أولًا": "Type the printer IP first", "ضريبة القيمة المضافة": "VAT", "زيادة على كل الأسعار": "Increase on all prices", "الرقم السري غير صحيح": "Wrong PIN", "المبلغ المستلم (فاضي": "Amount received (empty", "طابعة الجهاز المدمجة": "Built-in device printer", "تم حفظ طابعة المطبخ": "Kitchen printer saved", "تقرير يومي في الجرد": "daily reports in inventory", "حفظ بيانات الفاتورة": "Save receipt details", "المجموع قبل الضريبة": "Subtotal (excl. VAT)", "تقرير فترة (المدير)": "Period report (manager)", "فاتورة ضريبية مبسطة": "Simplified tax invoice", "ذاكرة الجهاز ممتلئة": "Device storage is full", "رسالة أسفل الفاتورة": "Receipt footer message", "اضغط عليها للاختيار": "tap to select", "طابعة المطبخ — فاضي": "Kitchen printer — empty", "اكتب رقم هاتف صحيح": "Enter a valid phone number", "هذا ليس رمز المدير": "This is not the manager PIN", "رقم السيارة/الهاتف": "Car/phone number", "رقم سري جديد (فاضي": "New PIN (empty", "تمت إضافة الكاشير": "Cashier added", "الطابعة غير متصلة": "Printer not connected", "لا يوجد كاشير بعد": "No cashiers yet", "طلب بانتظار الرفع": "order(s) waiting to upload", "جارِ تحميل المنيو": "Loading menu…", "حصّل المبلغ أولًا": "Collect payment first", "كل الطلبات مرفوعة": "All orders uploaded", "بانتظار الإنترنت": "waiting for internet", "عدد نسخ الفاتورة": "Receipt copies", "لم يتم الربط بعد": "Not connected yet", "تأكد إنها شغّالة": "Make sure it's on", "زيارة هذا الموقع": "Visit this website", "فتح صفحة الطابعة": "Open printer page", "تم تحديث المنيو": "Menu updated", "الفرع غير موجود": "Branch not found", "أسعار التطبيقات": "App prices", "فتح لوحة التحكم": "Open control panel", "بيانات الفاتورة": "Receipt details", "إجمالي المبيعات": "Total sales", "عرض ورق الطابعة": "Paper width", "اختر التاريخين": "Pick both dates", "المبلغ المطلوب": "Amount due", "تم تحصيل الطلب": "Payment collected", "إظهار التفاصيل": "Show Details", "لتفادي التكرار": "to avoid duplicates", "تم ربط الطابعة": "Printer connected", "تم إلغاء الطلب": "Order cancelled", "إعادة المحاولة": "Retry", "بعدها ارجع هنا": "Then come back here", "الخانة الفاضية": "An empty box", "الكاشير الحالي": "Current cashier", "الباقي للزبون": "Change due", "الدفع بالفيزا": "Card payment", "تعذّر التحميل": "Couldn't load", "طباعة تجريبية": "Test print", "أسعار التطبيق": "App prices", "تجربة الطباعة": "Test printing", "الأكثر مبيعًا": "Best sellers", "نافذة الطباعة": "Print dialog", "تبديل الكاشير": "Switch cashier", "بانتظار الرفع": "waiting to upload", "لا توجد أصناف": "No items", "تقارير الفروع": "Branch reports", "لا توجد طلبات": "No orders", "طباعة التقرير": "Print report", "تعذّر التحديث": "Couldn't refresh", "تثبيت التطبيق": "Install app", "تعذّر الاتصال": "Couldn't connect", "طابعة الجهاز": "Device printer", "طباعة فاتورة": "Print receipt", "اختر التطبيق": "Choose app", "طابعة بلوتوث": "Bluetooth printer", "زيارة الموقع": "Visit Website", "تم ربط طابعة": "Connected printer", "اكتب IP صحيح": "Enter a valid IP", "لم يُرفع بعد": "not uploaded yet", "جارِ التحميل": "Loading…", "الطلب الحالي": "Current order", "تحديث المنيو": "Refresh menu", "تقرير مبيعات": "Sales report", "تمت المزامنة": "Synced", "تأكيد الطلب": "Confirm order", "قيد التحضير": "Preparing", "نسخة للمطبخ": "Kitchen copy", "خروج وتبديل": "Sign out & switch", "حذف التطبيق": "Delete app", "طلبات اليوم": "Today's orders", "تحديث الجرد": "Update inventory", "تعذّر النسخ": "Couldn't copy", "حسب الكاشير": "By cashier", "تطبيق توصيل": "Delivery app", "بدون تغيير)": "no change)", "ابحث عن صنف": "Search items", "نفس الطابعة": "same printer", "منفذ تسلسلي": "serial port", "اسم الكاشير": "Cashier name", "رقم السيارة": "Car number", "طلب عن طريق": "Order via", "بدون إنترنت": "Offline", "تغيير الفرع": "Change branch", "تأكيد الدفع": "Confirm payment", "تعذّر الربط": "Couldn't connect", "نسخة المطبخ": "Kitchen copy", "المبلغ ناقص": "Not enough", "تحصيل الطلب": "Collect order", "عدد الطلبات": "Orders", "طريقة الدفع": "Payment", "الرقم السري": "PIN", "تمت الطباعة": "Printed", "تعذّر الحفظ": "Couldn't save", "متوسط الطلب": "Average order", "الدرج مطابق": "Drawer matches", "مزامنة الآن": "Sync now", "لوحة التحكم": "Control panel", "جارِ التحقق": "Checking…", "إلغاء الطلب": "Cancel order", "إضافة كاشير": "Add cashier", "طابعة شبكة": "Network printer", "نسخ الملخص": "Copy summary", "آخر مزامنة": "Last sync", "تم التسليم": "Delivered", "جارِ الرفع": "Uploading", "لقيت طابعة": "Found printer", "رقم الهاتف": "Phone number", "تطبيق جديد": "New app", "جارِ البحث": "Searching", "أم القيوين": "Umm Al Quwain", "لكل الفروع": "all branches", "للمدير فقط": "Manager only", "اكتب الاسم": "Enter the name", "على الشبكة": "on the network", "تسجيل خروج": "Sign out", "نعم، إلغاء": "Yes, cancel", "اختر الفرع": "Choose branch", "رأس الخيمة": "Ras Al Khaimah", "عرض الطلب": "View order", "تأكيد طلب": "Confirm order", "لا مبيعات": "No sales", "غير مدفوع": "Unpaid", "ربط طابعة": "Connect printer", "الكاشيرية": "Cashiers", "طلب مباشر": "Walk-in", "تمّ الدفع": "Paid", "رقم الطلب": "Order No.", "غير محصّل": "Uncollected", "الدفع كاش": "Cash payment", "كل الفروع": "All branches", "غير متصلة": "Disconnected", "طرق ثانية": "Other options", "التطبيقات": "Apps", "الإعدادات": "Settings", "سعر المحل": "Store price", "غير صحيح": "invalid", "تم تحديث": "Updated", "المبيعات": "Sales", "الإجمالي": "Total", "تم الحفظ": "Saved", "المزامنة": "Sync", "طلب جديد": "New order", "الكاشير": "Cashier", "الطابعة": "Printer", "التقرير": "Report", "الطباعة": "Printing", "الحالية": "Current", "سعر خاص": "special price", "الفجيرة": "Fujairah", "الطلبات": "Orders", "المستلم": "Received", "التاريخ": "Date", "الشارقة": "Sharjah", "الأسعار": "Prices", "خطأ رفع": "Upload error", "تطبيقات": "Apps", "التطبيق": "the app", "الأصناف": "Items", "الإمارة": "Emirate", "الضريبة": "VAT", "لا ترد": "not responding", "أبوظبي": "Abu Dhabi", "ما زال": "Still", "الحالة": "Status", "النشطة": "Active", "المدير": "Manager", "بلوتوث": "Bluetooth", "بالضبط": "Exact", "وقريبة": "and nearby", "المبلغ": "Amount", "الكمية": "Qty", "ملاحظة": "Note", "الباقي": "Change", "موقوف": "Inactive", "عجمان": "Ajman", "الصنف": "Item", "النوع": "Type", "ملغاة": "Cancelled", "إضافة": "Add", "تحصيل": "Collect", "اليوم": "Today", "الدفع": "Payment", "تطبيق": "App", "تثبيت": "Install", "الاسم": "Name", "إغلاق": "Close", "زيادة": "Increase", "الفرع": "Branch", "طلبات": "Talabat", "البيع": "Sell", "طابعة": "Printer", "فعّال": "Active", "كاشير": "cashier", "متصلة": "Connected", "اللون": "Color", "تعديل": "Edit", "سيارة": "Car", "طباعة": "Print", "تنزيل": "Download", "إلغاء": "Cancel", "رمادي": "Grey", "متوفر": "Available", "أصناف": "items", "الرقم": "Number", "الوقت": "Time", "أزرق": "Blue", "ملغي": "Cancelled", "هاتف": "Phone", "رجوع": "Back", "فيزا": "Card", "الكل": "All", "أخرى": "Other", "جهاز": "device", "أبيض": "White", "مدير": "Manager", "جاهز": "Ready", "أحمر": "Red", "متصل": "Online", "أسود": "Black", "طلب": "order", "فضي": "Silver", "بني": "Brown", "مسح": "Clear", "د.إ": "AED", "دبي": "Dubai", "صنف": "item", "عرض": "Show", "فرع": "Branch", "إلى": "to", "كاش": "Cash", "نقص": "Short", "حفظ": "Save", "من": "From", "مم": "mm", "تم": "Done", "كيتا": "Keeta", "نون فود": "Noon Food", "ديليفرو": "Deliveroo", "كريم": "Careem", "العين": "Al Ain", "الوثبة": "Al Wathba", "برجر حوار": "Huwar Burger", "برجر واغيو": "Wagyu Burger", "دجاج": "Chicken", "سوشي": "Sushi", "هوت دوق وراب": "Hot Dog & Wrap", "مقبلات": "Appetizers", "كومبو": "Combo", "مشروبات": "Drinks", "الكود": "Code", "شكرًا لزيارتكم": "Thank you for visiting", "تم ربط طابعة Epson": "Epson printer connected", "لقيت طابعة:": "Found a printer:", "فاضي = بالضبط": "empty = exact"};
+const AR_RE=/[\u0600-\u06FF]/;
+const TR_RE=new RegExp("(^|[^\u0600-\u06FF])("+Object.keys(EN_DICT).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")(?![\u0600-\u06FF])","g");
+function tr(s){ if(!s||!AR_RE.test(s)) return s; let prev, out=s; do{ prev=out; out=out.replace(TR_RE,(m,p1,k)=>p1+EN_DICT[k]); }while(out!==prev && AR_RE.test(out)); return out; }
+let LANG=LS.get("pos.lang","ar");
+function trNode(root){
+  if(LANG!=="en"||!root) return;
+  if(root.nodeType===3){ const v=root.nodeValue; if(AR_RE.test(v)){ const n=tr(v); if(n!==v) root.nodeValue=n; } return; }
+  if(root.nodeType!==1 || root.closest && root.closest(".notr,script,style")) return;
+  const w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT);
+  let n=root; do{
+    if(n.nodeType===3){ const p=n.parentNode; if(p && !p.closest(".notr,script,style") && AR_RE.test(n.nodeValue)){ const v=tr(n.nodeValue); if(v!==n.nodeValue) n.nodeValue=v; } }
+    else{ ["placeholder","title","aria-label"].forEach(a=>{ const v=n.getAttribute&&n.getAttribute(a); if(v&&AR_RE.test(v)){ const t2=tr(v); if(t2!==v) n.setAttribute(a,t2); } }); }
+  }while((n=w.nextNode()));
+}
+let trPending=new Set(), trTimer=0;
+const trObs=new MutationObserver(ms=>{ if(LANG!=="en") return; ms.forEach(m=>{ if(m.type==="characterData") trPending.add(m.target); else m.addedNodes.forEach(x=>trPending.add(x)); }); if(!trTimer) trTimer=requestAnimationFrame(()=>{ trTimer=0; const s=[...trPending]; trPending.clear(); s.forEach(trNode); }); });
+function applyLang(){
+  document.documentElement.lang=LANG; document.documentElement.dir=LANG==="en"?"ltr":"rtl";
+  document.querySelectorAll(".langBtn").forEach(b=>b.textContent=LANG==="en"?"ع":"EN");
+  if(LANG==="en"){ trObs.observe(document.body,{childList:true,subtree:true,characterData:true}); trNode(document.body); }
+  else { trObs.disconnect(); }
+}
+function setLang(l){ LS.set("pos.lang",l); if(l==="ar" && LANG==="en"){ location.reload(); return; } LANG=l; applyLang(); if(typeof renderAll==="function" && !$("#app").hidden) renderAll(); }
+document.addEventListener("click", e=>{ const b=e.target.closest(".langBtn"); if(b) setLang(LANG==="en"?"ar":"en"); });
+// ---------- theme (dark / light) ----------
+let THEME=LS.get("pos.theme","dark");
+function applyTheme(){ document.documentElement.classList.toggle("light",THEME==="light"); document.querySelectorAll(".themeBtn").forEach(b=>b.textContent=THEME==="light"?"🌙":"☀️"); const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content=THEME==="light"?"#f4f4f5":"#0e0e10"; }
+document.addEventListener("click", e=>{ const b=e.target.closest(".themeBtn"); if(!b) return; THEME=THEME==="light"?"dark":"light"; LS.set("pos.theme",THEME); applyTheme(); });
 
 // ---------- ui utils ----------
 let toastT;
@@ -843,6 +894,9 @@ $("#modeSeg").addEventListener("click", e=>{ const b=e.target.closest("[data-m]"
 $("#colors").addEventListener("click", e=>{ const b=e.target.closest("[data-col]"); if(!b) return; carColor=carColor===b.dataset.col?"":b.dataset.col; renderColors(); });
 $("#pnum").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[^\d٠-٩]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)); $("#identErr").textContent=""; });
 $("#phone").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d+ ]/g,""); $("#identErr").textContent=""; });
+const QNOTES=["No onion","No pickles","No tomato","No sauce","Extra sauce","Sauce on side","Spicy","No spicy","Extra cheese","No cheese","Well done","Cut in half","No sesame","Takeaway bag"];
+$("#qnotes").innerHTML=QNOTES.map(n=>`<button data-qn="${n}">+ ${n}</button>`).join("");
+$("#qnotes").addEventListener("click", e=>{ const b=e.target.closest("[data-qn]"); if(!b) return; const v=$("#note").value.trim(); const n=b.dataset.qn; if(v.split(", ").includes(n)) return; $("#note").value=v?v+", "+n:n; });
 $("#mbar").addEventListener("click", ()=>$("#cart").classList.add("open"));
 $("#closeCart").addEventListener("click", ()=>$("#cart").classList.remove("open"));
 
@@ -965,7 +1019,7 @@ function receiptHTML(o, kitchen){
   </div>`;
 }
 function doPrint(html){
-  const r=$("#rcpt"); r.className="w"+(prefs.width||80); r.innerHTML=html;
+  const r=$("#rcpt"); r.className="w"+(prefs.width||80); const enR=(prefs.rlang||"en")==="en"; r.dir=enR?"ltr":"rtl"; r.innerHTML=enR?tr(html):html;
   const imgs=[...r.querySelectorAll("img")];
   Promise.all(imgs.map(im=>im.complete?1:new Promise(res=>{ im.onload=im.onerror=res; setTimeout(res,1500); }))).then(()=>{
     try{ window.print(); }catch(e){ toast("الطباعة غير متاحة على هذا الجهاز"); }
@@ -1032,37 +1086,40 @@ async function rawSend(bytes){
 // draw the receipt on a canvas (so Arabic prints correctly) and convert to ESC/POS raster
 let logoImg=null; function getLogo(){ return new Promise(res=>{ if(logoImg) return res(logoImg); const im=new Image(); im.onload=()=>{logoImg=im;res(im)}; im.onerror=()=>res(null); im.src="/logo.png"; }); }
 async function receiptCanvas(o, kitchen){
+  const EN_R=(prefs.rlang||"en")==="en", R=(ar,en)=>EN_R?en:ar, T=s=>EN_R?tr(String(s||"")):String(s||"");
   const W=(prefs.width===58?384:576), PAD=8, cv=document.createElement("canvas"); cv.width=W; cv.height=3000;
   const x=cv.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,W,cv.height); x.fillStyle="#000"; x.textBaseline="top";
   const F=(s,b)=>`${b?"700":"500"} ${s}px "IBM Plex Sans Arabic", Tahoma, Arial, sans-serif`;
   const sc=W/576; let y=6;
-  const center=(t,s,b,dir)=>{ x.font=F(s*sc,b); x.direction=dir||"rtl"; x.textAlign="center"; x.fillText(t,W/2,y); y+=s*sc*1.35; };
-  const lr=(r,l,s,b)=>{ x.font=F(s*sc,b); x.direction="rtl"; x.textAlign="right"; x.fillText(r,W-PAD,y); x.direction="ltr"; x.textAlign="left"; x.fillText(l,PAD,y); y+=s*sc*1.4; };
+  const START=EN_R?PAD:W-PAD, END=EN_R?W-PAD:PAD, DIR=EN_R?"ltr":"rtl", A0=EN_R?"left":"right", A1=EN_R?"right":"left";
+  const center=(t,s,b,dir)=>{ x.font=F(s*sc,b); x.direction=dir||DIR; x.textAlign="center"; x.fillText(t,W/2,y); y+=s*sc*1.35; };
+  const lr=(lab,val,s,b)=>{ x.font=F(s*sc,b); x.direction=DIR; x.textAlign=A0; x.fillText(lab,START,y); x.direction="ltr"; x.textAlign=A1; x.fillText(val,END,y); y+=s*sc*1.4; };
   const hr=()=>{ y+=4; x.setLineDash([6,4]); x.lineWidth=2; x.beginPath(); x.moveTo(PAD,y); x.lineTo(W-PAD,y); x.stroke(); x.setLineDash([]); y+=10; };
   const wrap=(t,maxW)=>{ const ws=String(t).split(" "), out=[]; let cur=""; ws.forEach(w=>{ const n=cur?cur+" "+w:w; if(x.measureText(n).width>maxW&&cur){ out.push(cur); cur=w; } else cur=n; }); if(cur) out.push(cur); return out; };
+  const para=(txt,fs,b)=>{ x.font=F(fs,b); x.direction="ltr"; const isAr=/[؀-ۿ]/.test(txt); x.direction=isAr?"rtl":"ltr"; x.textAlign=isAr?"right":"left"; wrap(txt,W-2*PAD).forEach(l=>{ x.fillText(l,isAr?W-PAD:PAD,y); y+=fs*1.3; }); };
   const s=(ctx&&ctx.settings)||{}, t=+o.total, vat=o.vat!=null?+o.vat:t-t/(1+VAT);
+  const bn=T(branchName(o.branch_id));
   if(!kitchen){ const lg=await getLogo(); if(lg){ const lw=190*sc, lh=lw*lg.height/lg.width; x.filter="grayscale(1) brightness(.55) contrast(2.5)"; x.drawImage(lg,(W-lw)/2,y,lw,lh); x.filter="none"; y+=lh+6; } }
-  center(kitchen?"نسخة المطبخ — "+branchName(o.branch_id):"RQ KITCHEN — "+branchName(o.branch_id),24,true);
-  if(!kitchen&&s.trn){ center("فاتورة ضريبية مبسطة",20,false); center("TRN: "+s.trn,20,false,"ltr"); }
+  center(kitchen?R("نسخة المطبخ — ","KITCHEN — ")+bn:"RQ KITCHEN — "+bn,24,true);
+  if(!kitchen&&s.trn){ center(R("فاتورة ضريبية مبسطة","Simplified Tax Invoice"),20,false); center("TRN: "+s.trn,20,false,"ltr"); }
   y+=4; x.lineWidth=4; const bh=78*sc; x.strokeRect(PAD+20,y,W-2*PAD-40,bh); x.font=F(56*sc,true); x.textAlign="center"; x.direction="ltr"; x.fillText("#"+o.no,W/2,y+10*sc); y+=bh+10;
-  center(identText(o),34,true,"ltr");
-  if(o.mode==="car"&&o.car){ const sub=[o.car.em,o.car.color].filter(Boolean).join(" · "); if(sub) center(sub,20,false); }
-  center(dt(o.ts),20,false,"ltr"); if(o.cashier&&!kitchen) center("الكاشير: "+o.cashier,19,false); hr();
+  center(T(identText(o)),34,true,"ltr");
+  if(o.mode==="car"&&o.car){ const sub=[o.car.em,o.car.color].filter(Boolean).map(T).join(" · "); if(sub) center(sub,20,false); }
+  center(dt(o.ts),20,false,"ltr"); if(o.cashier&&!kitchen) center(R("الكاشير: ","Cashier: ")+o.cashier,19,false); hr();
   const nameW=W-2*PAD-(kitchen?60:200)*sc;
   o.items.forEach(i=>{ const fs=(kitchen?30:22)*sc; x.font=F(fs,kitchen);
-    const lines=wrap(i.name,nameW); x.direction="rtl"; x.textAlign="right"; x.font=F(fs,true); x.fillText(String(i.qty)+(kitchen?"×":""),W-PAD,y);
-    x.font=F(fs,kitchen); x.direction="ltr"; lines.forEach((ln,k)=>{ x.textAlign="right"; x.fillText(ln,W-PAD-50*sc,y+k*fs*1.3); });
-    if(!kitchen){ x.textAlign="left"; x.font=F(fs,false); x.fillText(money(i.price*i.qty),PAD,y); }
+    const lines=wrap(i.name,nameW); x.direction="ltr"; x.textAlign=A0; x.font=F(fs,true); x.fillText(String(i.qty)+(kitchen?"×":""),START,y);
+    x.font=F(fs,kitchen); lines.forEach((ln,k)=>{ x.textAlign=A0; x.fillText(ln,START+(EN_R?1:-1)*50*sc,y+k*fs*1.3); });
+    if(!kitchen){ x.textAlign=A1; x.font=F(fs,false); x.fillText(money(i.price*i.qty),END,y); }
     y+=Math.max(1,lines.length)*fs*1.3+4; });
-  if(kitchen){ if(o.note){ hr(); x.font=F(26*sc,true); x.direction="rtl"; x.textAlign="right"; wrap("ملاحظة: "+o.note,W-2*PAD).forEach(l=>{ x.fillText(l,W-PAD,y); y+=34*sc; }); } }
+  if(kitchen){ if(o.note){ hr(); para(R("ملاحظة: ","NOTE: ")+o.note,28*sc,true); } }
   else{
-    hr(); lr("المجموع قبل الضريبة",money(t-vat),21); lr("ضريبة القيمة المضافة 5%",money(vat),21); lr("الإجمالي",money(t)+" AED",30,true); hr();
-    lr("طريقة الدفع", o.pay==="cash"?"Cash":o.pay==="visa"?"Visa":"", o.pay==="unpaid"?24:21, o.pay==="unpaid");
-    if(o.pay!=="cash"&&o.pay!=="visa"){ y-=21*sc*1.4; x.font=F(21*sc,true); x.direction="rtl"; x.textAlign="left"; x.fillText(payLabel(o),PAD,y); y+=21*sc*1.4; }
-    if(o.pay==="cash"&&o.received!=null){ lr("المستلم",money(o.received),21); lr("الباقي",money(o.change),21); }
-    if(o.note){ hr(); x.font=F(21*sc,false); x.direction="rtl"; x.textAlign="right"; wrap("ملاحظة: "+o.note,W-2*PAD).forEach(l=>{ x.fillText(l,W-PAD,y); y+=28*sc; }); }
-    if(o.status==="cancelled"){ hr(); center("*** ملغي ***",28,true); }
-    y+=8; if(s.footer) center(s.footer,19,false); center("@rqkitchen.ae",19,false,"ltr");
+    hr(); lr(R("المجموع قبل الضريبة","Subtotal"),money(t-vat),21); lr(R("ضريبة القيمة المضافة 5%","VAT 5%"),money(vat),21); lr(R("الإجمالي","TOTAL"),money(t)+" AED",30,true); hr();
+    lr(R("طريقة الدفع","Payment"), EN_R?(o.pay==="cash"?"Cash":o.pay==="visa"?"Card":o.pay==="unpaid"?"UNPAID":T(payLabel(o))):(o.pay==="cash"?"Cash":o.pay==="visa"?"Visa":payLabel(o)), o.pay==="unpaid"?24:21, o.pay==="unpaid");
+    if(o.pay==="cash"&&o.received!=null){ lr(R("المستلم","Received"),money(o.received),21); lr(R("الباقي","Change"),money(o.change),21); }
+    if(o.note){ hr(); para(R("ملاحظة: ","Note: ")+o.note,21*sc,false); }
+    if(o.status==="cancelled"){ hr(); center(R("*** ملغي ***","*** CANCELLED ***"),28,true); }
+    y+=8; if(s.footer) center(T(s.footer),19,false); center("@rqkitchen.ae",19,false,"ltr");
   }
   y+=10; const out=document.createElement("canvas"); out.width=W; out.height=Math.ceil(y); out.getContext("2d").drawImage(cv,0,0); return out;
 }
@@ -1366,6 +1423,7 @@ function openSettings(){
     <div class="set-row"><div><div class="l">طباعة تلقائية عند تأكيد الطلب</div><div class="d">تفتح نافذة الطباعة مباشرة بعد الدفع</div></div><button class="sw ${prefs.autoPrint?"on":""}" id="sAuto"></button></div>
     <div class="set-row"><div class="l">عدد نسخ الفاتورة</div><div class="opt" id="sCopies">${[1,2].map(n=>`<button data-v="${n}" class="${prefs.copies===n?"on":""}">${n}</button>`).join("")}</div></div>
     <div class="set-row"><div><div class="l">نسخة للمطبخ</div><div class="d">ورقة إضافية فيها الأصناف بخط كبير بدون أسعار</div></div><button class="sw ${prefs.kitchen?"on":""}" id="sKit"></button></div>
+    <div class="set-row"><div><div class="l">لغة الفاتورة ونسخة المطبخ</div><div class="d">الإنجليزي أوضح للشيفات غير العرب</div></div><div class="opt" id="sRl">${[["en","English"],["ar","عربي"]].map(([k,n])=>`<button data-v="${k}" class="${(prefs.rlang||"en")===k?"on":""}">${n}</button>`).join("")}</div></div>
     <div class="set-row"><div class="l">عرض ورق الطابعة</div><div class="opt" id="sWidth">${[80,58].map(n=>`<button data-v="${n}" class="${prefs.width===n?"on":""}">${n} مم</button>`).join("")}</div></div>
     <div class="set-row"><div class="l">تجربة الطباعة</div><button class="abtn" id="sTest">🖨 طباعة تجريبية</button></div>
     ${admin?`<div class="set-sec">الكاشيرية</div><div class="set-row"><div><div class="l">الكاشيرية وأرقامهم السرية</div><div class="d">إضافة كاشير لكل فرع، تغيير الرقم السري، إيقاف كاشير</div></div><button class="abtn pri" id="sCash">فتح لوحة التحكم</button></div>`:""}
@@ -1382,6 +1440,7 @@ function openSettings(){
   $("#sAuto").onclick=e=>{ prefs.autoPrint=!prefs.autoPrint; e.currentTarget.classList.toggle("on",prefs.autoPrint); sp(); };
   $("#sKit").onclick=e=>{ prefs.kitchen=!prefs.kitchen; e.currentTarget.classList.toggle("on",prefs.kitchen); sp(); };
   $("#sCopies").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; prefs.copies=+b.dataset.v; sp(); openSettings(); };
+  $("#sRl").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; prefs.rlang=b.dataset.v; sp(); openSettings(); };
   $("#sWidth").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; prefs.width=+b.dataset.v; sp(); openSettings(); };
   $("#sTest").onclick=()=>printOrder(testOrder());
   $("#sPr").onclick=openPrinter;
@@ -1528,6 +1587,7 @@ function startApp(){
 }
 
 // boot
+applyTheme(); applyLang();
 renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 if(!NATIVE && "serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")) navigator.serviceWorker.register("/sw.js").catch(()=>{});
