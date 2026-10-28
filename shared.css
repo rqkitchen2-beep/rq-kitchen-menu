@@ -1,0 +1,21 @@
+:root{--orange:#F26A1B;--orange-deep:#C94F0C;--ink:#1A1A1A;--paper:#FFFFFF;--bg:#F6F6F4;--line:#E4E2DD;--muted:#6E6A64;--green:#1F9D55;--red:#D33A2C;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--ink:#F3F1EC;--paper:#1C1B1A;--bg:#121212;--line:#2E2C2A;--muted:#A49F97}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif;font-size:16px;line-height:1.6}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.logo{display:flex;align-items:baseline;gap:6px;direction:ltr}
+.logo b{font-family:Pacifico,cursive;color:var(--orange);font-size:24px;font-weight:400;line-height:1}
+.logo span{font-family:Georgia,"Times New Roman",serif;letter-spacing:.12em;font-size:12px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-weight:700;font-size:17px;margin-top:14px;text-align:center;text-decoration:none}
+.btn.primary{background:var(--orange);color:#fff}.btn.primary:active{background:var(--orange-deep)}
+.btn.dark{background:var(--ink);color:var(--paper)}
+.btn.green{background:var(--green);color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.5}
+input,select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font:inherit;font-size:18px}
+.chip{font-size:12px;border-radius:999px;padding:2px 10px;background:var(--bg);color:var(--ink);white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(140px);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:14px;transition:transform .3s;z-index:9;max-width:92vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

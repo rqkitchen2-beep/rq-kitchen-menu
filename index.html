@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F26A1B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RQ طلبي">
+<title>RQ Kitchen — طلبي</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<style>
+body{min-height:100vh;display:flex;flex-direction:column;transition:background .2s}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px}
+main{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 22px 30px;max-width:460px;margin:0 auto;width:100%}
+.steps{display:flex;gap:6px;width:100%;margin:4px 0}
+.steps i{flex:1;height:5px;border-radius:5px;background:var(--line)}.steps i.done{background:var(--orange)}
+.steplbl{display:flex;justify-content:space-between;width:100%;font-size:12px;color:var(--muted)}
+h1{font-size:27px;margin:12px 0 2px}
+.sub{color:var(--muted);margin:0}
+.stage{position:relative;width:220px;height:220px;margin:14px auto 4px}
+.layer{position:absolute;left:50%;transform:translateX(-50%)}
+.bun-b{bottom:18px;width:170px;height:34px;background:#E9A24C;border-radius:8px 8px 40px 40px}
+.patty{bottom:50px;width:180px;height:30px;background:#5B3220;border-radius:16px}
+.cheese{bottom:76px;width:184px;height:12px;background:#FFC93C;clip-path:polygon(0 0,100% 0,100% 40%,78% 100%,64% 40%,40% 100%,26% 40%,0 60%)}
+.lettuce{bottom:84px;width:188px;height:14px;background:#5FB34A;border-radius:10px;clip-path:polygon(0 30%,8% 0,16% 40%,26% 0,36% 40%,46% 0,56% 40%,66% 0,76% 40%,86% 0,94% 40%,100% 10%,100% 100%,0 100%)}
+.bun-t{bottom:96px;width:172px;height:70px;background:#F0AE57;border-radius:90px 90px 12px 12px}
+.bun-t::after{content:"";position:absolute;inset:16px 30px auto;height:6px;background:radial-gradient(circle,#FFF3D6 2px,transparent 2.5px) 0 0/18px 8px}
+.plate{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:210px;height:12px;border-radius:50%;background:var(--line)}
+.building .layer{animation:drop 3.6s ease-in infinite both}
+.building .patty{animation-delay:.3s}.building .cheese{animation-delay:.6s}.building .lettuce{animation-delay:.9s}.building .bun-t{animation-delay:1.2s}
+@keyframes drop{0%{transform:translate(-50%,-220px);opacity:0}12%{opacity:1}22%{transform:translate(-50%,0)}26%{transform:translate(-50%,-6px)}30%,82%{transform:translate(-50%,0);opacity:1}100%{transform:translate(-50%,0);opacity:0}}
+.alertcard{width:100%;border:2px solid var(--orange);border-radius:18px;padding:16px;margin-top:16px;text-align:right}
+.alertcard p{margin:0;font-size:15px}
+.alertcard.ok{border-color:var(--green)}
+.btn.wallet{background:#000;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
+.btn.wallet .apl{font-family:-apple-system,system-ui;font-size:20px;line-height:1}
+.ios-steps{margin:10px 0 0;padding-right:20px;font-size:15px}
+.pickup{border:3px dashed var(--orange);border-radius:20px;padding:8px 30px;margin:10px 0}
+.pickup small{display:block;color:var(--muted)}
+.pickup strong{font-size:56px;direction:ltr;display:block;line-height:1.15;color:var(--orange)}
+body.alarm{animation:flash 1s steps(1) infinite}
+body.alarm .pickup{background:#fff;border-color:#fff}
+body.alarm .pickup strong{color:#1A1A1A}
+body.alarm .pickup small,body.alarm .sub,body.alarm .steplbl{color:#1A1A1A}
+body.alarm h1{color:#1A1A1A}
+body.alarm .logo b{color:#fff}
+.gate{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.gate .sheet{background:var(--paper);border-radius:24px;padding:24px 20px;max-width:440px;width:100%;text-align:center}
+.gate h2{margin:0 0 6px;font-size:22px}
+.gate p{margin:0;color:var(--muted);font-size:15px}
+.gate .btn{font-size:19px;padding:16px}
+.diag{font-size:12px;color:var(--muted);margin-top:8px;direction:ltr}
+@keyframes flash{0%{background:var(--orange)}50%{background:var(--bg)}}
+body.alarm h1,body.alarm .pickup strong{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.rate{display:flex;gap:14px;margin:18px 0 4px}
+.rate button{width:120px;height:120px;border-radius:22px;border:2px solid var(--line);background:var(--paper);font-size:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
+.rate button span{font-size:14px;color:var(--muted)}
+.empty{margin-top:80px}
+</style>
+</head>
+<body>
+<header><div class="logo" aria-label="RQ Kitchen"><b>RQ</b><span>KITCHEN</span></div><span class="chip" id="br" hidden></span></header>
+<main id="app"><p class="sub empty">جاري تحميل طلبك…</p></main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const API="https://dhqgorvtwgzekmmjztyr.supabase.co/functions/v1/track";
+const BR={"MBZ":"مدينة محمد بن زايد","Al Wathba":"الوثبة","Al Nahyan":"آل نهيان","Al Ain":"العين"};
+const MAPS={"MBZ":"RQ Kitchen Mohamed Bin Zayed City","Al Wathba":"RQ Kitchen ADNOC Al Wathba","Al Nahyan":"RQ Kitchen Al Nahyan Abu Dhabi","Al Ain":"RQ Kitchen Bin Ham Hall Al Ain"};
+const $=s=>document.querySelector(s);
+const SLUG={"mbz":"MBZ","wathba":"Al Wathba","nahyan":"Al Nahyan","alain":"Al Ain"};
+const joinBranch=SLUG[((location.pathname.match(/\/b\/([a-z]+)/i)||[])[1]||"").toLowerCase()]||null;
+let id=(location.pathname.match(/\/o\/([0-9a-f-]{36})/i)||[])[1]||new URLSearchParams(location.search).get("o");
+let prevId=null;
+try{ if(id) localStorage.setItem("rq_last",id); else if(joinBranch) prevId=localStorage.getItem("rq_last"); else id=localStorage.getItem("rq_last"); }catch(e){}
+let order=null, subscribed=false, alarmOn=false, alarmStopped=false, audio=null, beepTimer=null, lastStatus=null;
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const pushable="serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),3200)}
+async function call(a,extra={}){const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({a,id,...extra})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error||"error"),{code:j.error});return j}
+
+// ---- sound: an <audio> element (plays even with the silent switch on iPhone) + WebAudio backup.
+// Browsers only allow sound after the customer taps the page once, so the gate below asks for that tap.
+let audioEl=null, unlocked=false, gateDone=false;
+function makeChimeWav(){
+  const sr=22050, dur=1.8, n=Math.floor(sr*dur), buf=new ArrayBuffer(44+n*2), v=new DataView(buf);
+  const w=(o,str)=>{for(let i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i))};
+  w(0,"RIFF");v.setUint32(4,36+n*2,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,n*2,true);
+  const notes=[[880,0],[1175,.2],[1568,.4],[1175,.9],[1568,1.1]];
+  for(let i=0;i<n;i++){const t=i/sr;let x=0;
+    for(const [f,d] of notes){const tt=t-d;if(tt>=0&&tt<.6)x+=Math.sin(2*Math.PI*f*tt)*Math.exp(-tt*5)}
+    v.setInt16(44+i*2,Math.max(-1,Math.min(1,x*.8))*32767,true)}
+  return URL.createObjectURL(new Blob([buf],{type:"audio/wav"}));
+}
+function unlockAudio(){
+  try{ if(navigator.audioSession) navigator.audioSession.type="playback"; }catch(e){}
+  try{ audio=audio||new (window.AudioContext||window.webkitAudioContext)(); audio.resume(); }catch(e){}
+  try{
+    if(!audioEl){audioEl=new Audio(makeChimeWav());audioEl.loop=true;audioEl.preload="auto";audioEl.setAttribute("playsinline","")}
+    audioEl.muted=true; const p=audioEl.play(); if(p) p.then(()=>{audioEl.pause();audioEl.currentTime=0;audioEl.muted=false;unlocked=true}).catch(()=>{});
+  }catch(e){}
+}
+function chime(){ if(!audio) return; const t=audio.currentTime;
+  [[880,0],[1175,.18],[1568,.36]].forEach(([f,d])=>{const o=audio.createOscillator(),g=audio.createGain();o.type="triangle";o.frequency.value=f;
+    g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.6,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.5);o.connect(g).connect(audio.destination);o.start(t+d);o.stop(t+d+.55)});}
+let wake=null;
+async function keepAwake(){try{if("wakeLock" in navigator&&!wake&&!document.hidden){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",()=>wake=null)}}catch(e){}}
+function startAlarm(){ if(alarmOn||alarmStopped) return; alarmOn=true; document.body.classList.add("alarm");
+  let played=false; if(audioEl){audioEl.muted=false;audioEl.currentTime=0;const p=audioEl.play();if(p)p.then(()=>played=true).catch(()=>{})}
+  const tick=()=>{ if(!played) chime(); if(navigator.vibrate) navigator.vibrate([400,150,400]); document.title=document.title.startsWith("🔔")?"طلبك جاهز!":"🔔 طلبك جاهز!";};
+  tick(); beepTimer=setInterval(tick,2200);}
+function stopAlarm(){alarmOn=false;alarmStopped=true;clearInterval(beepTimer);if(audioEl)audioEl.pause();document.body.classList.remove("alarm");document.title="RQ Kitchen — طلبي";if(navigator.vibrate)navigator.vibrate(0)}
+
+// ---- push subscription ----
+function b64(s){s=s.replace(/-/g,"+").replace(/_/g,"/");const p="=".repeat((4-s.length%4)%4);const r=atob(s+p);return Uint8Array.from(r,c=>c.charCodeAt(0))}
+let pushErr="";
+async function enableAlerts(){
+  unlockAudio(); keepAwake();
+  if(!pushable||(isIOS&&!standalone)){render();return}
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){toast("التنبيه مرفوض. فعّل الإشعارات لهذا الموقع من إعدادات المتصفح.");return}
+    const reg=await navigator.serviceWorker.register("/sw.js"); await navigator.serviceWorker.ready;
+    const {vapid}=await (await fetch(API)).json();
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(vapid)});
+    await call("sub",{sub:sub.toJSON()});
+    subscribed=true; toast("تم ✓ بيوصلك تنبيه حتى لو قفلت الصفحة"); render();
+  }catch(e){pushErr=(e&&(e.name+": "+e.message))||String(e);toast("ما قدرنا نفعّل الإشعار. خلّ الصفحة مفتوحة وبننبهك بالصوت.");render()}
+}
+
+function burger(build){return `<div class="stage ${build?"building":""}"><div class="plate"></div><div class="layer bun-b"></div><div class="layer patty"></div><div class="layer cheese"></div><div class="layer lettuce"></div><div class="layer bun-t"></div></div>`}
+function steps(i){return `<div class="steps">${[0,1,2].map(k=>`<i class="${k<=i?"done":""}"></i>`).join("")}</div><div class="steplbl"><span>استلمنا طلبك</span><span>نحضّره</span><span>جاهز</span></div>`}
+const WALLET_URL="https://dhqgorvtwgzekmmjztyr.supabase.co/functions/v1/wallet/pass/";
+let walletAdded=false;
+function alertCard(){
+  if(walletAdded) return `<div class="alertcard ok"><p><b>أُضيف طلبك إلى Apple Wallet ✓</b><br>تقدر تقفل الصفحة أو تطلع، بيوصلك إشعار على شاشة القفل أول ما يجهز طلبك.</p></div>`;
+  if(isIOS&&!subscribed) return `<div class="alertcard"><p><b>لا تفوّت طلبك</b><br>أضف طلبك إلى Apple Wallet ويوصلك إشعار على شاشة القفل حتى لو قفلت الجوال أو كنت بعيد.</p>
+    <a class="btn wallet" href="${WALLET_URL}${order.id}"><span class="apl"></span> إضافة إلى Apple Wallet</a>
+    <p class="sub" style="margin-top:8px;font-size:13px">اضغط الزر ثم «إضافة» في أعلى الشاشة</p></div>`;
+  if(subscribed) return `<div class="alertcard ok"><p><b>التنبيه مفعّل 🔔</b><br>تقدر تقفل الصفحة أو تطلع، بيوصلك إشعار على جوالك أول ما يجهز طلبك.</p></div>`;
+  if(isIOS&&!standalone) return `<div class="alertcard"><p><b>عشان يوصلك تنبيه على الآيفون حتى لو طلعت:</b></p>
+    <ol class="ios-steps"><li>اضغط زر المشاركة <b>⬆︎</b> أسفل Safari</li><li>اختر «إضافة إلى الشاشة الرئيسية»</li><li>افتح «RQ طلبي» من الشاشة الرئيسية واضغط «فعّل التنبيه»</li></ol>
+    <p class="sub" style="margin-top:8px">أو خلّ هذه الصفحة مفتوحة: الشاشة ما بتنطفي وبننبهك بالصوت.</p></div>`;
+  if(!pushable) return `<div class="alertcard"><p>متصفحك ما يدعم الإشعارات. خلّ الصفحة مفتوحة وبننبهك بصوت.</p><button class="btn ghost" data-act="sound">تشغيل تنبيه الصوت</button></div>`;
+  return `<div class="alertcard"><p><b>لا تفوّت طلبك</b><br>فعّل التنبيه ويوصلك إشعار حتى لو قفلت الجوال أو كنت بعيد.</p><button class="btn primary" data-act="enable">فعّل التنبيه 🔔</button>${pushErr?`<div class="diag">${pushErr.replace(/</g,"")}</div>`:""}</div>`;
+}
+function render(){
+  const app=$("#app");
+  if(!order){return}
+  $("#br").hidden=false;$("#br").textContent="فرع "+(BR[order.branch]||order.branch);
+  const n=`<b dir="ltr">#${order.num}</b>`;
+  if(order.status==="preparing"){
+    app.innerHTML=steps(1)+burger(true)+`<h1>نحضّر طلبك الآن</h1><p class="sub">طلب رقم ${n}</p>`+alertCard();
+  }else if(order.status==="ready"){
+    app.innerHTML=steps(2)+`<h1>طلبك جاهز!</h1><div class="pickup"><small>رقم الاستلام</small><strong>#${order.num}</strong></div><p class="sub">تفضّل استلمه من الكاونتر</p>`+
+      (alarmOn?`<button class="btn dark" data-act="stop">جاي أستلم — أوقف التنبيه</button>`:"")+
+      (order.arrived?`<p class="sub" style="margin-top:14px">أبلغنا الفريق إنك وصلت ✓</p>`:`<button class="btn green" data-act="arrive">أنا عند الكاونتر</button>`);
+  }else{
+    app.innerHTML=order.rating?`<h1 style="margin-top:70px">شكراً لك 🧡</h1><p class="sub">Good Food Bigger Mood</p>`+
+      (order.rating==="up"?`<a class="btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAPS[order.branch]||"RQ Kitchen")}">قيّمنا على جوجل ⭐</a>`:`<p class="sub" style="margin-top:12px">وصلت ملاحظتك لمدير الفرع، ونوعدك بتجربة أحسن.</p>`)
+    :`<h1 style="margin-top:50px">كيف كانت تجربتك؟</h1><p class="sub">طلب رقم ${n}</p><div class="rate"><button data-act="up">👍<span>ممتازة</span></button><button data-act="down">👎<span>تحتاج تحسين</span></button></div>`;
+  }
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return; const a=b.dataset.act;
+  if(a==="enable") return enableAlerts();
+  if(a==="sound"){unlockAudio();chime();toast("تمام، بننبهك بالصوت ما دامت الصفحة مفتوحة");return}
+  if(a==="stop"){stopAlarm();render();return}
+  try{
+    if(a==="arrive"){stopAlarm();await call("arrive");order.arrived=true;toast("أبلغنا الكاشير إنك وصلت")}
+    if(a==="up"||a==="down"){await call("rate",{r:a});order.rating=a}
+    render();
+  }catch(err){toast("صار خطأ في الاتصال، حاول مرة ثانية")}
+});
+function showJoin(){
+  $("#br").hidden=false;$("#br").textContent="فرع "+BR[joinBranch];
+  $("#app").innerHTML=`<h1 style="margin-top:30px">تابع طلبك</h1><p class="sub">اكتب رقم الطلب المكتوب على فاتورتك</p>
+    <input id="jn" inputmode="numeric" maxlength="6" placeholder="000" aria-label="رقم الطلب" style="margin-top:18px;font-size:44px;font-weight:700;text-align:center;letter-spacing:.1em;direction:ltr">
+    <button class="btn primary" id="jb" style="font-size:19px;padding:16px">تابع طلبي ونبّهني 🔔</button>
+    <p class="sub" style="margin-top:12px;font-size:14px">بننبهك بالصوت أول ما يجهز طلبك</p>
+    ${prevId?`<a class="btn ghost" href="/o/${prevId}">طلبي السابق</a>`:""}`;
+  const inp=$("#jn"); inp.addEventListener("input",()=>inp.value=inp.value.replace(/\D/g,""));
+  try{const pn=new URLSearchParams(location.search).get("n"); if(pn) inp.value=pn.replace(/\D/g,"").slice(0,6);}catch(e){}
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")$("#jb").click()});
+  $("#jb").onclick=async()=>{
+    const num=inp.value.trim(); if(!num){toast("اكتب رقم الطلب");inp.focus();return}
+    unlockAudio(); keepAwake();
+    // ask for notification permission inside the tap (iOS requires it)
+    if(pushable&&!(isIOS&&!standalone)){try{Notification.requestPermission()}catch(e){}}
+    $("#jb").disabled=true;
+    try{
+      const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({a:"join",branch:joinBranch,num})});
+      const j=await r.json(); if(!r.ok||!j.order) throw 0;
+      id=j.order.id; try{localStorage.setItem("rq_last",id)}catch(e){}
+      history.replaceState(null,"","/o/"+id);
+      gateDone=true; poll(); enableAlerts();
+    }catch(e){$("#jb").disabled=false;toast("صار خطأ في الاتصال، حاول مرة ثانية")}
+  };
+  inp.focus();
+}
+function showGate(){
+  if(document.getElementById("gate")) return;
+  const g=document.createElement("div");g.className="gate";g.id="gate";
+  g.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gt"><h2 id="gt">تابع طلبك</h2><p>اضغط هنا عشان نقدر ننبهك بالصوت أول ما يجهز طلبك.</p><button class="btn primary" id="gateBtn">تابع طلبي ونبّهني 🔔</button></div>`;
+  document.body.appendChild(g);
+  document.getElementById("gateBtn").onclick=()=>{gateDone=true;g.remove();enableAlerts()};
+}
+
+async function poll(){
+  if(!id){$("#app").innerHTML=`<p class="sub empty">امسح رمز الطلب من الكاشير لمتابعة طلبك.</p>`;return}
+  try{
+    const j=await call("get"); order=j.order; subscribed=j.subscribed||subscribed; walletAdded=!!j.wallet;
+    if(order.status==="ready"&&lastStatus!=="ready") startAlarm();
+    if(order.status!=="ready"&&alarmOn) stopAlarm();
+    lastStatus=order.status; render();
+    if(order.status!=="picked"&&!gateDone) showGate(); else if(order.status==="picked"){const g=document.getElementById("gate");if(g)g.remove()}
+  }catch(e){
+    if(e.code==="not_found"||e.code==="bad_id"){try{localStorage.removeItem("rq_last")}catch(_){} $("#app").innerHTML=`<p class="sub empty">ما لقينا هذا الطلب. امسح الرمز من الكاشير مرة ثانية.</p>`;return}
+  }
+  setTimeout(poll,order&&order.status==="picked"?30000:5000);
+}
+if(pushable) navigator.serviceWorker.register("/sw.js").then(r=>r.pushManager.getSubscription()).then(s=>{if(s&&id)call("sub",{sub:s.toJSON()}).then(()=>{subscribed=true;render()}).catch(()=>{})}).catch(()=>{});
+if(pushable) navigator.serviceWorker.addEventListener("message",ev=>{if(ev.data==="refresh"){lastStatus=null;alarmStopped=false;}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){keepAwake();if(order)render()}});
+if(joinBranch&&!id) showJoin(); else poll();
+</script>
+</body>
+</html>

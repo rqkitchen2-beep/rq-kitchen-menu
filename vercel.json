@@ -1,0 +1,2 @@
+{"rewrites":[{"source":"/o/:id","destination":"/index.html"},{"source":"/b/:branch","destination":"/index.html"},{"source":"/cashier","destination":"/cashier.html"}],
+"headers":[{"source":"/sw.js","headers":[{"key":"Cache-Control","value":"no-cache"}]}]}
