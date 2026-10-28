@@ -329,6 +329,7 @@ main{flex:1;min-height:0;position:relative}
       <p>الفرع اللي تشتغل فيه اليوم</p>
       <div class="brs" id="brs"></div>
       <div class="lerr" id="berr"></div>
+      <button class="link" id="admEntry" style="margin-top:18px;font-size:14px">🔐 دخول المدير — لوحة التحكم</button>
     </div>
     <div id="stepPin" hidden>
       <h2 id="pinBranch">الفرع</h2>
@@ -349,6 +350,7 @@ main{flex:1;min-height:0;position:relative}
       <button data-v="orders">الطلبات <span class="badge" id="badge" hidden>0</span></button>
       <button data-v="report">التقرير</button>
       <button data-v="menu">الأصناف</button>
+      <button data-v="admin" id="navAdmin" hidden>🔐 لوحة التحكم</button>
     </nav>
     <div class="hspace"></div>
     <div class="branch" id="branchBox"></div>
@@ -460,6 +462,20 @@ main{flex:1;min-height:0;position:relative}
         </div>
         <div id="rangeOut" style="margin-top:12px"></div>
       </div>
+    </section>
+
+    <section class="view page" id="v-admin">
+      <div class="page-h"><h2>🔐 لوحة التحكم</h2><div class="sp"></div><span style="color:var(--dim);font-size:13px">للمدير فقط · لكل الفروع</span></div>
+      <div class="filters" id="admTabs" style="margin-bottom:14px">
+        <button class="cat on" data-at="cash">👤 الكاشيرية</button>
+        <button class="cat" data-at="apps">🛵 أسعار التطبيقات</button>
+        <button class="cat" data-at="rep">📊 تقارير الفروع</button>
+        <button class="cat" data-at="inv">🧾 بيانات الفاتورة</button>
+      </div>
+      <div id="adm-cash"></div>
+      <div id="adm-apps" hidden></div>
+      <div id="adm-rep" hidden></div>
+      <div id="adm-inv" hidden></div>
     </section>
 
     <section class="view page" id="v-menu">
@@ -587,7 +603,9 @@ function renderBranches(){
   $("#berr").textContent=branchList.length?"":"تعذّر تحميل الفروع — تأكد من الإنترنت";
 }
 $("#brs").addEventListener("click", e=>{ const b=e.target.closest("[data-br]"); if(!b) return; loginBranch=b.dataset.br; LS.set("pos.loginBranch",loginBranch); showPinStep(); });
-$("#chgBranch").addEventListener("click", ()=>{ loginBranch=null; LS.del("pos.loginBranch"); showBranchStep(); });
+let adminEntry=false;
+$("#admEntry").addEventListener("click", ()=>{ if(!branchList.length){ toast("تعذّر تحميل الفروع — تأكد من الإنترنت"); return; } adminEntry=true; loginBranch=branchList[0].id; showPinStep(); $("#pinBranch").textContent="🔐 المدير"; $("#stepPin p").textContent="أدخل رمز المدير (نفس رمز المدير في تطبيق الجرد)"; });
+$("#chgBranch").addEventListener("click", ()=>{ adminEntry=false; $("#stepPin p").textContent="أدخل الرقم السري الخاص فيك"; loginBranch=null; LS.del("pos.loginBranch"); showBranchStep(); });
 function showBranchStep(){ $("#stepBranch").hidden=false; $("#stepPin").hidden=true; renderBranches(); loadBranches(); }
 function showPinStep(){ const b=branchList.find(x=>x.id===loginBranch); $("#pinBranch").textContent="فرع "+(b?b.name:""); $("#stepBranch").hidden=true; $("#stepPin").hidden=false; pin=""; renderPad(); $("#lerr").textContent=""; }
 async function doLogin(){
@@ -600,7 +618,9 @@ async function doLogin(){
     branch = ctx.role==="branch" ? ctx.branch_id : loginBranch;
     LS.set("pos.branch", branch);
     pin=""; renderPad(); $("#lerr").textContent="";
+    if(adminEntry && ctx.role!=="admin"){ $("#lerr").textContent="هذا ليس رمز المدير"; token=null; LS.del("pos.token"); return; }
     startApp();
+    if(adminEntry){ adminEntry=false; $("#stepPin p").textContent="أدخل الرقم السري الخاص فيك"; goView("admin"); }
   }catch(e){
     pin=""; renderPad();
     $("#lerr").textContent = e.bad ? "الرقم السري غير صحيح" : /branch/.test(e.message) ? "الفرع غير موجود" : /locked/.test(e.message) ? "محاولات كثيرة — انتظر ١٥ دقيقة" : /forbidden/.test(e.message) ? "هذا الرمز ما له صلاحية الكاشير" : "تعذّر الاتصال — تأكد من الإنترنت";
@@ -1284,7 +1304,7 @@ async function renderReport(){
   $("#top").innerHTML=top.length?top.map(([n,q])=>`<div class="bar-row"><span class="bn">${esc(n)}</span><span class="bt"><i style="width:${q/mx*100}%"></i></span><span class="bq num">${q}</span></div>`).join(""):`<div style="color:var(--dim);font-size:13px">لا مبيعات</div>`;
   $("#expCash").textContent=money(s.cash)+" د.إ"; updDiff();
   const cs=Object.entries(s.byC); $("#top").insertAdjacentHTML("beforeend", cs.length>1||(cs[0]&&cs[0][0]!=="—")?`<h3 style="margin:16px 0 8px">حسب الكاشير</h3>`+cs.map(([n,a])=>`<div class="tr"><span>👤 ${esc(n)} (${a.n} طلب)</span><b class="num">${money(a.t)}</b></div>`).join(""):"");
-  $("#rangeBox").hidden = !(ctx && ctx.role==="admin");
+
 }
 $("#rDay").addEventListener("change", ()=>{ repOrders=null; renderReport(); });
 function updDiff(){
@@ -1348,7 +1368,7 @@ function openSettings(){
     <div class="set-row"><div><div class="l">نسخة للمطبخ</div><div class="d">ورقة إضافية فيها الأصناف بخط كبير بدون أسعار</div></div><button class="sw ${prefs.kitchen?"on":""}" id="sKit"></button></div>
     <div class="set-row"><div class="l">عرض ورق الطابعة</div><div class="opt" id="sWidth">${[80,58].map(n=>`<button data-v="${n}" class="${prefs.width===n?"on":""}">${n} مم</button>`).join("")}</div></div>
     <div class="set-row"><div class="l">تجربة الطباعة</div><button class="abtn" id="sTest">🖨 طباعة تجريبية</button></div>
-    ${admin?`<div class="set-sec">الكاشيرية</div><div class="set-row"><div><div class="l">الكاشيرية وأرقامهم السرية</div><div class="d">إضافة كاشير لكل فرع، تغيير الرقم السري، إيقاف كاشير</div></div><button class="abtn pri" id="sCash">إدارة</button></div>`:""}
+    ${admin?`<div class="set-sec">الكاشيرية</div><div class="set-row"><div><div class="l">الكاشيرية وأرقامهم السرية</div><div class="d">إضافة كاشير لكل فرع، تغيير الرقم السري، إيقاف كاشير</div></div><button class="abtn pri" id="sCash">فتح لوحة التحكم</button></div>`:""}
     ${admin?`<div class="set-sec">بيانات الفاتورة (لكل الفروع)</div>
     <div style="margin-top:10px"><input id="sTrn" placeholder="الرقم الضريبي TRN (اختياري)" value="${esc(s.trn||"")}" class="num"></div>
     <div style="margin-top:8px"><input id="sFooter" placeholder="رسالة أسفل الفاتورة" value="${esc(s.footer||"")}"></div>
@@ -1367,7 +1387,7 @@ function openSettings(){
   $("#sPr").onclick=openPrinter;
   $("#sSync").onclick=async()=>{ await sync(); toast(queue.length?"ما زال "+queue.length+" بانتظار الإنترنت":"تمت المزامنة ✓"); openSettings(); };
   $("#sOut").onclick=logout;
-  if($("#sCash")) $("#sCash").onclick=openCashiers;
+  if($("#sCash")) $("#sCash").onclick=()=>{ closeModal(); goView("admin"); };
   $("#modal [data-x]").onclick=closeModal;
   if(admin) $("#sSave").onclick=async()=>{ try{ await rpc("pos_save_settings",{p_token:token,p_trn:$("#sTrn").value.trim(),p_footer:$("#sFooter").value.trim()}); ctx.settings={trn:$("#sTrn").value.trim(),footer:$("#sFooter").value.trim()}; LS.set("pos.ctx",ctx); toast("تم الحفظ"); }catch(e){ toast("تعذّر الحفظ"); } };
   const ib=$("#sInstall"); if(ib) ib.onclick=async()=>{ deferredInstall.prompt(); deferredInstall=null; closeModal(); };
@@ -1380,6 +1400,53 @@ $("#whoBtn").addEventListener("click", ()=>{
 $("#prBtn").addEventListener("click", openPrinter);
 let deferredInstall=null;
 addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferredInstall=e; });
+
+// ---------- control panel (admin) ----------
+let admTab="cash";
+$("#admTabs").addEventListener("click", e=>{ const b=e.target.closest("[data-at]"); if(!b) return; admTab=b.dataset.at; renderAdmin(); });
+function renderAdmin(){
+  if(!(ctx&&ctx.role==="admin")) return;
+  document.querySelectorAll("#admTabs [data-at]").forEach(b=>b.classList.toggle("on",b.dataset.at===admTab));
+  ["cash","apps","rep","inv"].forEach(t=>$("#adm-"+t).hidden=t!==admTab);
+  if(!$("#adm-apps").contains($("#appsAdmin"))){ $("#adm-apps").appendChild($("#appsAdmin")); $("#appsAdmin").style.marginTop="0"; }
+  if(!$("#adm-rep").contains($("#rangeBox"))){ $("#adm-rep").appendChild($("#rangeBox")); $("#rangeBox").style.marginTop="0"; }
+  if(admTab==="cash") admCashiers();
+  if(admTab==="apps") renderAppsAdmin();
+  if(admTab==="rep"){ $("#rangeBox").hidden=false; if(!$("#rd1").value){ $("#rd1").value=day; $("#rd2").value=day; } }
+  if(admTab==="inv"){ const s=ctx.settings||{};
+    $("#adm-inv").innerHTML=`<div class="box" style="max-width:520px"><h3>بيانات الفاتورة (لكل الفروع)</h3>
+      <div style="display:flex;flex-direction:column;gap:8px"><input id="aTrn" class="num" placeholder="الرقم الضريبي TRN (اختياري)" value="${esc(s.trn||"")}"><input id="aFooter" placeholder="رسالة أسفل الفاتورة" value="${esc(s.footer||"")}"><button class="abtn pri" id="aSave">💾 حفظ</button></div></div>`;
+    $("#aSave").onclick=async()=>{ try{ await rpc("pos_save_settings",{p_token:token,p_trn:$("#aTrn").value.trim(),p_footer:$("#aFooter").value.trim()}); ctx.settings.trn=$("#aTrn").value.trim(); ctx.settings.footer=$("#aFooter").value.trim(); LS.set("pos.ctx",ctx); toast("تم الحفظ ✓"); }catch(e){ toast("تعذّر الحفظ"); } };
+  }
+}
+async function admCashiers(){
+  const el=$("#adm-cash"); el.innerHTML=`<div class="empty">جارِ التحميل…</div>`;
+  let list=[]; try{ list=await rpc("pos_cashiers_list",{p_token:token}); }catch(e){ el.innerHTML=`<div class="empty" style="color:var(--red)">تعذّر التحميل — تأكد من الإنترنت</div>`; return; }
+  const brs=ctx.branches||[];
+  const errMsg=e=>/pin_taken/.test(e.message)?"الرقم السري مستخدم لكاشير ثاني في نفس الفرع":/pin_format/.test(e.message)?"الرقم السري لازم ٤ إلى ٨ أرقام":/name/.test(e.message)?"اكتب الاسم":"تعذّر الحفظ";
+  el.innerHTML=`<div class="box" style="margin-bottom:12px"><h3>➕ إضافة كاشير</h3>
+      <div class="row" style="flex-wrap:wrap">
+        <select id="ncB" style="flex:1 1 140px">${brs.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("")}</select>
+        <input id="ncN" placeholder="اسم الكاشير" style="flex:2 1 160px">
+        <input id="ncP" class="num" inputmode="numeric" maxlength="8" placeholder="الرقم السري (٤–٨ أرقام)" style="flex:1 1 150px">
+        <button class="abtn pri" id="ncAdd">إضافة</button>
+      </div></div>
+    <div class="cards2">${brs.map(b=>{ const cs=list.filter(c=>c.branch_id===b.id); return `<div class="box"><h3>فرع ${esc(b.name)} <span style="color:var(--dim);font-weight:500;font-size:13px">(${cs.filter(c=>c.active).length} كاشير)</span></h3>`+(cs.length?cs.map(c=>`<div class="set-row"><div><div class="l" style="${c.active?"":"text-decoration:line-through;color:var(--dim)"}">👤 ${esc(c.name)}</div><div class="d">${c.active?"فعّال":"موقوف"}</div></div><button class="abtn" data-ce="${c.id}">تعديل</button></div>`).join(""):`<div style="color:var(--dim);font-size:13px">لا يوجد كاشير — أضف من فوق</div>`)+`</div>`; }).join("")}</div>`;
+  $("#ncAdd").onclick=async()=>{ try{ await rpc("pos_cashier_save",{p_token:token,p_id:null,p_branch:$("#ncB").value,p_name:$("#ncN").value.trim(),p_pin:$("#ncP").value.trim(),p_active:true}); toast("تمت إضافة الكاشير ✓"); admCashiers(); }catch(e){ toast(errMsg(e)); } };
+  el.onclick=e=>{ const b=e.target.closest("[data-ce]"); if(!b) return; const c=list.find(x=>x.id===b.dataset.ce); if(!c) return;
+    modal(`<h3>تعديل ${esc(c.name)}</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="ecN" value="${esc(c.name)}" placeholder="الاسم">
+        <select id="ecB">${brs.map(x=>`<option value="${esc(x.id)}" ${x.id===c.branch_id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+        <input id="ecP" class="num" inputmode="numeric" maxlength="8" placeholder="رقم سري جديد (فاضي = بدون تغيير)">
+        <div class="set-row"><div class="l">فعّال</div><button class="sw ${c.active?"on":""}" id="ecA"></button></div>
+      </div>
+      <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok" id="ecSave">حفظ</button></div>`);
+    let act=c.active; $("#ecA").onclick=e2=>{ act=!act; e2.currentTarget.classList.toggle("on",act); };
+    $("#modal [data-x]").onclick=closeModal;
+    $("#ecSave").onclick=async()=>{ try{ await rpc("pos_cashier_save",{p_token:token,p_id:c.id,p_branch:$("#ecB").value,p_name:$("#ecN").value.trim(),p_pin:$("#ecP").value.trim()||null,p_active:act}); toast("تم الحفظ ✓"); closeModal(); admCashiers(); }catch(e){ toast(errMsg(e)); } };
+  };
+}
 
 // ---------- cashiers (admin) ----------
 async function openCashiers(){
@@ -1415,15 +1482,17 @@ async function openCashiers(){
 }
 
 // ---------- nav / branch / clock ----------
+function goView(v){ const b=document.querySelector(`#nav [data-v="${v}"]`); if(b) b.click(); }
 $("#nav").addEventListener("click", e=>{
   const b=e.target.closest("[data-v]"); if(!b) return; curView=b.dataset.v;
   document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x===b));
+  if(curView==="admin") renderAdmin();
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+curView));
   if(curView==="report"){ repOrders=null; $("#rDay").value=day; }
   renderAll();
 });
 function renderWho(){ $("#whoName").textContent=(ctx&&ctx.cashier)||"الفرع"; }
-function renderBranch(){ renderWho();
+function renderBranch(){ renderWho(); $("#navAdmin").hidden=!(ctx&&ctx.role==="admin");
   const bx=$("#branchBox");
   if(ctx&&ctx.role==="admin"){
     bx.innerHTML=`الفرع <select id="branchSel">${ctx.branches.map(b=>`<option value="${esc(b.id)}" ${b.id===branch?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`;
@@ -1446,7 +1515,7 @@ async function keepAwake(){ try{ if("wakeLock" in navigator && document.visibili
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible"){ keepAwake(); if(token && !$("#app").hidden){ tick(); sync(); } } });
 document.addEventListener("click", keepAwake, {once:true});
 
-function renderAll(){ renderCart(); renderOrders(); if(curView==="pos") renderMenuSide(); if(curView==="report") renderReport(); if(curView==="menu"){ renderAvail(); renderAppsAdmin(); } updSync(); }
+function renderAll(){ renderCart(); renderOrders(); if(curView==="pos") renderMenuSide(); if(curView==="report") renderReport(); if(curView==="menu"){ renderAvail(); } updSync(); }
 
 function startApp(){
   const failed=LS.get("pos.failed",[]); if(failed.length){ failed.forEach(f=>{ delete f._tries; if(!queue.some(x=>x.id===f.id)) queue.push(f); }); saveQueue(); LS.del("pos.failed"); }
