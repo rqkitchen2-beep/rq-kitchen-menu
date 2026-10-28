@@ -1104,7 +1104,7 @@ function openPrinter(){ if(NATIVE) return openPrinterNative();
     <div class="pr-list" style="margin-top:6px">
       ${IS_IOS?"":opt("cBt","📶","طابعة بلوتوث","طابعات الإيصالات المحمولة والمكتبية (أندرويد وكمبيوتر بمتصفح Chrome)",!CAN.bt)}
       ${IS_IOS?"":opt("cUsb","🔌","طابعة USB","طابعة إيصالات موصولة بالسلك (أندرويد وكمبيوتر بمتصفح Chrome)",!CAN.usb)}
-      ${CAN.serial?opt("cSer","🖧","منفذ COM / بلوتوث مقترن (كمبيوتر)","للطابعات المعرّفة كمنفذ تسلسلي على ويندوز",false):""}
+      ${CAN.serial&&!IS_IOS?opt("cSer","🖧","منفذ COM / بلوتوث مقترن (كمبيوتر)","للطابعات المعرّفة كمنفذ تسلسلي على ويندوز",false):""}
       ${opt("cSys","🖨","نافذة الطباعة / AirPrint","آيفون وآيباد، أو أي طابعة معرّفة في الجهاز",false)}
 
     </div>
@@ -1121,7 +1121,7 @@ function openPrinter(){ if(NATIVE) return openPrinterNative();
     LS.set("pos.epip",v); const m=$("#epMsg"); m.style.color="var(--mute)"; m.textContent="جارِ الاتصال بالطابعة…";
     try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; await eposSend(v,[await receiptCanvas(testOrder(),false)],false);
       prefs.printer={type:"epos",host:v}; PR.ok=true; LS.set("pos.prefs",prefs); updPrinterBtn();
-      m.style.color="var(--green)"; m.textContent="✓ تم الربط — طلعت ورقة التجربة من الطابعة"; toast("تم ربط طابعة Epson ✓"); }
+      m.style.color="var(--green)"; m.textContent="✓ تم الربط — طلعت ورقة التجربة من الطابعة"; toast("تم ربط طابعة Epson ✓"); setTimeout(closeModal,1400); }
     catch(e){ m.style.color="var(--red)";
       m.innerHTML = e.epos ? "ما قدرت أوصل للطابعة. تأكد إن الجوال على نفس واي فاي الطابعة، وإنك سويت الخطوة ١ وقبلت الشهادة، ثم جرّب مرة ثانية." : esc(e.message)+" — تأكد إن خاصية ePOS-Print مفعّلة في الطابعة."; }
   };
