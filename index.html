@@ -66,6 +66,15 @@ nav .badge{background:var(--red);color:#fff;border-radius:99px;font-size:11px;pa
 .dot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex-shrink:0}
 .dot.ok{background:var(--green)} .dot.wait{background:var(--yellow)} .dot.off{background:var(--red)}
 .clock{font-size:14px;color:var(--mute)}
+.gear{position:relative;}
+#prBtn i{position:absolute;top:5px;inset-inline-end:5px;width:8px;height:8px;border-radius:50%;background:transparent}
+#prBtn.ok i{background:var(--green)} #prBtn.warn i{background:var(--yellow)}
+.pr-list{display:flex;flex-direction:column;gap:8px}
+.pr-opt{display:flex;align-items:center;gap:12px;text-align:start;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.pr-opt:active{border-color:var(--or)} .pr-opt.dis{opacity:.4}
+.pr-opt .pi{font-size:22px;width:30px;text-align:center}
+.pr-opt .pt{display:flex;flex-direction:column;gap:2px} .pr-opt small{color:var(--dim);font-size:12px}
+.hint-b{margin-top:12px;background:var(--yellowbg);color:#fde68a;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.6}
 .gear{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--mute);background:var(--panel2);border:1px solid var(--line);flex-shrink:0}
 
 main{flex:1;min-height:0;position:relative}
@@ -315,6 +324,7 @@ main{flex:1;min-height:0;position:relative}
     <div class="branch" id="branchBox"></div>
     <div class="sync"><span class="dot" id="dot"></span><span id="syncTxt"></span></div>
     <div class="clock num" id="clock"></div>
+    <button class="gear" id="prBtn" aria-label="الطابعة"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><rect x="6" y="14" width="12" height="8"/></svg><i></i></button>
     <button class="gear" id="gear" aria-label="الإعدادات"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <div class="offbar" id="offbar" hidden>لا يوجد إنترنت — الكاشير شغّال والطلبات محفوظة على الجهاز وتُرفع تلقائيًا لما يرجع النت</div>
@@ -747,7 +757,7 @@ function finish(method,id,extra){
       <div class="mact"><button class="b-cancel" id="rePrint">🖨 طباعة</button><button class="b-ok" id="newOrder">طلب جديد</button></div>`);
     $("#newOrder").onclick=closeModal;
     $("#rePrint").onclick=()=>printOrder(o);
-    if(prefs.autoPrint) setTimeout(()=>printOrder(o), 250);
+    if(prefs.autoPrint) setTimeout(()=>printOrder(o,{drawer:method==="cash"}), 150);
   }finally{ finishing=false; }
 }
 
@@ -785,11 +795,154 @@ function doPrint(html){
     try{ window.print(); }catch(e){ toast("الطباعة غير متاحة على هذا الجهاز"); }
   });
 }
-function printOrder(o){
+function printSystem(o){
   let h=""; for(let i=0;i<(prefs.copies||1);i++) h+=receiptHTML(o,false);
   if(prefs.kitchen) h+=receiptHTML(o,true);
   doPrint(h);
 }
+function printOrder(o, opts){ if(prefs.printer && prefs.printer.type!=="system") return printDirect(o, opts); printSystem(o); }
+// ---------- direct printer (ESC/POS over Bluetooth / USB / Serial) ----------
+const BT_SERVICES=["000018f0-0000-1000-8000-00805f9b34fb","e7810a71-73ae-499d-8c15-faa9aef0c3f2","49535343-fe7d-4ae5-8fa9-9fafd205e455","0000ff00-0000-1000-8000-00805f9b34fb","0000ffe0-0000-1000-8000-00805f9b34fb","0000fee7-0000-1000-8000-00805f9b34fb","0000ae30-0000-1000-8000-00805f9b34fb","0000af30-0000-1000-8000-00805f9b34fb"];
+const CAN={bt:!!(navigator.bluetooth), usb:!!(navigator.usb), serial:!!(navigator.serial)};
+const IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+let PR={ch:null,dev:null,usb:null,ep:null,port:null,ok:false};
+if(!prefs.printer) prefs.printer={type:"system"};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function prLabel(){ const p=prefs.printer; return p.type==="bt"?"بلوتوث: "+(p.name||"طابعة"):p.type==="usb"?"USB: "+(p.name||"طابعة"):p.type==="serial"?"منفذ تسلسلي":"نافذة الطباعة (AirPrint / طابعة النظام)"; }
+function updPrinterBtn(){ const b=$("#prBtn"); if(!b) return; const direct=prefs.printer.type!=="system"; b.classList.toggle("ok", direct&&PR.ok); b.classList.toggle("warn", direct&&!PR.ok); b.title=prLabel(); }
+async function btOpen(device){
+  const server=await device.gatt.connect();
+  const svcs=await server.getPrimaryServices();
+  for(const s of svcs){ let chs=[]; try{ chs=await s.getCharacteristics(); }catch(e){}
+    for(const c of chs){ if(c.properties.writeWithoutResponse||c.properties.write){ PR.ch=c; PR.dev=device; PR.ok=true;
+      device.addEventListener("gattserverdisconnected",()=>{ PR.ok=false; PR.ch=null; updPrinterBtn(); }); return; } } }
+  throw new Error("الطابعة ما تدعم الطباعة عبر البلوتوث المباشر");
+}
+async function usbOpen(d){
+  await d.open(); if(d.configuration===null) await d.selectConfiguration(1);
+  for(const itf of d.configuration.interfaces){ for(const alt of itf.alternates){ const ep=alt.endpoints.find(e=>e.direction==="out");
+    if(ep){ await d.claimInterface(itf.interfaceNumber); PR.usb=d; PR.ep=ep.endpointNumber; PR.ok=true; return; } } }
+  throw new Error("لم يتم العثور على منفذ طباعة في جهاز USB");
+}
+async function connectPrinter(type){
+  try{
+    if(type==="bt"){ const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true, optionalServices:BT_SERVICES}); await btOpen(d); prefs.printer={type:"bt",id:d.id,name:d.name||"طابعة"}; }
+    else if(type==="usb"){ const d=await navigator.usb.requestDevice({filters:[]}); await usbOpen(d); prefs.printer={type:"usb",vid:d.vendorId,pid:d.productId,name:d.productName||"طابعة"}; }
+    else if(type==="serial"){ const p=await navigator.serial.requestPort(); await p.open({baudRate:9600}); PR.port=p; PR.ok=true; prefs.printer={type:"serial"}; }
+    else { prefs.printer={type:"system"}; PR={ch:null,dev:null,usb:null,ep:null,port:null,ok:false}; }
+    LS.set("pos.prefs",prefs); updPrinterBtn(); toast(type==="system"?"سيتم استخدام نافذة الطباعة":"تم ربط الطابعة ✓"); return true;
+  }catch(e){ if(e&&e.name==="NotFoundError") return false; toast("تعذّر الربط: "+(e.message||e)); return false; }
+}
+async function reconnect(){
+  const p=prefs.printer; if(PR.ok) return true;
+  try{
+    if(p.type==="bt"&&navigator.bluetooth.getDevices){ const d=(await navigator.bluetooth.getDevices()).find(x=>x.id===p.id); if(d){ await btOpen(d); return true; } }
+    if(p.type==="usb"){ const d=(await navigator.usb.getDevices()).find(x=>x.vendorId===p.vid&&x.productId===p.pid); if(d){ await usbOpen(d); return true; } }
+    if(p.type==="serial"){ const ps=await navigator.serial.getPorts(); if(ps[0]){ try{ await ps[0].open({baudRate:9600}); }catch(e){} PR.port=ps[0]; PR.ok=true; return true; } }
+  }catch(e){ console.error(e); }
+  return false;
+}
+async function rawSend(bytes){
+  if(prefs.printer.type==="bt"){ const c=PR.ch, n=c.properties.writeWithoutResponse?180:120;
+    for(let i=0;i<bytes.length;i+=n){ const part=bytes.slice(i,i+n); if(c.properties.writeWithoutResponse&&c.writeValueWithoutResponse){ await c.writeValueWithoutResponse(part); await sleep(12); } else await c.writeValue(part); } }
+  else if(prefs.printer.type==="usb"){ for(let i=0;i<bytes.length;i+=4096) await PR.usb.transferOut(PR.ep, bytes.slice(i,i+4096)); }
+  else if(prefs.printer.type==="serial"){ const w=PR.port.writable.getWriter(); try{ await w.write(bytes); } finally{ w.releaseLock(); } }
+}
+// draw the receipt on a canvas (so Arabic prints correctly) and convert to ESC/POS raster
+let logoImg=null; function getLogo(){ return new Promise(res=>{ if(logoImg) return res(logoImg); const im=new Image(); im.onload=()=>{logoImg=im;res(im)}; im.onerror=()=>res(null); im.src="/logo.png"; }); }
+async function receiptCanvas(o, kitchen){
+  const W=(prefs.width===58?384:576), PAD=8, cv=document.createElement("canvas"); cv.width=W; cv.height=3000;
+  const x=cv.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,W,cv.height); x.fillStyle="#000"; x.textBaseline="top";
+  const F=(s,b)=>`${b?"700":"500"} ${s}px "IBM Plex Sans Arabic", Tahoma, Arial, sans-serif`;
+  const sc=W/576; let y=6;
+  const center=(t,s,b,dir)=>{ x.font=F(s*sc,b); x.direction=dir||"rtl"; x.textAlign="center"; x.fillText(t,W/2,y); y+=s*sc*1.35; };
+  const lr=(r,l,s,b)=>{ x.font=F(s*sc,b); x.direction="rtl"; x.textAlign="right"; x.fillText(r,W-PAD,y); x.direction="ltr"; x.textAlign="left"; x.fillText(l,PAD,y); y+=s*sc*1.4; };
+  const hr=()=>{ y+=4; x.setLineDash([6,4]); x.lineWidth=2; x.beginPath(); x.moveTo(PAD,y); x.lineTo(W-PAD,y); x.stroke(); x.setLineDash([]); y+=10; };
+  const wrap=(t,maxW)=>{ const ws=String(t).split(" "), out=[]; let cur=""; ws.forEach(w=>{ const n=cur?cur+" "+w:w; if(x.measureText(n).width>maxW&&cur){ out.push(cur); cur=w; } else cur=n; }); if(cur) out.push(cur); return out; };
+  const s=(ctx&&ctx.settings)||{}, t=+o.total, vat=o.vat!=null?+o.vat:t-t/(1+VAT);
+  if(!kitchen){ const lg=await getLogo(); if(lg){ const lw=190*sc, lh=lw*lg.height/lg.width; x.filter="grayscale(1) brightness(.55) contrast(2.5)"; x.drawImage(lg,(W-lw)/2,y,lw,lh); x.filter="none"; y+=lh+6; } }
+  center(kitchen?"نسخة المطبخ — "+branchName(o.branch_id):"RQ KITCHEN — "+branchName(o.branch_id),24,true);
+  if(!kitchen&&s.trn){ center("فاتورة ضريبية مبسطة",20,false); center("TRN: "+s.trn,20,false,"ltr"); }
+  y+=4; x.lineWidth=4; const bh=78*sc; x.strokeRect(PAD+20,y,W-2*PAD-40,bh); x.font=F(56*sc,true); x.textAlign="center"; x.direction="ltr"; x.fillText("#"+o.no,W/2,y+10*sc); y+=bh+10;
+  center(identText(o),34,true,"ltr");
+  if(o.mode==="car"&&o.car){ const sub=[o.car.em,o.car.color].filter(Boolean).join(" · "); if(sub) center(sub,20,false); }
+  center(dt(o.ts),20,false,"ltr"); hr();
+  const nameW=W-2*PAD-(kitchen?60:200)*sc;
+  o.items.forEach(i=>{ const fs=(kitchen?30:22)*sc; x.font=F(fs,kitchen);
+    const lines=wrap(i.name,nameW); x.direction="rtl"; x.textAlign="right"; x.font=F(fs,true); x.fillText(String(i.qty)+(kitchen?"×":""),W-PAD,y);
+    x.font=F(fs,kitchen); x.direction="ltr"; lines.forEach((ln,k)=>{ x.textAlign="right"; x.fillText(ln,W-PAD-50*sc,y+k*fs*1.3); });
+    if(!kitchen){ x.textAlign="left"; x.font=F(fs,false); x.fillText(money(i.price*i.qty),PAD,y); }
+    y+=Math.max(1,lines.length)*fs*1.3+4; });
+  if(kitchen){ if(o.note){ hr(); x.font=F(26*sc,true); x.direction="rtl"; x.textAlign="right"; wrap("ملاحظة: "+o.note,W-2*PAD).forEach(l=>{ x.fillText(l,W-PAD,y); y+=34*sc; }); } }
+  else{
+    hr(); lr("المجموع قبل الضريبة",money(t-vat),21); lr("ضريبة القيمة المضافة 5%",money(vat),21); lr("الإجمالي",money(t)+" AED",30,true); hr();
+    lr("طريقة الدفع",o.pay==="cash"?"Cash":"Visa",21);
+    if(o.pay==="cash"&&o.received!=null){ lr("المستلم",money(o.received),21); lr("الباقي",money(o.change),21); }
+    if(o.note){ hr(); x.font=F(21*sc,false); x.direction="rtl"; x.textAlign="right"; wrap("ملاحظة: "+o.note,W-2*PAD).forEach(l=>{ x.fillText(l,W-PAD,y); y+=28*sc; }); }
+    if(o.status==="cancelled"){ hr(); center("*** ملغي ***",28,true); }
+    y+=8; if(s.footer) center(s.footer,19,false); center("@rqkitchen.ae",19,false,"ltr");
+  }
+  y+=10; const out=document.createElement("canvas"); out.width=W; out.height=Math.ceil(y); out.getContext("2d").drawImage(cv,0,0); return out;
+}
+function canvasToEscpos(cv){
+  const W=cv.width, H=cv.height, bw=W/8, d=cv.getContext("2d").getImageData(0,0,W,H).data, parts=[];
+  for(let y0=0;y0<H;y0+=128){ const h=Math.min(128,H-y0), buf=new Uint8Array(8+bw*h); buf.set([0x1d,0x76,0x30,0,bw&255,bw>>8,h&255,h>>8]);
+    for(let y=0;y<h;y++) for(let xb=0;xb<bw;xb++){ let v=0; for(let b=0;b<8;b++){ const i=((y0+y)*W+xb*8+b)*4; if(d[i]*.299+d[i+1]*.587+d[i+2]*.114<165) v|=128>>b; } buf[8+y*bw+xb]=v; }
+    parts.push(buf); }
+  return parts;
+}
+function concat(arrs){ const n=arrs.reduce((s,a)=>s+a.length,0), o=new Uint8Array(n); let p=0; arrs.forEach(a=>{o.set(a,p);p+=a.length;}); return o; }
+async function escposPrint(pages, drawer){
+  if(document.fonts&&document.fonts.ready) try{ await document.fonts.ready; }catch(e){}
+  const chunks=[new Uint8Array([0x1b,0x40])];
+  if(drawer) chunks.push(new Uint8Array([0x1b,0x70,0,25,250]));
+  for(const pg of pages){ const cv=await receiptCanvas(pg.o,pg.kitchen); chunks.push(...canvasToEscpos(cv)); chunks.push(new Uint8Array([0x1b,0x64,4,0x1d,0x56,66,0])); }
+  await rawSend(concat(chunks));
+}
+async function printDirect(o, opts){
+  const pages=[]; for(let i=0;i<(prefs.copies||1);i++) pages.push({o,kitchen:false}); if(prefs.kitchen) pages.push({o,kitchen:true});
+  const drawer=!!(opts&&opts.drawer&&prefs.drawer);
+  const run=async()=>{ await escposPrint(pages, drawer); };
+  try{
+    if(!PR.ok && !(await reconnect())) throw Object.assign(new Error("need"),{need:true});
+    await run(); toast("تمت الطباعة ✓",1500);
+  }catch(e){
+    PR.ok=false; updPrinterBtn(); console.error(e);
+    modal(`<h3>الطابعة غير متصلة</h3><div class="sub">${esc(prLabel())} — تأكد إنها شغّالة وقريبة، ثم اضغط إعادة الاتصال.</div>
+      <div class="mact"><button class="b-cancel" id="pSys">نافذة الطباعة</button><button class="b-ok" id="pRe">إعادة الاتصال والطباعة</button></div>`);
+    $("#pSys").onclick=()=>{ closeModal(); printSystem(o); };
+    $("#pRe").onclick=async()=>{ const p=prefs.printer; let ok=await reconnect();
+      if(!ok){ try{ if(p.type==="bt"){ const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:BT_SERVICES}); await btOpen(d); prefs.printer.id=d.id; LS.set("pos.prefs",prefs); ok=true; }
+        else if(p.type==="usb"){ const d=await navigator.usb.requestDevice({filters:[]}); await usbOpen(d); ok=true; }
+        else if(p.type==="serial"){ const pt=await navigator.serial.requestPort(); await pt.open({baudRate:9600}); PR.port=pt; PR.ok=true; ok=true; } }catch(err){ toast("تعذّر الاتصال"); } }
+      updPrinterBtn(); if(ok){ closeModal(); try{ await run(); toast("تمت الطباعة ✓",1500); }catch(err){ toast("فشلت الطباعة — جرّب نافذة الطباعة"); } } };
+  }
+}
+function openPrinter(){
+  const p=prefs.printer, direct=p.type!=="system";
+  const opt=(id,ic,t,d,dis)=>`<button class="pr-opt ${dis?"dis":""}" id="${id}" ${dis?"disabled":""}><span class="pi">${ic}</span><span class="pt"><b>${t}</b><small>${d}</small></span></button>`;
+  modal(`<h3>الطابعة</h3><div class="sub">الحالية: <b>${esc(prLabel())}</b> ${direct?(PR.ok?'<span style="color:var(--green)">● متصلة</span>':'<span style="color:var(--yellow)">● غير متصلة</span>'):""}</div>
+    <div class="pr-list">
+      ${opt("cBt","📶","طابعة بلوتوث","طابعات الإيصالات المحمولة والمكتبية (أندرويد وكمبيوتر بمتصفح Chrome)",!CAN.bt)}
+      ${opt("cUsb","🔌","طابعة USB","طابعة إيصالات موصولة بالسلك (أندرويد وكمبيوتر بمتصفح Chrome)",!CAN.usb)}
+      ${CAN.serial?opt("cSer","🖧","منفذ COM / بلوتوث مقترن (كمبيوتر)","للطابعات المعرّفة كمنفذ تسلسلي على ويندوز",false):""}
+      ${opt("cSys","🖨","نافذة الطباعة / AirPrint","آيفون وآيباد، أو أي طابعة معرّفة في الجهاز",false)}
+    </div>
+    ${IS_IOS?`<div class="hint-b">على الآيفون والآيباد ما يسمح المتصفح بالبلوتوث أو USB مباشرة — استخدم طابعة إيصالات تدعم AirPrint (مثل Epson TM-m30 أو Star mC-Print) واختر «نافذة الطباعة».</div>`:(!CAN.bt?`<div class="hint-b">افتح الكاشير من متصفح Chrome عشان تقدر تربط طابعة بلوتوث أو USB.</div>`:"")}
+    ${direct?`<div class="set-row"><div><div class="l">فتح درج الكاش عند الدفع كاش</div><div class="d">للدرج الموصول بالطابعة</div></div><button class="sw ${prefs.drawer?"on":""}" id="cDr"></button></div>`:""}
+    <div class="mact"><button class="b-cancel" id="cTest">🖨 طباعة تجريبية</button><button class="b-ok" data-x>تم</button></div>`);
+  const go=async t=>{ if(await connectPrinter(t)) openPrinter(); };
+  if(CAN.bt) $("#cBt").onclick=()=>go("bt");
+  if(CAN.usb) $("#cUsb").onclick=()=>go("usb");
+  if($("#cSer")) $("#cSer").onclick=()=>go("serial");
+  $("#cSys").onclick=()=>go("system");
+  if($("#cDr")) $("#cDr").onclick=e=>{ prefs.drawer=!prefs.drawer; e.currentTarget.classList.toggle("on",prefs.drawer); LS.set("pos.prefs",prefs); };
+  $("#cTest").onclick=()=>printOrder(testOrder());
+  $("#modal [data-x]").onclick=closeModal;
+}
+function testOrder(){ return {no:0,ts:Date.now(),branch_id:branch,mode:"car",car:{em:"أبوظبي",code:"1",num:"12345",color:"أبيض"},items:[{name:"Double Wagyu Burger",price:63,qty:1},{name:"Classic Fries",price:21,qty:2}],total:105,vat:105-105/1.05,pay:"cash",received:110,change:5,note:"طباعة تجريبية",status:"new"}; }
+
+
 
 // ---------- orders view ----------
 const STATUS={new:"قيد التحضير",ready:"جاهز",done:"تم التسليم",cancelled:"ملغي"};
@@ -910,6 +1063,7 @@ function openSettings(){
   const failed=LS.get("pos.failed",[]);
   modal(`<h3>الإعدادات</h3><div class="sub">${esc(branchName())} · ${admin?"مدير":"فرع"} · جهاز ${esc(DEVICE)}</div>
     <div class="set-sec">الطباعة</div>
+    <div class="set-row"><div><div class="l">الطابعة</div><div class="d">${esc(prLabel())}</div></div><button class="abtn pri" id="sPr">ربط طابعة</button></div>
     <div class="set-row"><div><div class="l">طباعة تلقائية عند تأكيد الطلب</div><div class="d">تفتح نافذة الطباعة مباشرة بعد الدفع</div></div><button class="sw ${prefs.autoPrint?"on":""}" id="sAuto"></button></div>
     <div class="set-row"><div class="l">عدد نسخ الفاتورة</div><div class="opt" id="sCopies">${[1,2].map(n=>`<button data-v="${n}" class="${prefs.copies===n?"on":""}">${n}</button>`).join("")}</div></div>
     <div class="set-row"><div><div class="l">نسخة للمطبخ</div><div class="d">ورقة إضافية فيها الأصناف بخط كبير بدون أسعار</div></div><button class="sw ${prefs.kitchen?"on":""}" id="sKit"></button></div>
@@ -929,7 +1083,8 @@ function openSettings(){
   $("#sKit").onclick=e=>{ prefs.kitchen=!prefs.kitchen; e.currentTarget.classList.toggle("on",prefs.kitchen); sp(); };
   $("#sCopies").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; prefs.copies=+b.dataset.v; sp(); openSettings(); };
   $("#sWidth").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; prefs.width=+b.dataset.v; sp(); openSettings(); };
-  $("#sTest").onclick=()=>printOrder({no:0,ts:Date.now(),branch_id:branch,mode:"car",car:{em:"أبوظبي",code:"1",num:"12345",color:"أبيض"},items:[{name:"Test Item",price:10,qty:1}],total:10,vat:10-10/1.05,pay:"cash",received:10,change:0,note:"طباعة تجريبية",status:"new"});
+  $("#sTest").onclick=()=>printOrder(testOrder());
+  $("#sPr").onclick=openPrinter;
   $("#sSync").onclick=async()=>{ await sync(); toast(queue.length?"ما زال "+queue.length+" بانتظار الإنترنت":"تمت المزامنة ✓"); openSettings(); };
   $("#sOut").onclick=logout;
   $("#modal [data-x]").onclick=closeModal;
@@ -937,6 +1092,7 @@ function openSettings(){
   const ib=$("#sInstall"); if(ib) ib.onclick=async()=>{ deferredInstall.prompt(); deferredInstall=null; closeModal(); };
 }
 $("#gear").addEventListener("click", openSettings);
+$("#prBtn").addEventListener("click", openPrinter);
 let deferredInstall=null;
 addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferredInstall=e; });
 
@@ -977,7 +1133,7 @@ function startApp(){
   $("#login").hidden=true; $("#app").hidden=false;
   offItems=new Set(LS.get(offKey(),[]));
   day=bizDay(); loadLocalOrders(); renderBranch(); renderColors(); setMode("car"); renderAll(); tick();
-  loadMenu(false); sync();
+  loadMenu(false); sync(); updPrinterBtn(); if(prefs.printer&&prefs.printer.type!=="system") reconnect().then(updPrinterBtn);
   // refresh session info (branches / receipt settings)
   rpc("pos_ctx",{p_token:token}).then(c=>{ if(c){ ctx=Object.assign(ctx||{},c); LS.set("pos.ctx",ctx); if(ctx.role==="branch" && branch!==ctx.branch_id){ switchBranch(ctx.branch_id); } renderBranch(); } }).catch(e=>{ if(isAuthErr(e)){ showLogin(); } });
 }
