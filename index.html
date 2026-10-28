@@ -542,7 +542,7 @@ let orders = [];
 let queue = LS.get("pos.queue", []);
 let cart = [], mode = "car", carColor = "", curCat = "all", q = "", ofilter = "active", oq = "", curView = "pos";
 let prefs = Object.assign({autoPrint:true, copies:1, width:80, kitchen:false}, LS.get("pos.prefs", {}));
-let online = navigator.onLine, lastSyncOk = 0, syncing = false;
+let online = navigator.onLine, lastSyncOk = 0, syncing = false, lastErr = "";
 const okey = () => "pos.o."+branch+"."+day;
 const offKey = () => "pos.off."+branch;
 let offItems = new Set();
@@ -713,7 +713,7 @@ function updSync(){
   const d=$("#dot"), t=$("#syncTxt");
   $("#offbar").hidden = online;
   if(!online){ d.className="dot off"; t.textContent = queue.length ? queue.length+" بانتظار الرفع" : "بدون إنترنت"; return; }
-  if(queue.length){ d.className="dot wait"; t.textContent = "جارِ الرفع ("+queue.length+")"; return; }
+  if(queue.length){ d.className="dot wait"; t.textContent = (lastErr?"خطأ رفع ":"جارِ الرفع ")+"("+queue.length+")"; return; }
   d.className="dot ok"; t.textContent="متصل";
 }
 async function sync(){
@@ -723,18 +723,20 @@ async function sync(){
     while(queue.length){
       const o=queue[0];
       try{
-        const r = await rpc("pos_save_order", {p_token: token, p_o: o});
+        const send=Object.assign({},o); delete send._tries; delete send._ok; delete send._local;
+        const r = await rpc("pos_save_order", {p_token: token, p_o: send});
         queue.shift(); saveQueue();
-        online=true;
+        online=true; lastErr="";
+        { const lo=orders.find(x=>x.id===o.id); if(lo && !lo._ok){ lo._ok=true; saveLocal(); } }
         if(r && r.no && r.no!==o.no && o.day===day && o.branch_id===branch){
           const lo=orders.find(x=>x.id===o.id); if(lo){ lo.no=r.no; saveLocal(); toast("تم تعديل رقم الطلب إلى #"+r.no+" لتفادي التكرار"); }
         }
       }catch(e){
         if(!e.server){ online=false; break; }
         if(isAuthErr(e)){ online=true; toast("انتهت الجلسة — أدخل رمز الفرع مرة ثانية"); showLogin(); break; }
-        o._tries=(o._tries||0)+1; console.error("sync", e.message);
-        if(o._tries>=5){ queue.shift(); const f=LS.get("pos.failed",[]); f.push(o); LS.set("pos.failed",f); } else { queue.push(queue.shift()); }
-        saveQueue(); break;
+        o._tries=(o._tries||0)+1; console.error("sync", e.message); lastErr=e.message;
+        if(o._tries===1||o._tries%10===0) toast("تعذّر رفع طلب للسيرفر — سيُعاد المحاولة تلقائيًا ("+String(e.message).slice(0,60)+")",4000);
+        queue.push(queue.shift()); saveQueue(); break;
       }
     }
     if(online) await pull();
@@ -747,7 +749,8 @@ async function pull(){
     online=true;
     const pend = new Map(queue.filter(x=>x.branch_id===branch && x.day===day).map(x=>[x.id,x]));
     const byId = new Map(list.map(o=>[o.id,o]));
-    orders.forEach(o=>{ if(pend.has(o.id)) byId.set(o.id, o); else if(!byId.has(o.id) && o._local && Date.now()-o.ts<120000) byId.set(o.id,o); });
+    list.forEach(o=>{ o._ok=true; });
+    orders.forEach(o=>{ if(pend.has(o.id)) byId.set(o.id, Object.assign(o,{_ok:o._ok})); else if(!byId.has(o.id) && !o._ok){ byId.set(o.id,o); if(!queue.some(x=>x.id===o.id)){ queue.push(clone(o)); saveQueue(); } } });
     const merged=[...byId.values()].map(o=>{ o.total=+o.total; o.vat=+o.vat; if(o.received!=null) o.received=+o.received; if(o.change!=null) o.change=+o.change; return o; }).sort((a,b)=>a.no-b.no);
     if(JSON.stringify(merged)!==JSON.stringify(orders)){ orders=merged; saveLocal(); renderAll(); }
   }catch(e){ if(!e.server) online=false; else if(isAuthErr(e)) showLogin(); }
@@ -1446,6 +1449,7 @@ document.addEventListener("click", keepAwake, {once:true});
 function renderAll(){ renderCart(); renderOrders(); if(curView==="pos") renderMenuSide(); if(curView==="report") renderReport(); if(curView==="menu"){ renderAvail(); renderAppsAdmin(); } updSync(); }
 
 function startApp(){
+  const failed=LS.get("pos.failed",[]); if(failed.length){ failed.forEach(f=>{ delete f._tries; if(!queue.some(x=>x.id===f.id)) queue.push(f); }); saveQueue(); LS.del("pos.failed"); }
   $("#login").hidden=true; $("#app").hidden=false;
   offItems=new Set(LS.get(offKey(),[]));
   day=bizDay(); loadLocalOrders(); renderBranch(); renderColors(); setMode("car"); renderAll(); tick();
