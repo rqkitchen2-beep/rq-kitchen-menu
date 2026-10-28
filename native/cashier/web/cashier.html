@@ -1125,8 +1125,8 @@ function openPrinter(){ if(NATIVE) return openPrinterNative();
     catch(e){ m.style.color="var(--red)";
       m.innerHTML = e.epos ? "ما قدرت أوصل للطابعة. تأكد إن الجوال على نفس واي فاي الطابعة، وإنك سويت الخطوة ١ وقبلت الشهادة، ثم جرّب مرة ثانية." : esc(e.message)+" — تأكد إن خاصية ePOS-Print مفعّلة في الطابعة."; }
   };
-  if(CAN.bt) $("#cBt").onclick=()=>go("bt");
-  if(CAN.usb) $("#cUsb").onclick=()=>go("usb");
+  if($("#cBt")&&CAN.bt) $("#cBt").onclick=()=>go("bt");
+  if($("#cUsb")&&CAN.usb) $("#cUsb").onclick=()=>go("usb");
   if($("#cSer")) $("#cSer").onclick=()=>go("serial");
   $("#cSys").onclick=()=>go("system");
   if($("#cDr")) $("#cDr").onclick=e=>{ prefs.drawer=!prefs.drawer; e.currentTarget.classList.toggle("on",prefs.drawer); LS.set("pos.prefs",prefs); };
