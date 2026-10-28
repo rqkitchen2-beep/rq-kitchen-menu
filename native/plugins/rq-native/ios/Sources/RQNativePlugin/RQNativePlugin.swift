@@ -3,6 +3,7 @@ import UIKit
 import CoreLocation
 import Capacitor
 import PassKit
+import Network
 
 /// Background driver location (posted straight to Supabase so it keeps working
 /// while the web view is suspended) and screen keep-awake.
@@ -17,7 +18,10 @@ public class RQNativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDeleg
         CAPPluginMethod(name: "status", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "applePayAvailable", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "applePay", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "applePayComplete", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "applePayComplete", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "tcpSend", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "tcpProbe", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "localIp", returnType: CAPPluginReturnPromise)
     ]
 
     private var manager: CLLocationManager?
@@ -213,6 +217,89 @@ public class RQNativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDeleg
         controller.dismiss {}
         if !payAuthorized { payCall?.reject("cancelled"); payCall = nil }
         payController = nil
+    }
+
+    // MARK: Network receipt printers (Epson TM etc.) — raw ESC/POS over TCP port 9100.
+    private let netQueue = DispatchQueue(label: "rq.net", attributes: .concurrent)
+
+    @objc func tcpSend(_ call: CAPPluginCall) {
+        guard let host = call.getString("host"), let b64 = call.getString("data"), let data = Data(base64Encoded: b64) else {
+            call.reject("missing host/data"); return
+        }
+        let port = NWEndpoint.Port(rawValue: UInt16(call.getInt("port") ?? 9100)) ?? 9100
+        let timeout = Double(call.getInt("timeout") ?? 8000) / 1000.0
+        let conn = NWConnection(host: NWEndpoint.Host(host), port: port, using: .tcp)
+        var finished = false
+        let lock = NSLock()
+        func finish(_ err: String?) {
+            lock.lock(); defer { lock.unlock() }
+            if finished { return }
+            finished = true
+            conn.cancel()
+            if let e = err { call.reject(e) } else { call.resolve(["ok": true]) }
+        }
+        conn.stateUpdateHandler = { st in
+            switch st {
+            case .ready:
+                conn.send(content: data, completion: .contentProcessed { err in
+                    if let e = err { finish("send: \(e)"); return }
+                    // give the printer a moment to take the buffer before closing
+                    self.netQueue.asyncAfter(deadline: .now() + 0.3) { finish(nil) }
+                })
+            case .failed(let e): finish("connect: \(e)")
+            case .waiting(let e): finish("unreachable: \(e)")
+            default: break
+            }
+        }
+        conn.start(queue: netQueue)
+        netQueue.asyncAfter(deadline: .now() + timeout + 2) { finish("timeout") }
+    }
+
+    @objc func tcpProbe(_ call: CAPPluginCall) {
+        guard let host = call.getString("host") else { call.reject("missing host"); return }
+        let port = NWEndpoint.Port(rawValue: UInt16(call.getInt("port") ?? 9100)) ?? 9100
+        let timeout = Double(call.getInt("timeout") ?? 600) / 1000.0
+        let conn = NWConnection(host: NWEndpoint.Host(host), port: port, using: .tcp)
+        var done = false
+        let lock = NSLock()
+        func finish(_ open: Bool) {
+            lock.lock(); defer { lock.unlock() }
+            if done { return }
+            done = true
+            conn.cancel()
+            call.resolve(["open": open, "host": host])
+        }
+        conn.stateUpdateHandler = { st in
+            switch st {
+            case .ready: finish(true)
+            case .failed, .waiting: finish(false)
+            default: break
+            }
+        }
+        conn.start(queue: netQueue)
+        netQueue.asyncAfter(deadline: .now() + timeout) { finish(false) }
+    }
+
+    @objc func localIp(_ call: CAPPluginCall) {
+        var ip: String? = nil
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        if getifaddrs(&ifaddr) == 0, let first = ifaddr {
+            var p: UnsafeMutablePointer<ifaddrs>? = first
+            while let cur = p {
+                let ifa = cur.pointee
+                if ifa.ifa_addr.pointee.sa_family == UInt8(AF_INET) {
+                    let name = String(cString: ifa.ifa_name)
+                    if name == "en0" || (ip == nil && name.hasPrefix("en")) {
+                        var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                        getnameinfo(ifa.ifa_addr, socklen_t(ifa.ifa_addr.pointee.sa_len), &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST)
+                        ip = String(cString: host)
+                    }
+                }
+                p = ifa.ifa_next
+            }
+            freeifaddrs(ifaddr)
+        }
+        call.resolve(["ip": ip ?? ""])
     }
 
 }

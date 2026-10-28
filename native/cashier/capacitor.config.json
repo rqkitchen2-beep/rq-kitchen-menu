@@ -1,0 +1,26 @@
+{
+  "appId": "com.rqkitchen.cashier",
+  "appName": "RQ Cashier",
+  "webDir": "www",
+  "backgroundColor": "#0e0e10",
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Cashier",
+    "webContentsDebuggingEnabled": false
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#0e0e10",
+      "showSpinner": false,
+      "launchAutoHide": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "overlaysWebView": true
+    }
+  }
+}

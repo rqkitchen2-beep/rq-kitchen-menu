@@ -52,6 +52,7 @@ UNS=$(ls app/build/outputs/apk/release/*-unsigned.apk 2>/dev/null | head -1)
 [ -f "$UNS" ] || die "no apk"
 BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
 "$BT/zipalign" -f -p 4 "$UNS" "$RUNNER_TEMP/aligned.apk" || die "zipalign failed"
-OUT="$RUNNER_TEMP/RQ-Branch.apk"
+NAME=$(python3 -c "import json;print(json.load(open('$DIR/capacitor.config.json'))['appName'].replace(' ','-'))")
+OUT="$RUNNER_TEMP/$NAME.apk"
 "$BT/apksigner" sign --ks "$RUNNER_TEMP/rq.jks" --ks-key-alias rq --ks-pass pass:$PASS --key-pass pass:$PASS --out "$OUT" "$RUNNER_TEMP/aligned.apk" || die "sign failed"
 "$BT/apksigner" verify "$OUT" && echo "RESULT: apk signed $(du -h "$OUT" | cut -f1) versionCode $VC"

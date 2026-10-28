@@ -44,6 +44,7 @@ jobs:
           T1=$(python3 native/scripts/asc.py ensure-bundle com.rqkitchen.app "RQ Kitchen" 2>>"$ST")
           T2=$(python3 native/scripts/asc.py ensure-bundle com.rqkitchen.driver "RQ Driver" 2>>"$ST")
           python3 native/scripts/asc.py ensure-bundle com.rqkitchen.branch "RQ Branch" >/dev/null 2>>"$ST"
+          python3 native/scripts/asc.py ensure-bundle com.rqkitchen.cashier "RQ Cashier" >/dev/null 2>>"$ST"
           echo "team: $T1 / $T2" >> "$ST"
           A1=$(python3 native/scripts/asc.py find-app com.rqkitchen.app)
           A2=$(python3 native/scripts/asc.py find-app com.rqkitchen.driver)
@@ -51,6 +52,8 @@ jobs:
           echo "app_driver: ${A2:-MISSING}" >> "$ST"
           A3=$(python3 native/scripts/asc.py find-app com.rqkitchen.branch)
           echo "app_branch: ${A3:-MISSING}" >> "$ST"
+          A4=$(python3 native/scripts/asc.py find-app com.rqkitchen.cashier)
+          echo "app_cashier: ${A4:-MISSING}" >> "$ST"
           REQ=$(cat native/build-request.txt)
           M="[]"
           L=""
@@ -58,6 +61,9 @@ jobs:
             if [ "$a" = customer ]; then L="$L\"customer\","; fi
             if [ "$a" = driver ]; then L="$L\"driver\","; fi
             if [ "$a" = branch ]; then L="$L\"branch\","; fi
+            if [ "$a" = cashier ]; then
+              if [ -n "$A4" ]; then L="$L\"cashier\","; else echo "cashier: create the app in App Store Connect first (bundle com.rqkitchen.cashier)" >> "$ST"; fi
+            fi
           done
           [ -n "$L" ] && M="[${L%,}]"
           echo "matrix: $M" >> "$ST"

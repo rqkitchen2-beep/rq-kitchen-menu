@@ -1,0 +1,9 @@
+{
+  "page": "cashier.html",
+  "remote": "https://cashier.rqkitchen.app/",
+  "bg": "#0e0e10",
+  "files": [
+    "native/cashier/web/cashier.html",
+    "native/cashier/web/logo.png"
+  ]
+}

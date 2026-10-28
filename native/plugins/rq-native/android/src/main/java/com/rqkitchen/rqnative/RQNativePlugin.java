@@ -5,6 +5,14 @@ import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.view.WindowManager;
 
+import java.io.OutputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.util.Collections;
+
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -95,4 +103,64 @@ public class RQNativePlugin extends Plugin {
     @PluginMethod public void startTracking(PluginCall call) { call.resolve(); }
     @PluginMethod public void stopTracking(PluginCall call) { call.resolve(); }
     @PluginMethod public void status(PluginCall call) { JSObject r = new JSObject(); r.put("tracking", false); call.resolve(r); }
+
+    // Network receipt printers (Epson TM etc.): raw ESC/POS over TCP port 9100.
+    @PluginMethod
+    public void tcpSend(PluginCall call) {
+        String host = call.getString("host");
+        String data = call.getString("data");
+        int port = call.getInt("port", 9100);
+        int timeout = call.getInt("timeout", 8000);
+        if (host == null || data == null) { call.reject("missing host/data"); return; }
+        new Thread(() -> {
+            Socket s = new Socket();
+            try {
+                byte[] bytes = Base64.decode(data, Base64.DEFAULT);
+                s.connect(new InetSocketAddress(host, port), timeout);
+                s.setSoTimeout(timeout);
+                OutputStream out = s.getOutputStream();
+                out.write(bytes);
+                out.flush();
+                Thread.sleep(300);
+                JSObject r = new JSObject(); r.put("ok", true); call.resolve(r);
+            } catch (Exception e) {
+                call.reject("print: " + e.getMessage());
+            } finally {
+                try { s.close(); } catch (Exception ignored) {}
+            }
+        }).start();
+    }
+
+    @PluginMethod
+    public void tcpProbe(PluginCall call) {
+        String host = call.getString("host");
+        int port = call.getInt("port", 9100);
+        int timeout = call.getInt("timeout", 600);
+        if (host == null) { call.reject("missing host"); return; }
+        new Thread(() -> {
+            boolean open = false;
+            Socket s = new Socket();
+            try { s.connect(new InetSocketAddress(host, port), timeout); open = true; }
+            catch (Exception ignored) {}
+            finally { try { s.close(); } catch (Exception ignored) {} }
+            JSObject r = new JSObject(); r.put("open", open); r.put("host", host); call.resolve(r);
+        }).start();
+    }
+
+    @PluginMethod
+    public void localIp(PluginCall call) {
+        String ip = "";
+        try {
+            for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                if (!ni.isUp() || ni.isLoopback()) continue;
+                for (InetAddress a : Collections.list(ni.getInetAddresses())) {
+                    if (a instanceof Inet4Address && !a.isLoopbackAddress()) {
+                        String h = a.getHostAddress();
+                        if (ip.isEmpty() || ni.getName().startsWith("wlan") || ni.getName().startsWith("eth")) ip = h;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        JSObject r = new JSObject(); r.put("ip", ip); call.resolve(r);
+    }
 }
