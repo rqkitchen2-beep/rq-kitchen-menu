@@ -1,20 +1,20 @@
-android branch run: 3 rc: 0 Wed Oct 28 10:30:17 UTC 2026
+android branch run: 4 rc: 0 Wed Oct 28 10:54:57 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
 RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin" "classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin" "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin" "classpath": "com.rqkitchen.rqnative.RQNativePlugin" 
 STEP: icon + version
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 103
+RESULT: apk signed 3.2M versionCode 104
 ---- errors ----
 ---- tail ----
+> Task :capacitor-android:bundleReleaseAar
 > Task :capacitor-android:mapReleaseSourceSetPaths
-> Task :app:mergeReleaseJavaResource
 > Task :capacitor-android:mergeReleaseResources
 > Task :capacitor-cordova-android-plugins:bundleReleaseAar
 > Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
-> Task :capacitor-android:verifyReleaseResources
 > Task :capacitor-cordova-android-plugins:mergeReleaseResources
+> Task :capacitor-android:verifyReleaseResources
 > Task :capacitor-android:assembleRelease
 > Task :capacitor-haptics:bundleReleaseAar
 > Task :capacitor-haptics:mapReleaseSourceSetPaths
@@ -33,8 +33,8 @@ RESULT: apk signed 3.2M versionCode 103
 > Task :capacitor-local-notifications:assembleRelease
 > Task :capacitor-status-bar:bundleReleaseAar
 > Task :capacitor-status-bar:mapReleaseSourceSetPaths
-> Task :capacitor-status-bar:mergeReleaseResources
 > Task :capacitor-splash-screen:verifyReleaseResources
+> Task :capacitor-status-bar:mergeReleaseResources
 > Task :capacitor-splash-screen:assembleRelease
 > Task :rq-native:bundleReleaseAar
 > Task :rq-native:mapReleaseSourceSetPaths
@@ -65,7 +65,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 39s
+BUILD SUCCESSFUL in 2m 4s
 324 actionable tasks: 324 executed
-RESULT: apk signed 3.2M versionCode 103
+RESULT: apk signed 3.2M versionCode 104
 RESULT: published
