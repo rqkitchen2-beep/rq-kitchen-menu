@@ -1,15 +1,15 @@
-android branch run: 7 rc: 0 Wed Oct 28 11:16:40 UTC 2026
+android branch run: 8 rc: 0 Wed Oct 28 11:39:32 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
 RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin" "classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin" "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin" "classpath": "com.rqkitchen.rqnative.RQNativePlugin" 
 STEP: icon + version
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 107
+RESULT: apk signed 3.2M versionCode 108
 ---- errors ----
 ---- tail ----
-> Task :capacitor-android:bundleReleaseAar
 > Task :capacitor-android:mapReleaseSourceSetPaths
+> Task :app:mergeReleaseJavaResource
 > Task :capacitor-android:mergeReleaseResources
 > Task :capacitor-cordova-android-plugins:bundleReleaseAar
 > Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
@@ -19,13 +19,13 @@ RESULT: apk signed 3.2M versionCode 107
 > Task :capacitor-haptics:bundleReleaseAar
 > Task :capacitor-haptics:mapReleaseSourceSetPaths
 > Task :capacitor-haptics:mergeReleaseResources
-> Task :capacitor-cordova-android-plugins:verifyReleaseResources
-> Task :capacitor-cordova-android-plugins:assembleRelease
-> Task :capacitor-local-notifications:bundleReleaseAar
-> Task :capacitor-local-notifications:mapReleaseSourceSetPaths
 > Task :capacitor-haptics:verifyReleaseResources
-> Task :capacitor-local-notifications:mergeReleaseResources
 > Task :capacitor-haptics:assembleRelease
+> Task :capacitor-cordova-android-plugins:verifyReleaseResources
+> Task :capacitor-local-notifications:bundleReleaseAar
+> Task :capacitor-cordova-android-plugins:assembleRelease
+> Task :capacitor-local-notifications:mapReleaseSourceSetPaths
+> Task :capacitor-local-notifications:mergeReleaseResources
 > Task :capacitor-splash-screen:bundleReleaseAar
 > Task :capacitor-splash-screen:mapReleaseSourceSetPaths
 > Task :capacitor-splash-screen:mergeReleaseResources
@@ -33,18 +33,18 @@ RESULT: apk signed 3.2M versionCode 107
 > Task :capacitor-local-notifications:assembleRelease
 > Task :capacitor-status-bar:bundleReleaseAar
 > Task :capacitor-status-bar:mapReleaseSourceSetPaths
-> Task :capacitor-status-bar:mergeReleaseResources
+> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-splash-screen:verifyReleaseResources
+> Task :capacitor-status-bar:mergeReleaseResources
 > Task :capacitor-splash-screen:assembleRelease
 > Task :rq-native:bundleReleaseAar
 > Task :rq-native:mapReleaseSourceSetPaths
 > Task :rq-native:mergeReleaseResources
-> Task :capacitor-status-bar:verifyReleaseResources
-> Task :capacitor-status-bar:assembleRelease
-> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
+> Task :capacitor-haptics:lintVitalAnalyzeRelease
 > Task :rq-native:verifyReleaseResources
 > Task :rq-native:assembleRelease
-> Task :capacitor-haptics:lintVitalAnalyzeRelease
+> Task :capacitor-status-bar:verifyReleaseResources
+> Task :capacitor-status-bar:assembleRelease
 > Task :capacitor-android:lintVitalAnalyzeRelease
 > Task :capacitor-splash-screen:lintVitalAnalyzeRelease
 > Task :capacitor-status-bar:lintVitalAnalyzeRelease
@@ -65,7 +65,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 11s
+BUILD SUCCESSFUL in 2m 13s
 324 actionable tasks: 324 executed
-RESULT: apk signed 3.2M versionCode 107
+RESULT: apk signed 3.2M versionCode 108
 RESULT: published
