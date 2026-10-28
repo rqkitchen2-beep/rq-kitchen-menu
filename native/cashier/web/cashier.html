@@ -43,6 +43,11 @@ input:focus,select:focus{border-color:var(--or)}
 .dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--dim);transition:.12s}
 .dots i.on{background:var(--or);border-color:var(--or)}
 .lerr{color:var(--red);min-height:20px;font-size:13px;margin-bottom:8px}
+.brs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.brs button{height:70px;border-radius:16px;background:var(--panel);border:1px solid var(--line);font-size:18px;font-weight:700}
+.brs button:active,.brs button.on{border-color:var(--or);background:var(--orbg)}
+.who{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.ocsh{color:var(--dim);font-size:11px}
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;direction:ltr}
 .pad button{height:64px;border-radius:16px;background:var(--panel);border:1px solid var(--line);font-size:24px;font-weight:600}
 .pad button:active{background:var(--orbg);border-color:var(--or)}
@@ -319,11 +324,20 @@ main{flex:1;min-height:0;position:relative}
 <div id="login" hidden>
   <div class="lbox">
     <div class="logo"><span class="rq">RQ</span><span class="k">KITCHEN</span></div>
-    <h2>الكاشير</h2>
-    <p>أدخل رمز الفرع (نفس رمز تطبيق الجرد)</p>
-    <div class="dots" id="dots"></div>
-    <div class="lerr" id="lerr"></div>
-    <div class="pad" id="pad"></div>
+    <div id="stepBranch">
+      <h2>اختر الفرع</h2>
+      <p>الفرع اللي تشتغل فيه اليوم</p>
+      <div class="brs" id="brs"></div>
+      <div class="lerr" id="berr"></div>
+    </div>
+    <div id="stepPin" hidden>
+      <h2 id="pinBranch">الفرع</h2>
+      <p>أدخل الرقم السري الخاص فيك</p>
+      <div class="dots" id="dots"></div>
+      <div class="lerr" id="lerr"></div>
+      <div class="pad" id="pad"></div>
+      <button class="link" id="chgBranch" style="margin-top:14px">↩ تغيير الفرع</button>
+    </div>
   </div>
 </div>
 
@@ -338,6 +352,7 @@ main{flex:1;min-height:0;position:relative}
     </nav>
     <div class="hspace"></div>
     <div class="branch" id="branchBox"></div>
+    <button class="who" id="whoBtn" title="تبديل الكاشير">👤 <span id="whoName"></span></button>
     <div class="sync"><span class="dot" id="dot"></span><span id="syncTxt"></span></div>
     <div class="clock num" id="clock"></div>
     <button class="gear" id="prBtn" aria-label="الطابعة"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><rect x="6" y="14" width="12" height="8"/></svg><i></i></button>
@@ -536,7 +551,7 @@ function branchName(id){ const b=(ctx&&ctx.branches||[]).find(x=>x.id===(id||bra
 // ---------- ui utils ----------
 let toastT;
 function toast(m, ms){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"), ms||2600); }
-function modal(h){ $("#modal").innerHTML=h; $("#ov").classList.add("on"); }
+function modal(h){ $("#modal").onclick=null; $("#modal").innerHTML=h; $("#ov").classList.add("on"); }
 function closeModal(){ $("#ov").classList.remove("on"); }
 $("#ov").addEventListener("click", e=>{ if(e.target.id==="ov" && !$("#modal").dataset.lock) closeModal(); });
 window.addEventListener("error", e=>{ console.error(e.error||e.message); });
@@ -562,27 +577,39 @@ async function padKey(k){
   if(pin.length>=8) return;
   pin+=k; renderPad();
 }
+let loginBranch=LS.get("pos.loginBranch",null), branchList=LS.get("pos.branches",[]);
+async function loadBranches(){
+  try{ const l=await rpc("pos_branches",{}); if(Array.isArray(l)&&l.length){ branchList=l; LS.set("pos.branches",l); } }catch(e){}
+  renderBranches();
+}
+function renderBranches(){
+  $("#brs").innerHTML=branchList.map(b=>`<button data-br="${esc(b.id)}">${esc(b.name)}</button>`).join("");
+  $("#berr").textContent=branchList.length?"":"تعذّر تحميل الفروع — تأكد من الإنترنت";
+}
+$("#brs").addEventListener("click", e=>{ const b=e.target.closest("[data-br]"); if(!b) return; loginBranch=b.dataset.br; LS.set("pos.loginBranch",loginBranch); showPinStep(); });
+$("#chgBranch").addEventListener("click", ()=>{ loginBranch=null; LS.del("pos.loginBranch"); showBranchStep(); });
+function showBranchStep(){ $("#stepBranch").hidden=false; $("#stepPin").hidden=true; renderBranches(); loadBranches(); }
+function showPinStep(){ const b=branchList.find(x=>x.id===loginBranch); $("#pinBranch").textContent="فرع "+(b?b.name:""); $("#stepBranch").hidden=true; $("#stepPin").hidden=false; pin=""; renderPad(); $("#lerr").textContent=""; }
 async function doLogin(){
   logging=true; $("#lerr").textContent="جارِ التحقق…";
   try{
-    const r = await rpc("pos_login", {p_pin: pin});
+    const r = await rpc("pos_login2", {p_branch: loginBranch, p_pin: pin});
     if(!r){ throw Object.assign(new Error("bad"),{bad:true}); }
-    token=r.token; ctx={role:r.role, branch_id:r.branch_id, branches:r.branches||[], settings:r.settings||{}};
+    token=r.token; ctx={role:r.role, branch_id:r.branch_id, cashier:r.cashier||"", branches:r.branches||[], settings:r.settings||{}};
     LS.set("pos.token", token); LS.set("pos.ctx", ctx);
-    if(ctx.role==="branch") branch=ctx.branch_id;
-    else if(!branch || !ctx.branches.some(b=>b.id===branch)) branch=(ctx.branches[0]||{}).id;
+    branch = ctx.role==="branch" ? ctx.branch_id : loginBranch;
     LS.set("pos.branch", branch);
     pin=""; renderPad(); $("#lerr").textContent="";
     startApp();
   }catch(e){
     pin=""; renderPad();
-    $("#lerr").textContent = e.bad ? "الرمز غير صحيح" : /locked/.test(e.message) ? "محاولات كثيرة — انتظر ١٥ دقيقة" : /forbidden/.test(e.message) ? "هذا الرمز ما له صلاحية الكاشير" : "تعذّر الاتصال — تأكد من الإنترنت";
+    $("#lerr").textContent = e.bad ? "الرقم السري غير صحيح" : /branch/.test(e.message) ? "الفرع غير موجود" : /locked/.test(e.message) ? "محاولات كثيرة — انتظر ١٥ دقيقة" : /forbidden/.test(e.message) ? "هذا الرمز ما له صلاحية الكاشير" : "تعذّر الاتصال — تأكد من الإنترنت";
     $(".lbox").classList.remove("shake"); void $(".lbox").offsetWidth; $(".lbox").classList.add("shake");
   }finally{ logging=false; }
 }
-function showLogin(){ $("#app").hidden=true; $("#login").hidden=false; pin=""; renderPad(); }
+function showLogin(){ $("#app").hidden=true; $("#login").hidden=false; pin=""; renderPad(); if(loginBranch && branchList.some(b=>b.id===loginBranch)) showPinStep(); else showBranchStep(); if(branchList.length) loadBranches(); }
 function logout(){
-  if(queue.length){ toast("فيه "+queue.length+" طلب لم يُرفع بعد — اتصل بالنت أولًا"); return; }
+  if(queue.length) sync();
   rpc("inv_logout",{p_token:token}).catch(()=>{});
   token=null; LS.del("pos.token"); closeModal(); showLogin();
 }
@@ -727,7 +754,7 @@ async function pull(){
 }
 addEventListener("online", ()=>{ online=true; updSync(); sync(); });
 addEventListener("offline", ()=>{ online=false; updSync(); });
-setInterval(()=>{ if(!$("#app").hidden) sync(); }, 12000);
+setInterval(()=>{ if(!$("#app").hidden && document.visibilityState==="visible") sync(); }, 4000);
 
 // ---------- delivery apps (channels) ----------
 let channel=null;
@@ -868,6 +895,7 @@ function finish(method,id,extra){
     const o=Object.assign({id:uid(), no:nextNo(), ts:Date.now(), day, branch_id:branch, items:cart.map(c=>({id:c.id,name:c.name,price:c.price,qty:c.qty})),
       total:+money(t.tot), vat:+money(t.vat), pay:method, note:$("#note").value.trim(), status:"new", device:DEVICE, _local:true}, id, extra);
     if(channel){ o.channel=channel; }
+    o.cashier=(ctx&&ctx.cashier)||"";
     orders.push(o); saveLocal();
     const send=clone(o); delete send._local; enqueue(send);
     cart=[]; $("#pnum").value=""; $("#phone").value=""; $("#note").value=""; $("#appRef").value=""; carColor=""; renderColors();
@@ -898,6 +926,7 @@ function receiptHTML(o, kitchen){
     <div class="c idn num">${esc(identText(o))}</div>
     <div class="c">${esc(o.mode==="car"&&o.car?[o.car.em,o.car.color].filter(Boolean).join(" · "):"")}</div>
     <div class="c num" dir="ltr">${dt(o.ts)}</div>
+    ${o.cashier?`<div class="c">الكاشير: ${esc(o.cashier)}</div>`:""}
     <hr>
     <table>${o.items.map(i=>`<tr><td class="q num">${i.qty}</td><td class="n">${esc(i.name)}</td><td class="a num">${money(i.price*i.qty)}</td></tr>`).join("")}</table>
     <hr>
@@ -995,7 +1024,7 @@ async function receiptCanvas(o, kitchen){
   y+=4; x.lineWidth=4; const bh=78*sc; x.strokeRect(PAD+20,y,W-2*PAD-40,bh); x.font=F(56*sc,true); x.textAlign="center"; x.direction="ltr"; x.fillText("#"+o.no,W/2,y+10*sc); y+=bh+10;
   center(identText(o),34,true,"ltr");
   if(o.mode==="car"&&o.car){ const sub=[o.car.em,o.car.color].filter(Boolean).join(" · "); if(sub) center(sub,20,false); }
-  center(dt(o.ts),20,false,"ltr"); hr();
+  center(dt(o.ts),20,false,"ltr"); if(o.cashier&&!kitchen) center("الكاشير: "+o.cashier,19,false); hr();
   const nameW=W-2*PAD-(kitchen?60:200)*sc;
   o.items.forEach(i=>{ const fs=(kitchen?30:22)*sc; x.font=F(fs,kitchen);
     const lines=wrap(i.name,nameW); x.direction="rtl"; x.textAlign="right"; x.font=F(fs,true); x.fillText(String(i.qty)+(kitchen?"×":""),W-PAD,y);
@@ -1194,7 +1223,7 @@ function renderOrders(){
   list=list.slice().sort((a,b)=>b.no-a.no);
   $("#olist").innerHTML = list.length ? list.map(o=>`<div class="oc ${o.status} ${o.pay==="unpaid"&&o.status!=="cancelled"?"unpaid-o":""}">
     <div class="oc-top"><div class="ono num">#${o.no}</div>
-      <div class="oid"><div class="a num" dir="auto">${esc(identText(o))}</div><div class="b">${esc(identSub(o))} · <span class="num">${hm(o.ts)}</span> ${pend.has(o.id)?`<span class="unsync">· لم يُرفع بعد</span>`:""}</div></div>
+      <div class="oid"><div class="a num" dir="auto">${esc(identText(o))}</div><div class="b">${esc(identSub(o))} · <span class="num">${hm(o.ts)}</span>${o.cashier?` · 👤 ${esc(o.cashier)}`:""} ${pend.has(o.id)?`<span class="unsync">· لم يُرفع بعد</span>`:""}</div></div>
       <span class="st ${o.status}">${STATUS[o.status]||o.status}</span></div>
     <div class="oitems">${o.items.map(i=>`${esc(i.name)} <b class="num">×${i.qty}</b>`).join(" · ")}${o.note?`<div style="color:var(--yellow);direction:rtl;text-align:right">ملاحظة: ${esc(o.note)}</div>`:""}</div>
     <div class="oc-b"><div class="tot num">${money(o.total)} د.إ <span class="tag ${payCls(o)}">${esc(payLabel(o))}</span></div>
@@ -1229,9 +1258,10 @@ function stats(list){
   const ok=list.filter(o=>o.status!=="cancelled");
   const sum=f=>ok.filter(f).reduce((s,o)=>s+(+o.total),0);
   const items={}; ok.forEach(o=>o.items.forEach(i=>{ items[i.name]=(items[i.name]||0)+i.qty; }));
+  const byC={}; ok.forEach(o=>{ const n=o.cashier||"—"; byC[n]=byC[n]||{n:0,t:0}; byC[n].n++; byC[n].t+=+o.total; });
   const apps={}; ok.filter(o=>o.channel||(o.pay!=="cash"&&o.pay!=="visa"&&o.pay!=="unpaid")).forEach(o=>{ const n=payLabel(o); apps[n]=apps[n]||{n:0,t:0}; apps[n].n++; apps[n].t+=+o.total; });
   return {count:ok.length,total:sum(()=>1),cash:sum(o=>o.pay==="cash"),visa:sum(o=>o.pay==="visa"),vat:ok.reduce((s,o)=>s+(+o.vat||0),0),
-    unpaid:sum(o=>o.pay==="unpaid"),unpaidN:ok.filter(o=>o.pay==="unpaid").length,apps,appsT:Object.values(apps).reduce((s,a)=>s+a.t,0),
+    byC, unpaid:sum(o=>o.pay==="unpaid"),unpaidN:ok.filter(o=>o.pay==="unpaid").length,apps,appsT:Object.values(apps).reduce((s,a)=>s+a.t,0),
     cashN:ok.filter(o=>o.pay==="cash").length,visaN:ok.filter(o=>o.pay==="visa").length,cancelled:list.length-ok.length,
     avg:ok.length?sum(()=>1)/ok.length:0,top:Object.entries(items).sort((a,b)=>b[1]-a[1])};
 }
@@ -1250,6 +1280,7 @@ async function renderReport(){
   const top=s.top.slice(0,10), mx=top.length?top[0][1]:1;
   $("#top").innerHTML=top.length?top.map(([n,q])=>`<div class="bar-row"><span class="bn">${esc(n)}</span><span class="bt"><i style="width:${q/mx*100}%"></i></span><span class="bq num">${q}</span></div>`).join(""):`<div style="color:var(--dim);font-size:13px">لا مبيعات</div>`;
   $("#expCash").textContent=money(s.cash)+" د.إ"; updDiff();
+  const cs=Object.entries(s.byC); $("#top").insertAdjacentHTML("beforeend", cs.length>1||(cs[0]&&cs[0][0]!=="—")?`<h3 style="margin:16px 0 8px">حسب الكاشير</h3>`+cs.map(([n,a])=>`<div class="tr"><span>👤 ${esc(n)} (${a.n} طلب)</span><b class="num">${money(a.t)}</b></div>`).join(""):"");
   $("#rangeBox").hidden = !(ctx && ctx.role==="admin");
 }
 $("#rDay").addEventListener("change", ()=>{ repOrders=null; renderReport(); });
@@ -1314,6 +1345,7 @@ function openSettings(){
     <div class="set-row"><div><div class="l">نسخة للمطبخ</div><div class="d">ورقة إضافية فيها الأصناف بخط كبير بدون أسعار</div></div><button class="sw ${prefs.kitchen?"on":""}" id="sKit"></button></div>
     <div class="set-row"><div class="l">عرض ورق الطابعة</div><div class="opt" id="sWidth">${[80,58].map(n=>`<button data-v="${n}" class="${prefs.width===n?"on":""}">${n} مم</button>`).join("")}</div></div>
     <div class="set-row"><div class="l">تجربة الطباعة</div><button class="abtn" id="sTest">🖨 طباعة تجريبية</button></div>
+    ${admin?`<div class="set-sec">الكاشيرية</div><div class="set-row"><div><div class="l">الكاشيرية وأرقامهم السرية</div><div class="d">إضافة كاشير لكل فرع، تغيير الرقم السري، إيقاف كاشير</div></div><button class="abtn pri" id="sCash">إدارة</button></div>`:""}
     ${admin?`<div class="set-sec">بيانات الفاتورة (لكل الفروع)</div>
     <div style="margin-top:10px"><input id="sTrn" placeholder="الرقم الضريبي TRN (اختياري)" value="${esc(s.trn||"")}" class="num"></div>
     <div style="margin-top:8px"><input id="sFooter" placeholder="رسالة أسفل الفاتورة" value="${esc(s.footer||"")}"></div>
@@ -1332,14 +1364,52 @@ function openSettings(){
   $("#sPr").onclick=openPrinter;
   $("#sSync").onclick=async()=>{ await sync(); toast(queue.length?"ما زال "+queue.length+" بانتظار الإنترنت":"تمت المزامنة ✓"); openSettings(); };
   $("#sOut").onclick=logout;
+  if($("#sCash")) $("#sCash").onclick=openCashiers;
   $("#modal [data-x]").onclick=closeModal;
   if(admin) $("#sSave").onclick=async()=>{ try{ await rpc("pos_save_settings",{p_token:token,p_trn:$("#sTrn").value.trim(),p_footer:$("#sFooter").value.trim()}); ctx.settings={trn:$("#sTrn").value.trim(),footer:$("#sFooter").value.trim()}; LS.set("pos.ctx",ctx); toast("تم الحفظ"); }catch(e){ toast("تعذّر الحفظ"); } };
   const ib=$("#sInstall"); if(ib) ib.onclick=async()=>{ deferredInstall.prompt(); deferredInstall=null; closeModal(); };
 }
 $("#gear").addEventListener("click", openSettings);
+$("#whoBtn").addEventListener("click", ()=>{
+  modal(`<h3>تبديل الكاشير</h3><div class="sub">الكاشير الحالي: <b>${esc((ctx&&ctx.cashier)||"")}</b>. الطلبات تبقى محفوظة وتظهر للكاشير الجديد.</div><div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok" id="swOut">خروج وتبديل</button></div>`);
+  $("#modal [data-x]").onclick=closeModal; $("#swOut").onclick=()=>{ loginBranch=branch; LS.set("pos.loginBranch",branch); logout(); };
+});
 $("#prBtn").addEventListener("click", openPrinter);
 let deferredInstall=null;
 addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferredInstall=e; });
+
+// ---------- cashiers (admin) ----------
+async function openCashiers(){
+  modal(`<h3>الكاشيرية</h3><div class="sub">جارِ التحميل…</div>`);
+  let list=[]; try{ list=await rpc("pos_cashiers_list",{p_token:token}); }catch(e){ modal(`<h3>الكاشيرية</h3><div class="sub" style="color:var(--red)">تعذّر التحميل — تأكد من الإنترنت</div><div class="mact"><button class="b-ok" data-x>رجوع</button></div>`); $("#modal [data-x]").onclick=closeModal; return; }
+  const brs=(ctx.branches||[]);
+  const bn=id=>(brs.find(b=>b.id===id)||{}).name||id;
+  modal(`<h3>الكاشيرية</h3><div class="sub">كل كاشير يدخل باختيار الفرع ثم رقمه السري (٤–٨ أرقام).</div>
+    ${brs.map(b=>{ const cs=list.filter(c=>c.branch_id===b.id); return `<div class="set-sec">فرع ${esc(b.name)}</div>`+(cs.length?cs.map(c=>`<div class="set-row"><div><div class="l" style="${c.active?"":"text-decoration:line-through;color:var(--dim)"}">👤 ${esc(c.name)}</div><div class="d">${c.active?"فعّال":"موقوف"}</div></div><button class="abtn" data-ce="${c.id}">تعديل</button></div>`).join(""):`<div class="d" style="color:var(--dim);font-size:12px;padding:6px 0">لا يوجد كاشير بعد</div>`); }).join("")}
+    <div class="set-sec">➕ إضافة كاشير</div>
+    <div class="row" style="flex-wrap:wrap;margin-top:6px">
+      <select id="ncB" style="flex:1 1 120px">${brs.map(b=>`<option value="${esc(b.id)}" ${b.id===branch?"selected":""}>${esc(b.name)}</option>`).join("")}</select>
+      <input id="ncN" placeholder="اسم الكاشير" style="flex:1 1 140px">
+      <input id="ncP" class="num" inputmode="numeric" maxlength="8" placeholder="الرقم السري" style="flex:1 1 110px">
+    </div>
+    <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok" id="ncAdd">إضافة</button></div>`);
+  $("#modal [data-x]").onclick=closeModal;
+  const errMsg=e=>/pin_taken/.test(e.message)?"الرقم السري مستخدم لكاشير ثاني في نفس الفرع":/pin_format/.test(e.message)?"الرقم السري لازم ٤ إلى ٨ أرقام":/name/.test(e.message)?"اكتب الاسم":"تعذّر الحفظ";
+  $("#ncAdd").onclick=async()=>{ try{ await rpc("pos_cashier_save",{p_token:token,p_id:null,p_branch:$("#ncB").value,p_name:$("#ncN").value.trim(),p_pin:$("#ncP").value.trim(),p_active:true}); toast("تمت إضافة الكاشير ✓"); openCashiers(); }catch(e){ toast(errMsg(e)); } };
+  $("#modal").onclick=e=>{ const b=e.target.closest("[data-ce]"); if(!b) return; const c=list.find(x=>x.id===b.dataset.ce); if(!c) return;
+    modal(`<h3>تعديل ${esc(c.name)}</h3><div class="sub">فرع ${esc(bn(c.branch_id))}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="ecN" value="${esc(c.name)}" placeholder="الاسم">
+        <select id="ecB">${brs.map(b=>`<option value="${esc(b.id)}" ${b.id===c.branch_id?"selected":""}>${esc(b.name)}</option>`).join("")}</select>
+        <input id="ecP" class="num" inputmode="numeric" maxlength="8" placeholder="رقم سري جديد (اتركه فاضي إذا ما تبي تغيّره)">
+        <div class="set-row"><div class="l">فعّال</div><button class="sw ${c.active?"on":""}" id="ecA"></button></div>
+      </div>
+      <div class="mact"><button class="b-cancel" id="ecBack">رجوع</button><button class="b-ok" id="ecSave">حفظ</button></div>`);
+    let act=c.active; $("#ecA").onclick=e2=>{ act=!act; e2.currentTarget.classList.toggle("on",act); };
+    $("#ecBack").onclick=openCashiers;
+    $("#ecSave").onclick=async()=>{ try{ await rpc("pos_cashier_save",{p_token:token,p_id:c.id,p_branch:$("#ecB").value,p_name:$("#ecN").value.trim(),p_pin:$("#ecP").value.trim()||null,p_active:act}); toast("تم الحفظ ✓"); openCashiers(); }catch(e){ toast(errMsg(e)); } };
+  };
+}
 
 // ---------- nav / branch / clock ----------
 $("#nav").addEventListener("click", e=>{
@@ -1349,7 +1419,8 @@ $("#nav").addEventListener("click", e=>{
   if(curView==="report"){ repOrders=null; $("#rDay").value=day; }
   renderAll();
 });
-function renderBranch(){
+function renderWho(){ $("#whoName").textContent=(ctx&&ctx.cashier)||"الفرع"; }
+function renderBranch(){ renderWho();
   const bx=$("#branchBox");
   if(ctx&&ctx.role==="admin"){
     bx.innerHTML=`الفرع <select id="branchSel">${ctx.branches.map(b=>`<option value="${esc(b.id)}" ${b.id===branch?"selected":""}>${esc(b.name)}</option>`).join("")}</select>`;
@@ -1384,7 +1455,7 @@ function startApp(){
 }
 
 // boot
-renderPad(); renderMenuSide();
+renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 if(!NATIVE && "serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")) navigator.serviceWorker.register("/sw.js").catch(()=>{});
 })();
