@@ -961,7 +961,8 @@ function collect(o, after){
     o.pay=method; Object.assign(o, extra); saveLocal(); const s=clone(o); delete s._local; enqueue(s);
     if(method==="cash") kickDrawer();
     if(after) after(); else renderAll();
-    modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم تحصيل الطلب</div><div class="big-no num">#${o.no}</div><div class="mt">${method==="cash"?"كاش":"فيزا"} · <span class="num">${money(o.total)}</span> د.إ</div>${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}</div>
+    modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم تحصيل الطلب</div><div class="big-no num">#${o.no}</div><div class="mt">${method==="cash"?"كاش":"فيزا"} · <span class="num">${money(o.total)}</span> د.إ</div>${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}
+      ${(!o.channel&&trackOn())?(()=>{ const qc=qrCanvas(trackUrl(o),220); return qc?`<div style="margin-top:12px;text-align:center"><img src="${qc.toDataURL()}" style="width:150px;height:150px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:12px"><div class="mt" style="font-size:13px">امسح الكود ونبّهك أول ما يجهز طلبك</div></div>`:""; })():""}</div>
       <div class="mact"><button class="b-cancel" id="rePrint">🖨 طباعة فاتورة</button><button class="b-ok" data-x>تم</button></div>`);
     $("#modal [data-x]").onclick=closeModal; $("#rePrint").onclick=()=>printOrder(o);
   });
@@ -985,7 +986,8 @@ function finish(method,id,extra){
       <div class="mt">رقم الطلب</div><div class="big-no num">${o.no}</div><div class="id num" dir="auto">${esc(identText(o))}</div>
       <div class="mt">${esc(identSub(o))} · ${esc(payLabel(o))} · <span class="num">${money(o.total)}</span> د.إ</div>
       ${method==="unpaid"?`<div class="chg" style="background:var(--redbg);color:var(--red)">غير مدفوع — يظهر في الطلبات النشطة لين يتم التحصيل</div>`:""}
-      ${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}</div>
+      ${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}
+      ${(!o.channel&&trackOn())?(()=>{ const qc=qrCanvas(trackUrl(o),220); return qc?`<div style="margin-top:12px;text-align:center"><img src="${qc.toDataURL()}" style="width:150px;height:150px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:12px"><div class="mt" style="font-size:13px">امسح الكود ونبّهك أول ما يجهز طلبك</div></div>`:""; })():""}</div>
       <div class="mact"><button class="b-cancel" id="rePrint">🖨 طباعة</button><button class="b-ok" id="newOrder">طلب جديد</button></div>`);
     $("#newOrder").onclick=closeModal;
     $("#rePrint").onclick=()=>printOrder(o);
@@ -1753,6 +1755,20 @@ function startApp(){
 applyTheme(); applyLang();
 renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
+
+// auto-update: when a new version is published, reload while the cashier is idle
+const BUILD="202610290339";
+async function checkUpdate(){
+  try{
+    if(document.hidden) return;
+    const t=await (await fetch((NATIVE?SELF:"/")+"?u="+Date.now(),{cache:"no-store"})).text();
+    const m=t.match(/const BUILD="(\d+)"/); if(!m||m[1]===BUILD) return;
+    const idle=()=>!(typeof cart!=="undefined"&&cart.length) && !$("#ov").classList.contains("on");
+    if(idle()) location.reload(); else checkUpdate.pending=true;
+  }catch(e){}
+}
+setInterval(()=>{ if(checkUpdate.pending){ if(!(cart&&cart.length)&&!$("#ov").classList.contains("on")) location.reload(); } else checkUpdate(); }, 120000);
+setTimeout(checkUpdate, 15000);
 if(!NATIVE && "serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")) navigator.serviceWorker.register("/sw.js").catch(()=>{});
 })();
 </script>
