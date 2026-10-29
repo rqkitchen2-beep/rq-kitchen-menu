@@ -12,5 +12,5 @@ for i in 1 2 3 4 5; do
   cp "$SRC"/* "$W"/ 2>/dev/null
   cd "$W" && git add -A && { git commit -qm "status run $GITHUB_RUN_NUMBER" || exit 0; }
   git push -q origin ios-status && { echo "status pushed"; exit 0; }
-  cd - >/dev/null; sleep $((i*3))
+  cd - >/dev/null; echo "::warning title=status::push failed try $i"; sleep $((i*3))
 done

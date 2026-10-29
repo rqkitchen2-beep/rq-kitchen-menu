@@ -107,6 +107,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"
+      - name: Status as annotation
+        if: always()
+        run: |
+          [ -f "$RUNNER_TEMP/st/setup.txt" ] && grep -vE "^(list-merchant|merchant-bundles)" "$RUNNER_TEMP/st/setup.txt" | head -30 | while IFS= read -r l; do echo "::warning title=setup::${l:0:400}"; done || true
 
   build:
     needs: setup
