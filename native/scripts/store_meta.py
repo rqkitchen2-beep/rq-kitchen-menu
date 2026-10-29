@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from asc import call, find_app
 
 SHOTS = sys.argv[1]
+MODE = os.environ.get("META_MODE", "all")   # all | review | submit
 ONLY = sys.argv[2:]
 PRIVACY = "https://menu.rqkitchen.app/staff#privacy-en"
 SUPPORT = "https://menu.rqkitchen.app/staff#support-en"
@@ -181,6 +182,8 @@ def do(app):
 
     rd = first(f"/v1/appStoreVersions/{vid}/appStoreReviewDetail")
     attrs = dict(CONTACT, demoAccountRequired=True, demoAccountName=c["demo_name"], notes=c["notes"][:3900])
+    pw = os.environ.get("DEMO_" + app.upper(), "")
+    if pw: attrs["demoAccountPassword"] = pw
     if rd:
         s, j = call("PATCH", f"/v1/appStoreReviewDetails/{rd['id']}", {"data": {"type": "appStoreReviewDetails", "id": rd["id"], "attributes": attrs}})
     else:
@@ -188,6 +191,9 @@ def do(app):
             "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
     out.append(f"review {s}" + ("" if s < 300 else " " + err(j)))
 
+    out.append("password set" if pw else "password missing")
+    if MODE == "review":
+        ann(app, " | ".join(out)); return
     # screenshots
     for dev, dtype in (("iphone", "APP_IPHONE_67"), ("ipad", "APP_IPAD_PRO_3GEN_129")):
         d = os.path.join(SHOTS, app, dev)
@@ -245,6 +251,28 @@ def do(app):
     out.append(f"availability ({len(terr)} territories) {s}" + ("" if s < 300 else " " + err(j)[:300]))
     ann(app, " | ".join(out))
 
+
+def submit(app):
+    c = APPS[app]; a = find_app(c["bundle"]); aid = a["id"]
+    s, j = call("GET", f"/v1/apps/{aid}/appStoreVersions?filter[platform]=IOS&limit=10")
+    ver = next((d for d in j.get("data", []) if d["attributes"]["appStoreState"] in ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED")), None)
+    if not ver:
+        st = [d["attributes"]["appStoreState"] for d in j.get("data", [])]
+        ann(app, f"submit: nothing to submit, version state {st}"); return
+    s, j = call("GET", f"/v1/reviewSubmissions?filter[app]={aid}&filter[platform]=IOS&limit=20")
+    sub = next((d for d in j.get("data", []) if d["attributes"].get("state") in ("READY_FOR_REVIEW",)), None)
+    if not sub:
+        s, j = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"},
+            "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
+        if s >= 300: ann(app, f"submit create {s} {err(j)}"); return
+        sub = j["data"]
+    s, j = call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {
+        "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sub["id"]}},
+        "appStoreVersion": {"data": {"type": "appStoreVersions", "id": ver["id"]}}}}})
+    r1 = f"item {s}" + ("" if s < 300 else " " + err(j)[:800])
+    s, j = call("PATCH", f"/v1/reviewSubmissions/{sub['id']}", {"data": {"type": "reviewSubmissions", "id": sub["id"], "attributes": {"submitted": True}}})
+    ann(app, f"submit: {r1} | submitted {s}" + ("" if s < 300 else " " + err(j)[:1500]))
+
 for app in ONLY:
-    try: do(app)
+    try: submit(app) if MODE == "submit" else do(app)
     except Exception as e: ann(app, "EXC " + repr(e)[:500])
