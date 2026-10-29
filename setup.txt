@@ -1,13 +1,2 @@
-run: 42  Wed Oct 28 23:51:53 UTC 2026
-team: Z34R6L55G2 / Z34R6L55G2
-app_customer: 6822102459
-app_driver: 6822102915
-app_branch: 6822106188
-app_cashier: MISSING
-cashier: create the app in App Store Connect first (bundle com.rqkitchen.cashier)
-matrix: []
----- apple pay ----
-list-merchant 200 {"data": [{"type": "merchantIds", "id": "3MWDKN79PG", "attributes": {"isPlatformIntegrator": false, "identifier": "merchant.com.rqkitchen.app", "prefix": "Z34R6L55G2", "canEdit": true, "name": "RQ Kitchen", "canDelete": true, "isPSP": false}, "relationships": {"certificates": {"meta": {"paging": {"total": 0, "limit": 2147483647}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/relationships/certificates", "related": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/certificates"}}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/m
-merchant_id: 3MWDKN79PG
-caps: []
-merchant-bundles 404 {"errors": [{"id": "95e9c7fd-9bb4-44b5-82d7-2c853153c464", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
+run: 43  Wed Oct 28 23:59:58 UTC 2026
+bundle error 403 {"errors": [{"id": "d99eca88-f1c6-4418-9cbf-e77fbf2f26f3", "status": "403", "code": "FORBIDDEN_ERROR.PLA_NOT_ACCEPTED", "title": "Unable to process request - PLA Update available", "detail": "You currently don't have access to this membership resource. To resolve this issue, your team's Account Holder, Ahmed Deiab, must agree to the latest Program License Agreement."}]}
