@@ -45,6 +45,8 @@ jobs:
           T2=$(python3 native/scripts/asc.py ensure-bundle com.rqkitchen.driver "RQ Driver" 2>>"$ST")
           python3 native/scripts/asc.py ensure-bundle com.rqkitchen.branch "RQ Branch" >/dev/null 2>>"$ST"
           python3 native/scripts/asc.py ensure-bundle com.rqkitchen.cashier "RQ Cashier" >/dev/null 2>>"$ST"
+          python3 native/scripts/asc.py ensure-bundle com.rqkitchen.attendance "RQ Attendance" >/dev/null 2>>"$ST"
+          python3 native/scripts/asc.py ensure-bundle com.rqkitchen.inventory "RQ Inventory" >/dev/null 2>>"$ST"
           echo "team: $T1 / $T2" >> "$ST"
           A1=$(python3 native/scripts/asc.py find-app com.rqkitchen.app)
           A2=$(python3 native/scripts/asc.py find-app com.rqkitchen.driver)
@@ -54,6 +56,10 @@ jobs:
           echo "app_branch: ${A3:-MISSING}" >> "$ST"
           A4=$(python3 native/scripts/asc.py find-app com.rqkitchen.cashier)
           echo "app_cashier: ${A4:-MISSING}" >> "$ST"
+          A5=$(python3 native/scripts/asc.py find-app com.rqkitchen.attendance)
+          echo "app_attendance: ${A5:-MISSING}" >> "$ST"
+          A6=$(python3 native/scripts/asc.py find-app com.rqkitchen.inventory)
+          echo "app_inventory: ${A6:-MISSING}" >> "$ST"
           REQ=$(cat native/build-request.txt)
           M="[]"
           L=""
