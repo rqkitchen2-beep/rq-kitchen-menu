@@ -124,6 +124,38 @@ p.save
 RB
 ruby "$RUNNER_TEMP/snd.rb" "$APPDIR/App.xcodeproj" && echo "RESULT: alert sound bundled" || echo "RESULT: WARNING alert sound skipped"
 
+step "native page tweaks"
+# Apps that open a live site get a small script injected into every page: it marks the page as
+# running inside the app and hides the web "install this app" banner, which makes no sense there.
+INJECT_CSS=$(python3 -c "import json;print(json.load(open('$DIR/loader.json')).get('hide',''))" 2>/dev/null)
+if [ -n "$INJECT_CSS" ]; then
+cat > "$APPDIR/App/RQViewController.swift" <<SW
+import UIKit
+import WebKit
+import Capacitor
+
+class RQViewController: CAPBridgeViewController {
+    override func capacitorDidLoad() {
+        let js = "window.RQ_NATIVE=true;document.documentElement.classList.add('rq-native');var s=document.createElement('style');s.textContent='$INJECT_CSS{display:none!important}';(document.head||document.documentElement).appendChild(s);"
+        webView?.configuration.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+    }
+}
+SW
+cat > "$RUNNER_TEMP/vc.rb" <<'RB'
+require 'xcodeproj'
+p = Xcodeproj::Project.open(ARGV[0])
+t = p.targets.find { |x| x.name == 'App' }
+g = p.main_group.find_subpath('App', false)
+r = g.new_reference('RQViewController.swift')
+t.source_build_phase.add_file_reference(r)
+p.save
+RB
+ruby "$RUNNER_TEMP/vc.rb" "$APPDIR/App.xcodeproj" || die "view controller add failed"
+SB="$APPDIR/App/Base.lproj/Main.storyboard"
+sed -i '' 's/customClass="CAPBridgeViewController" customModule="Capacitor"/customClass="RQViewController" customModule="App" customModuleProvider="target"/' "$SB"
+grep -q RQViewController "$SB" && echo "RESULT: page tweaks injected ($INJECT_CSS)" || die "storyboard patch failed"
+fi
+
 step "push delegate"
 python3 - "$APPDIR/App/AppDelegate.swift" <<'PY' || die "AppDelegate patch failed"
 import sys

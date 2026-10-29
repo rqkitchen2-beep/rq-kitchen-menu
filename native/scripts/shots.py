@@ -54,9 +54,11 @@ def attendance(page, dev):
     page.goto("https://attendance.rqkitchen.app/", wait_until="networkidle")
     page.wait_for_selector("#loginBox:not(.hidden), #ticket:not(.hidden)", timeout=30000); time.sleep(1)
     click_if(page, "#salawatGo")
+    hide = "var s=document.createElement('style');s.textContent='#installBar,#starsBox{display:none!important}';document.head.appendChild(s)"
+    page.evaluate(hide)
     save(page, "attendance", dev, 1)
     page.fill("#lgEmail", ATT_EMAIL); page.fill("#lgPin", ATT_PIN); page.click("#lgBtn")
-    time.sleep(4); click_if(page, "#salawatGo", 3000); time.sleep(1.5)
+    time.sleep(4); click_if(page, "#salawatGo", 3000); time.sleep(1.5); page.evaluate(hide)
     save(page, "attendance", dev, 2)
     if click_if(page, '[data-tab="mine"]'):
         time.sleep(3); save(page, "attendance", dev, 3)
