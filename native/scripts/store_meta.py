@@ -273,6 +273,13 @@ def submit(app):
     s, j = call("PATCH", f"/v1/reviewSubmissions/{sub['id']}", {"data": {"type": "reviewSubmissions", "id": sub["id"], "attributes": {"submitted": True}}})
     ann(app, f"submit: {r1} | submitted {s}" + ("" if s < 300 else " " + err(j)[:1500]))
 
+def probe(app):
+    aid = find_app(APPS[app]["bundle"])["id"]; r = []
+    for path in (f"/v1/apps/{aid}/appDataUsages", f"/v1/appDataUsages?filter[app]={aid}", f"/v1/apps/{aid}/dataUsages",
+                 f"/v1/apps/{aid}/appDataUsagesPublishState", "/v1/appDataUsageCategories?limit=5"):
+        s_, j = call("GET", path); r.append(f"{path.split('?')[0][-40:]} {s_} {json.dumps(j)[:200]}")
+    ann(app, " || ".join(r))
+
 for app in ONLY:
-    try: submit(app) if MODE == "submit" else do(app)
+    try: submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
     except Exception as e: ann(app, "EXC " + repr(e)[:500])

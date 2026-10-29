@@ -69,5 +69,5 @@ jobs:
         run: |
           printf '%s\n' "$ASC_KEY" > "$RUNNER_TEMP/key.p8"
           export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
-          case "${{ inputs.step }}" in review) export META_MODE=review;; submit) export META_MODE=submit;; *) export META_MODE=all;; esac
+          case "${{ inputs.step }}" in review) export META_MODE=review;; submit) export META_MODE=submit;; probe) export META_MODE=probe;; *) export META_MODE=all;; esac
           python native/scripts/store_meta.py "$RUNNER_TEMP/shots" ${{ inputs.apps }}
