@@ -1,0 +1,15 @@
+{
+  "name": "rq-kitchen-attendance",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@capacitor/cli": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/ios": "latest",
+    "@capacitor/splash-screen": "latest",
+    "@capacitor/status-bar": "latest",
+    "@capacitor/haptics": "latest",
+    "rq-native": "file:../plugins/rq-native",
+    "@capacitor/geolocation": "latest"
+  }
+}

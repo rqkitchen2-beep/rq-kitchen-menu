@@ -1,1 +1,1 @@
-cashier
+cashier attendance inventory

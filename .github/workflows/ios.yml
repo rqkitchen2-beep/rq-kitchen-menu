@@ -70,6 +70,12 @@ jobs:
             if [ "$a" = cashier ]; then
               if [ -n "$A4" ]; then L="$L\"cashier\","; else echo "cashier: create the app in App Store Connect first (bundle com.rqkitchen.cashier)" >> "$ST"; fi
             fi
+            if [ "$a" = attendance ]; then
+              if [ -n "$A5" ]; then L="$L\"attendance\","; else echo "attendance: create the app in App Store Connect first (bundle com.rqkitchen.attendance)" >> "$ST"; fi
+            fi
+            if [ "$a" = inventory ]; then
+              if [ -n "$A6" ]; then L="$L\"inventory\","; else echo "inventory: create the app in App Store Connect first (bundle com.rqkitchen.inventory)" >> "$ST"; fi
+            fi
           done
           [ -n "$L" ] && M="[${L%,}]"
           echo "matrix: $M" >> "$ST"
