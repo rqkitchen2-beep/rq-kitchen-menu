@@ -1,15 +1,15 @@
-android branch run: 16 rc: 0 Wed Oct 28 23:54:30 UTC 2026
+android branch run: 17 rc: 0 Thu Oct 29 00:02:16 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
 RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin" "classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin" "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin" "classpath": "com.rqkitchen.rqnative.RQNativePlugin" 
 STEP: icon + version
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 116
+RESULT: apk signed 3.2M versionCode 117
 ---- errors ----
 ---- tail ----
+> Task :capacitor-android:bundleReleaseAar
 > Task :capacitor-android:mapReleaseSourceSetPaths
-> Task :app:mergeReleaseJavaResource
 > Task :capacitor-android:mergeReleaseResources
 > Task :capacitor-cordova-android-plugins:bundleReleaseAar
 > Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
@@ -38,10 +38,10 @@ RESULT: apk signed 3.2M versionCode 116
 > Task :capacitor-splash-screen:assembleRelease
 > Task :rq-native:bundleReleaseAar
 > Task :rq-native:mapReleaseSourceSetPaths
-> Task :rq-native:mergeReleaseResources
-> Task :capacitor-status-bar:verifyReleaseResources
-> Task :capacitor-status-bar:assembleRelease
 > Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
+> Task :capacitor-status-bar:verifyReleaseResources
+> Task :rq-native:mergeReleaseResources
+> Task :capacitor-status-bar:assembleRelease
 > Task :rq-native:verifyReleaseResources
 > Task :rq-native:assembleRelease
 > Task :capacitor-haptics:lintVitalAnalyzeRelease
@@ -65,7 +65,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 21s
+BUILD SUCCESSFUL in 2m 3s
 324 actionable tasks: 324 executed
-RESULT: apk signed 3.2M versionCode 116
+RESULT: apk signed 3.2M versionCode 117
 RESULT: published
