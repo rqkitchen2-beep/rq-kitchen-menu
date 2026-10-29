@@ -136,6 +136,7 @@ def do(app):
     if s < 300 and j.get("data"):
         ar = j["data"]; attrs = {}
         for k, v in ar["attributes"].items():
+            if "grac" in k.lower() or "korea" in k.lower(): continue
             if k in ("kidsAgeBand", "ageRatingOverride", "ageRatingOverrideV2", "koreaAgeRatingOverride", "developerAgeRatingInfoUrl"): continue
             if isinstance(v, bool) or k.startswith("is") or k in ("gambling", "lootBox", "unrestrictedWebAccess", "advertising", "ageAssurance", "healthOrWellnessTopics", "messagingAndChat", "parentalControls", "userGeneratedContent"):
                 attrs[k] = False
@@ -148,6 +149,9 @@ def do(app):
             for e in j2.get("errors", []):
                 k = (e.get("source", {}).get("pointer") or "").split("/")[-1]
                 det = e.get("detail", "")
+                if not k:
+                    import re as _re
+                    m = _re.search(r"attribute '([A-Za-z]+)'", det); k = m.group(1) if m else ""
                 if k in attrs:
                     if "BOOLEAN" in det: attrs[k] = False; fixed = True
                     elif "STRING" in det or "not a valid" in det.lower() or "invalid" in det.lower():
