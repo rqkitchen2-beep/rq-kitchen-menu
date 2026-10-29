@@ -1,0 +1,65 @@
+name: App Store listing
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: apps
+        default: "cashier attendance inventory"
+      step:
+        description: "shots | meta | all"
+        default: "all"
+
+permissions:
+  contents: write
+
+env:
+  ASC_KEY_ID: UC2RA225DB
+  ASC_ISSUER: b8b36c2c-fdf9-40d8-a572-a8c2f019f780
+
+jobs:
+  listing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tools
+        run: |
+          pip install -q playwright pyjwt cryptography
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-core fonts-noto-color-emoji >/dev/null
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Screenshots
+        if: inputs.step != 'meta'
+        env:
+          SHOT_CASHIER_PIN: "104729"
+          SHOT_INV_PIN: "266031"
+          SHOT_ATT_EMAIL: review@rqkitchen.app
+          SHOT_ATT_PIN: "3958"
+        run: |
+          python native/scripts/shots.py "$RUNNER_TEMP/shots" ${{ inputs.apps }} 2>&1 | tee "$RUNNER_TEMP/shots.log"
+          grep -E "ERROR" "$RUNNER_TEMP/shots.log" | head -8 | while IFS= read -r l; do echo "::warning title=shots::${l:0:400}"; done
+          echo "::warning title=shots::$(grep -c ' ok' "$RUNNER_TEMP/shots.log") screenshots"
+      - name: Save screenshots to branch store-shots
+        if: inputs.step != 'meta'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          W="$RUNNER_TEMP/sb"; mkdir -p "$W"; cp -r "$RUNNER_TEMP/shots/." "$W/"
+          cd "$W" && git init -q && git checkout -q -b store-shots
+          git config user.name "ios-bot"; git config user.email "ios-bot@users.noreply.github.com"
+          git add -A && git commit -qm "screenshots run $GITHUB_RUN_NUMBER"
+          git push -qf "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" store-shots 2>&1 | tail -2 | while IFS= read -r l; do echo "::warning title=push::$l"; done; true
+      - name: Fetch saved screenshots
+        if: inputs.step == 'meta'
+        run: git clone -q --depth 1 -b store-shots "https://github.com/${GITHUB_REPOSITORY}.git" "$RUNNER_TEMP/shots"
+      - name: Listing
+        if: inputs.step != 'shots'
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          printf '%s\n' "$ASC_KEY" > "$RUNNER_TEMP/key.p8"
+          export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
+          python native/scripts/store_meta.py "$RUNNER_TEMP/shots" ${{ inputs.apps }}
