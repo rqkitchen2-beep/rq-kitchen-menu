@@ -141,7 +141,20 @@ def do(app):
                 attrs[k] = False
             else:
                 attrs[k] = "NONE"
-        s2, j2 = call("PATCH", f"/v1/ageRatingDeclarations/{ar['id']}", {"data": {"type": "ageRatingDeclarations", "id": ar["id"], "attributes": attrs}})
+        for _ in range(6):
+            s2, j2 = call("PATCH", f"/v1/ageRatingDeclarations/{ar['id']}", {"data": {"type": "ageRatingDeclarations", "id": ar["id"], "attributes": attrs}})
+            if s2 < 300: break
+            fixed = False
+            for e in j2.get("errors", []):
+                k = (e.get("source", {}).get("pointer") or "").split("/")[-1]
+                det = e.get("detail", "")
+                if k in attrs:
+                    if "BOOLEAN" in det: attrs[k] = False; fixed = True
+                    elif "STRING" in det or "not a valid" in det.lower() or "invalid" in det.lower():
+                        if attrs[k] != "NONE": attrs[k] = "NONE"; fixed = True
+                        else: attrs.pop(k); fixed = True
+                    else: attrs.pop(k); fixed = True
+            if not fixed: break
         out.append(f"age {s2}" + ("" if s2 < 300 else " " + err(j2)))
 
     s, j = call("GET", f"/v1/apps/{aid}/appStoreVersions?filter[platform]=IOS&limit=10")
@@ -214,13 +227,18 @@ def do(app):
     else:
         out.append(f"price: free point not found {s}")
 
-    # availability: United Arab Emirates
+    # availability: United Arab Emirates only (Apple wants every territory listed)
+    terr = []; path = "/v1/territories?limit=200"
+    while path:
+        s, j = call("GET", path); terr += [t["id"] for t in j.get("data", [])]
+        nxt = j.get("links", {}).get("next"); path = nxt.replace("https://api.appstoreconnect.apple.com", "") if nxt else None
+    inc = [{"type": "territoryAvailabilities", "id": "${t%d}" % i, "attributes": {"available": t == "ARE", "releaseDate": None, "preOrderEnabled": False},
+            "relationships": {"territory": {"data": {"type": "territories", "id": t}}}} for i, t in enumerate(terr)]
     s, j = call("POST", "/v2/appAvailabilities", {"data": {"type": "appAvailabilities", "attributes": {"availableInNewTerritories": False},
         "relationships": {"app": {"data": {"type": "apps", "id": aid}},
-                          "territoryAvailabilities": {"data": [{"type": "territoryAvailabilities", "id": "${t0}"}]}}},
-        "included": [{"type": "territoryAvailabilities", "id": "${t0}", "attributes": {"available": True, "releaseDate": None, "preOrderEnabled": False},
-                      "relationships": {"territory": {"data": {"type": "territories", "id": "ARE"}}}}]})
-    out.append(f"availability {s}" + ("" if s < 300 else " " + err(j)))
+                          "territoryAvailabilities": {"data": [{"type": "territoryAvailabilities", "id": x["id"]} for x in inc]}}},
+        "included": inc})
+    out.append(f"availability ({len(terr)} territories) {s}" + ("" if s < 300 else " " + err(j)[:300]))
     ann(app, " | ".join(out))
 
 for app in ONLY:
