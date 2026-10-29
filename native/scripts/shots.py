@@ -6,10 +6,10 @@ from playwright.sync_api import sync_playwright
 
 OUT = sys.argv[1]
 ONLY = sys.argv[2:] or ["cashier", "attendance", "inventory"]
-CASHIER_PIN = os.environ.get("SHOT_CASHIER_PIN", "")
-INV_PIN = os.environ.get("SHOT_INV_PIN", "")
+CASHIER_PIN = os.environ.get("DEMO_CASHIER", "")
+INV_PIN = os.environ.get("DEMO_INVENTORY", "")
 ATT_EMAIL = os.environ.get("SHOT_ATT_EMAIL", "")
-ATT_PIN = os.environ.get("SHOT_ATT_PIN", "")
+ATT_PIN = os.environ.get("DEMO_ATTENDANCE", "")
 DEVICES = {
     "iphone": dict(viewport={"width": 430, "height": 932}, device_scale_factor=3, is_mobile=True, has_touch=True,
                    user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"),

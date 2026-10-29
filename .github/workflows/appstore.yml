@@ -32,19 +32,25 @@ jobs:
           pip install -q playwright pyjwt cryptography
           sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-core fonts-noto-color-emoji >/dev/null
           python -m playwright install --with-deps chromium >/dev/null
+      - name: Demo accounts
+        run: |
+          # demo PINs come from a Supabase function that only answers this workflow (GitHub OIDC)
+          OIDC=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=rq-demo-creds" | python -c "import sys,json;print(json.load(sys.stdin)['value'])")
+          CR=$(curl -s -H "Authorization: Bearer $OIDC" https://dhqgorvtwgzekmmjztyr.supabase.co/functions/v1/demo-creds)
+          for a in cashier attendance inventory; do
+            v=$(printf '%s' "$CR" | python -c "import sys,json;print(json.load(sys.stdin).get('$a',''))" 2>/dev/null)
+            if [ -n "$v" ]; then echo "::add-mask::$v"; echo "DEMO_${a^^}=$v" >> "$GITHUB_ENV"; else echo "::warning title=demo::no PIN for $a"; fi
+          done
       - name: Screenshots
-        if: inputs.step != 'meta'
+        if: inputs.step == 'shots' || inputs.step == 'all'
         env:
-          SHOT_CASHIER_PIN: "104729"
-          SHOT_INV_PIN: "266031"
           SHOT_ATT_EMAIL: review@rqkitchen.app
-          SHOT_ATT_PIN: "3958"
         run: |
           python native/scripts/shots.py "$RUNNER_TEMP/shots" ${{ inputs.apps }} 2>&1 | tee "$RUNNER_TEMP/shots.log"
           grep -E "ERROR" "$RUNNER_TEMP/shots.log" | head -8 | while IFS= read -r l; do echo "::warning title=shots::${l:0:400}"; done
           echo "::warning title=shots::$(grep -c ' ok' "$RUNNER_TEMP/shots.log") screenshots"
       - name: Save screenshots to branch store-shots
-        if: inputs.step != 'meta'
+        if: inputs.step == 'shots' || inputs.step == 'all'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
@@ -54,7 +60,7 @@ jobs:
           git add -A && git commit -qm "screenshots run $GITHUB_RUN_NUMBER"
           git push -qf "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" store-shots 2>&1 | tail -2 | while IFS= read -r l; do echo "::warning title=push::$l"; done; true
       - name: Fetch saved screenshots
-        if: inputs.step != 'shots' && inputs.step != 'all'
+        if: inputs.step == 'meta'
         run: git clone -q --depth 1 -b store-shots "https://github.com/${GITHUB_REPOSITORY}.git" "$RUNNER_TEMP/shots"
       - name: Listing
         if: inputs.step != 'shots'
@@ -63,12 +69,5 @@ jobs:
         run: |
           printf '%s\n' "$ASC_KEY" > "$RUNNER_TEMP/key.p8"
           export ASC_KEY_PATH="$RUNNER_TEMP/key.p8"
-          # demo PINs come from a Supabase function that only answers this workflow (GitHub OIDC)
-          OIDC=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=rq-demo-creds" | python -c "import sys,json;print(json.load(sys.stdin)['value'])")
-          CR=$(curl -s -H "Authorization: Bearer $OIDC" https://dhqgorvtwgzekmmjztyr.supabase.co/functions/v1/demo-creds)
-          for a in cashier attendance inventory; do
-            v=$(printf '%s' "$CR" | python -c "import sys,json;print(json.load(sys.stdin).get('$a',''))" 2>/dev/null)
-            [ -n "$v" ] && echo "::add-mask::$v" && export "DEMO_${a^^}=$v"
-          done
           case "${{ inputs.step }}" in review) export META_MODE=review;; submit) export META_MODE=submit;; *) export META_MODE=all;; esac
           python native/scripts/store_meta.py "$RUNNER_TEMP/shots" ${{ inputs.apps }}
