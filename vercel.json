@@ -10,6 +10,16 @@
         }
       ],
       "destination": "/app.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "/apps.html"
     }
   ],
   "git": {
@@ -18,6 +28,39 @@
     }
   },
   "redirects": [
+    {
+      "source": "/inventory",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-inventory/RQ-Inventory.apk",
+      "permanent": false
+    },
+    {
+      "source": "/attendance",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-attendance/RQ-Attendance.apk",
+      "permanent": false
+    },
+    {
+      "source": "/cashier",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-cashier/RQ-Cashier.apk",
+      "permanent": false
+    },
     {
       "source": "/",
       "has": [
@@ -63,21 +106,6 @@
     {
       "source": "/delivery-policy",
       "destination": "/legal#delivery",
-      "permanent": false
-    },
-    {
-      "source": "/apk-cashier",
-      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-cashier/RQ-Cashier.apk",
-      "permanent": false
-    },
-    {
-      "source": "/apk-attendance",
-      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-attendance/RQ-Attendance.apk",
-      "permanent": false
-    },
-    {
-      "source": "/apk-inventory",
-      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-inventory/RQ-Inventory.apk",
       "permanent": false
     }
   ],
