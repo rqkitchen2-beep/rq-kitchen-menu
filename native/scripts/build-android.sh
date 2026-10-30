@@ -43,6 +43,11 @@ VC=$((GITHUB_RUN_NUMBER + 100))
 sed -i "s/versionCode [0-9]*/versionCode $VC/; s/versionName \"[^\"]*\"/versionName \"1.0.$GITHUB_RUN_NUMBER\"/" android/app/build.gradle
 # keep the device awake & portrait-friendly; lock to sensor portrait is not forced
 sed -i 's#<application#<application android:usesCleartextTraffic="false"#' android/app/src/main/AndroidManifest.xml
+if [ "$APP" = attendance ]; then
+  # clock-in checks the device location at the branch
+  sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
+  grep -q ACCESS_FINE_LOCATION android/app/src/main/AndroidManifest.xml && echo "RESULT: location permission added"
+fi
 
 step "gradle build"
 cd android

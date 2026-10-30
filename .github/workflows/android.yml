@@ -8,6 +8,8 @@ on:
       - 'native/android/**'
       - 'native/branch/**'
       - 'native/cashier/**'
+      - 'native/attendance/**'
+      - 'native/inventory/**'
       - 'native/plugins/**'
       - 'native/loader/**'
       - 'native/scripts/build-android.sh'
@@ -92,3 +94,45 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: bash native/scripts/push-status.sh "$RUNNER_TEMP/st"
+
+  staff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: attendance
+            apk: RQ-Attendance.apk
+            title: "RQ Attendance (Android)"
+            notes: "RQ Kitchen staff attendance (clock in / clock out) app for Android. Download the APK and install it."
+          - app: inventory
+            apk: RQ-Inventory.apk
+            title: "RQ Inventory (Android)"
+            notes: "RQ Kitchen stock count app for Android phones and tablets. Download the APK and install it."
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Build APK
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+          APP: ${{ matrix.app }}
+        run: |
+          set +e
+          bash native/scripts/build-android.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
+          RC=${PIPESTATUS[0]}
+          grep -E "^(RESULT|ERROR)" "$RUNNER_TEMP/build.log" | while IFS= read -r l; do echo "::warning title=android ${{ matrix.app }}::$l"; done
+          exit $RC
+      - name: Publish APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view android-${{ matrix.app }} >/dev/null 2>&1 || gh release create android-${{ matrix.app }} --title "${{ matrix.title }}" --notes "${{ matrix.notes }}"
+          gh release upload android-${{ matrix.app }} "$RUNNER_TEMP/${{ matrix.apk }}" --clobber
+          echo "::warning title=android ${{ matrix.app }}::published"
