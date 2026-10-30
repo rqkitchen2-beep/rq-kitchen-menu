@@ -1,11 +1,11 @@
-android cashier run: 18 rc: 0 Thu Oct 29 00:15:29 UTC 2026
+android cashier run: 19 rc: 0 Fri Oct 30 01:28:19 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
 RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin" "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin" "classpath": "com.rqkitchen.rqnative.RQNativePlugin" 
 STEP: icon + version
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 118
+RESULT: apk signed 3.2M versionCode 119
 ---- errors ----
 ---- tail ----
 > Task :app:optimizeReleaseResources
@@ -42,14 +42,14 @@ RESULT: apk signed 3.2M versionCode 118
 > Task :capacitor-status-bar:verifyReleaseResources
 > Task :rq-native:mergeReleaseResources
 > Task :capacitor-status-bar:assembleRelease
+> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :rq-native:verifyReleaseResources
 > Task :rq-native:assembleRelease
-> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-haptics:lintVitalAnalyzeRelease
 > Task :capacitor-splash-screen:lintVitalAnalyzeRelease
 > Task :capacitor-status-bar:lintVitalAnalyzeRelease
-> Task :rq-native:lintVitalAnalyzeRelease
 > Task :capacitor-android:lintVitalAnalyzeRelease
+> Task :rq-native:lintVitalAnalyzeRelease
 > Task :app:lintVitalAnalyzeRelease
 > Task :app:lintVitalReportRelease
 > Task :app:lintVitalRelease
@@ -65,7 +65,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 56s
+BUILD SUCCESSFUL in 1m 51s
 283 actionable tasks: 283 executed
-RESULT: apk signed 3.2M versionCode 118
+RESULT: apk signed 3.2M versionCode 119
 RESULT: published
