@@ -280,6 +280,15 @@ def probe(app):
         s_, j = call("GET", path); r.append(f"{path.split('?')[0][-40:]} {s_} {json.dumps(j)[:200]}")
     ann(app, " || ".join(r))
 
+def status(app):
+    aid = find_app(APPS[app]["bundle"])["id"]
+    s, j = call("GET", f"/v1/apps/{aid}/appStoreVersions?filter[platform]=IOS&limit=5")
+    v = [f"{d['attributes']['versionString']}:{d['attributes']['appStoreState']}" for d in j.get("data", [])]
+    s, j = call("GET", f"/v1/reviewSubmissions?filter[app]={aid}&filter[platform]=IOS&limit=5")
+    r = [d["attributes"].get("state") for d in j.get("data", [])]
+    s, j = call("GET", f"/v1/apps/{aid}/appStoreVersions?filter[platform]=IOS&limit=1&include=appStoreVersionSubmission")
+    ann(app, f"versions {v} | submissions {r}")
+
 for app in ONLY:
-    try: submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
+    try: status(app) if MODE == "status" else submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
     except Exception as e: ann(app, "EXC " + repr(e)[:500])
