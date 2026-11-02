@@ -2,5 +2,5 @@
   "mode": "remote",
   "remote": "https://attendance.rqkitchen.app/",
   "bg": "#F8F5F1",
-  "hide": "#installBar"
+  "hide": "#installBar,p:has(#toReg),#regBox"
 }

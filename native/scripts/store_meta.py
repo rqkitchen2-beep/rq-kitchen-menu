@@ -83,6 +83,37 @@ APPS = {
           "next to 0. The demo PIN opens a separate demo branch, so you can try the stock count freely."),
 }
 
+COMMON = ("\n\n4) External services: Supabase (our own database and staff sign-in), Vercel (hosting of our web content), "
+          "Google Fonts. No third-party payment processor, no advertising, no analytics SDK and no AI services.\n"
+          "5) Regional differences: none - the app works the same everywhere. It is distributed only in the United Arab Emirates, where our branches are.\n"
+          "6) Regulated industry / third-party material: not applicable - this is an internal tool of a restaurant and contains only our own content.")
+INFO = {
+  "cashier": ("1) Screen recording: attached to our reply in App Review.\n"
+              "2) Purpose & audience: point-of-sale app for the cashiers of RQ Kitchen restaurants (UAE). It replaces paper and a costly "
+              "third-party POS: cashiers take walk-in, phone and delivery-app orders, take cash or card payment (card is charged on a separate bank terminal), "
+              "print receipts and kitchen tickets, and every order updates our sales reports and stock.\n"
+              "3) Instructions: launch the app, tap any branch, type the demo PIN and tap the check mark. The demo cashier always works in an isolated "
+              "demo branch. If asked to open the day, type any amount and tap the green button. Tap products to add them, enter any car plate number, "
+              "then tap Cash or Card to complete the order. The Orders tab shows live orders (mark Ready / Delivered, edit, cancel). "
+              "The Report tab shows the day's sales. A receipt printer is optional; without it the app still works."),
+  "attendance": ("1) Screen recording: attached to our reply in App Review.\n"
+              "2) Purpose & audience: time-clock app for RQ Kitchen employees (UAE). Staff clock in and out at their branch, see their monthly "
+              "attendance, lateness and salary details, request leave and receive notices; managers see live attendance and payroll reports. "
+              "It replaces paper sign-in sheets.\n"
+              "3) Instructions: launch the app and sign in with the demo email and PIN. The main screen shows the clock-in card; clocking in "
+              "opens only during shift hours and only when the device is physically inside a branch (location is checked only at the moment "
+              "of the tap), so outside our branches the app shows that clock-in is closed - this is expected. Tap 'My reports' (bottom bar) to see "
+              "the monthly report, salary details, points and leave request.\n"
+              "Accounts: there is no account sign-up inside the iOS app; employee accounts are created and approved by the restaurant management. "
+              "Employees can request account and data deletion through their manager or the contact in our privacy policy."),
+  "inventory": ("1) Screen recording: attached to our reply in App Review.\n"
+              "2) Purpose & audience: stock-count app for RQ Kitchen branches and warehouse staff (UAE). Staff count stock step by step, record "
+              "transfers from the warehouse to branches, and management sees consumption calculated from sales and recipes. It replaces "
+              "spreadsheets and paper counts.\n"
+              "3) Instructions: launch the app, type the demo PIN on the keypad and tap the button next to 0. The demo PIN opens an isolated demo "
+              "branch: follow the numbered steps at the top, search items by name, type counted quantities and continue to the next step."),
+}
+
 def ann(app, msg): print(f"::warning title=store {app}::{msg[:3000]}", flush=True)
 def err(j): return json.dumps(j.get("errors", j))[:600]
 
@@ -181,7 +212,8 @@ def do(app):
         out.append(f"ver-loc {loc['attributes']['locale']} {s2}" + ("" if s2 < 300 else " " + err(j2)))
 
     rd = first(f"/v1/appStoreVersions/{vid}/appStoreReviewDetail")
-    attrs = dict(CONTACT, demoAccountRequired=True, demoAccountName=c["demo_name"], notes=c["notes"][:3900])
+    notes = (UNLISTED + "\n\n" + INFO[app] + COMMON)[:3990]
+    attrs = dict(CONTACT, demoAccountRequired=True, demoAccountName=c["demo_name"], notes=notes)
     pw = os.environ.get("DEMO_" + app.upper(), "")
     if pw: attrs["demoAccountPassword"] = pw
     if rd:
@@ -193,6 +225,10 @@ def do(app):
 
     out.append("password set" if pw else "password missing")
     if MODE == "review":
+        b = first(f"/v1/builds?filter[app]={aid}&filter[processingState]=VALID&sort=-uploadedDate&limit=1")
+        if b:
+            s3, j3 = call("PATCH", f"/v1/appStoreVersions/{vid}/relationships/build", {"data": {"type": "builds", "id": b["id"]}})
+            out.append(f"build {b['attributes'].get('version')} {s3}" + ("" if s3 < 300 else " " + err(j3)[:300]))
         ann(app, " | ".join(out)); return
     # screenshots
     for dev, dtype in (("iphone", "APP_IPHONE_67"), ("ipad", "APP_IPAD_PRO_3GEN_129")):
@@ -289,6 +325,25 @@ def status(app):
     s, j = call("GET", f"/v1/apps/{aid}/appStoreVersions?filter[platform]=IOS&limit=1&include=appStoreVersionSubmission")
     ann(app, f"versions {v} | submissions {r}")
 
+def testflight(app):
+    aid = find_app(APPS[app]["bundle"])["id"]; out = []
+    s, j = call("GET", f"/v1/apps/{aid}/betaGroups?limit=20")
+    g = next((d for d in j.get("data", []) if d["attributes"].get("isInternalGroup")), None)
+    if not g:
+        s, j = call("POST", "/v1/betaGroups", {"data": {"type": "betaGroups", "attributes": {"name": "RQ Team", "isInternalGroup": True, "hasAccessToAllBuilds": True},
+            "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
+        out.append(f"group create {s}" + ("" if s < 300 else " " + err(j)[:300]))
+        g = j.get("data")
+    if not g: ann(app, " | ".join(out)); return
+    email = os.environ.get("TF_EMAIL", "")
+    s, j = call("GET", f"/v1/users?limit=50")
+    users = [(u["attributes"].get("username"), u["attributes"].get("firstName")) for u in j.get("data", [])]
+    out.append(f"users {users}")
+    s, j = call("POST", "/v1/betaTesters", {"data": {"type": "betaTesters", "attributes": {"email": email, "firstName": "Ahmed", "lastName": "Deiab"},
+        "relationships": {"betaGroups": {"data": [{"type": "betaGroups", "id": g["id"]}]}}}})
+    out.append(f"tester {s}" + ("" if s < 300 else " " + err(j)[:400]))
+    ann(app, " | ".join(out))
+
 for app in ONLY:
-    try: status(app) if MODE == "status" else submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
+    try: testflight(app) if MODE == "testflight" else status(app) if MODE == "status" else submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
     except Exception as e: ann(app, "EXC " + repr(e)[:500])
