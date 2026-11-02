@@ -341,7 +341,12 @@ def testflight(app):
     out.append(f"users {users}")
     s, j = call("POST", "/v1/betaTesters", {"data": {"type": "betaTesters", "attributes": {"email": email, "firstName": "Ahmed", "lastName": "Deiab"},
         "relationships": {"betaGroups": {"data": [{"type": "betaGroups", "id": g["id"]}]}}}})
-    out.append(f"tester {s}" + ("" if s < 300 else " " + err(j)[:400]))
+    out.append(f"tester {s}" + ("" if s < 300 else " " + err(j)[:200]))
+    s, j = call("GET", f"/v1/betaGroups/{g['id']}/betaTesters?limit=20")
+    out.append(f"group {g['attributes'].get('name')} testers {[t['attributes'].get('email') for t in j.get('data', [])]}")
+    s, j = call("GET", f"/v1/builds?filter[app]={aid}&sort=-uploadedDate&limit=3&include=buildBetaDetail")
+    out.append("builds " + str([(b['attributes'].get('version'), b['attributes'].get('processingState')) for b in j.get('data', [])]) +
+               " beta " + str([x['attributes'].get('internalBuildState') for x in j.get('included', [])]))
     ann(app, " | ".join(out))
 
 for app in ONLY:
