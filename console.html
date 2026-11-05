@@ -230,16 +230,18 @@ const isAdmin=()=>role==="admin";
 const BR_COLOR={b1:"--s1",b2:"--s2",b3:"--s3",b4:"--s4",bdemo:"--s5"};
 const bName=id=>(branches.find(b=>b.id===id)||{}).name||id;
 const appName=id=>(apps.find(a=>a.id===id)||{}).name||id;
-const payName=k=>k==="cash"?"كاش":k==="visa"?"فيزا":k==="unpaid"?"غير مدفوع":k&&k.startsWith("app:")?appName(k.slice(4)):apps.some(a=>a.id===k)?appName(k):k;
+let pays=[]; const DEF_PAYS=[{id:"cash",name:"كاش",on:true,branches:[]},{id:"visa",name:"فيزا",on:true,branches:[]}];
+const payName=k=>k==="unpaid"?"غير مدفوع":(pays.find(p=>p.id===k)||{}).name||(k==="cash"?"كاش":k==="visa"?"فيزا":null)||(k&&k.startsWith("app:")?appName(k.slice(4)):apps.some(a=>a.id===k)?appName(k):k);
 const STATUS={new:"جديد",ready:"جاهز",done:"تم التسليم",cancelled:"ملغي"};
-const MODE={car:"سيارة",phone:"هاتف","-":"تطبيقات"};
-const ident=o=>o.channel?(appName(o.channel)+(o.app_ref?" #"+o.app_ref:"")):o.mode==="car"&&o.car?[o.car.em,o.car.num,o.car.color].filter(Boolean).join(" "):o.phone||"";
+const MODE={car:"سيارة",phone:"هاتف",pickup:"بيك أب",app:"تطبيقات","-":"تطبيقات"};
+const ident=o=>o.mode==="pickup"?("بيك أب"+(o.phone?" · "+o.phone:"")):o.channel?(appName(o.channel)+(o.app_ref?" #"+o.app_ref:"")):o.mode==="car"&&o.car?[o.car.em,o.car.num,o.car.color].filter(Boolean).join(" "):o.phone||"";
 
 const PAGES=[
   {id:"home",t:"الرئيسية",i:"📊",filters:true},
   {id:"orders",t:"الطلبات",i:"🧾",filters:true},
   {id:"reports",t:"التقارير",i:"📈",filters:true},
   {id:"menu",t:"المنيو",i:"🍔"},
+  {id:"pays",t:"طرق الدفع",i:"💳",admin:true},
   {id:"apps",t:"التطبيقات",i:"🛵",admin:true},
   {id:"cashiers",t:"الكاشيرية",i:"👤",admin:true},
   {id:"settings",t:"الإعدادات",i:"⚙️"},
@@ -267,6 +269,7 @@ async function start(){
     const c=await rpc("pos_ctx",{p_token:token});
     role=c.role; myBranch=c.branch_id; branches=c.branches||[]; settings=c.settings||{};
     try{apps=JSON.parse(settings.apps||"[]")||[]}catch(e){apps=[]}
+    try{pays=JSON.parse(settings.pays||"null")||DEF_PAYS}catch(e){pays=DEF_PAYS} if(!Array.isArray(pays)||!pays.length) pays=DEF_PAYS;
   }catch(e){
     if(e.server&&/auth|forbidden/.test(e.message)){ LS.del("con.token"); token=null; $("#login").classList.remove("hidden"); $("#app").classList.add("hidden"); return }
     $("#lerr").textContent="تعذّر الاتصال — تأكد من الإنترنت"; setTimeout(start,5000); return }
@@ -313,7 +316,7 @@ async function route(quiet){
   $("#gf").classList.toggle("hidden",!pg.filters); $("#refresh").classList.toggle("hidden",!pg.filters);
   if(!quiet) $("#upd").textContent="جارِ التحميل…";
   try{
-    await ({home:pHome,orders:pOrders,reports:pReports,menu:pMenu,apps:pApps,cashiers:pCashiers,settings:pSettings})[id](quiet);
+    await ({home:pHome,orders:pOrders,reports:pReports,menu:pMenu,pays:pPays,apps:pApps,cashiers:pCashiers,settings:pSettings})[id](quiet);
     $("#upd").textContent=pg.filters?"آخر تحديث "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):"";
   }catch(e){
     if(e.server&&/\bauth\b/.test(e.message)){LS.del("con.token");location.reload();return}
@@ -440,7 +443,7 @@ async function pOrders(){
       <div class="toolbar">
         <input type="search" id="oq" placeholder="🔎 رقم الطلب، رقم السيارة، الهاتف، رقم طلب التطبيق، الكاشير أو اسم صنف">
         <select id="ost"><option value="">كل الحالات</option><option value="open">قيد التحضير</option><option value="new">جديد</option><option value="ready">جاهز</option><option value="done">تم التسليم</option><option value="cancelled">ملغي</option><option value="edited">معدّل</option></select>
-        <select id="opay"><option value="">كل طرق الدفع</option><option value="cash">كاش</option><option value="visa">فيزا</option><option value="unpaid">غير مدفوع</option>${apps.map(a=>`<option value="app:${esc(a.id)}">${esc(a.name)}</option>`).join("")}</select>
+        <select id="opay"><option value="">كل طرق الدفع</option>${pays.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}<option value="unpaid">غير مدفوع</option>${apps.map(a=>`<option value="app:${esc(a.id)}">${esc(a.name)}</option>`).join("")}</select>
         <button class="btn ghost sm" id="oexp">⬇ Excel</button>
       </div>
       <div class="muted" id="osum" style="margin-bottom:8px;font-size:13px"></div>
@@ -589,18 +592,45 @@ function itemModal(it){
     <div class="frow"><div class="fld"><label>التصنيف</label><select id="icat">${cats.map(c=>`<option value="${esc(c.id)}" ${c.id===it.category_id?"selected":""}>${esc(c.name_ar||c.name_en)}</option>`).join("")}</select></div>
     <div class="fld"><label>السعر (د.إ شامل الضريبة)</label><input id="iprice" class="num" type="number" step="0.5" min="0" value="${it.price!=null?+it.price:""}"></div></div>
     <div class="fld"><label>المكونات / الوصف</label><textarea id="ing" rows="2">${esc(it.ingredients||"")}</textarea></div>
-    <div class="fld"><label>رابط الصورة (اختياري)</label><input id="iimg" dir="ltr" value="${esc(it.image||"")}" placeholder="اسم الصورة في المنيو أو رابط https://"></div>
+    <div class="fld"><label>صورة الصنف</label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <img id="iprev" class="mimg" style="width:84px;height:84px" src="${esc(imgUrl(it)||"")}" alt="" ${imgUrl(it)?"":'hidden'}>
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+          <label class="btn ghost sm" style="justify-content:center;cursor:pointer">📷 ${it.image?"تغيير الصورة":"رفع صورة"}<input type="file" id="ifile" accept="image/*" hidden></label>
+          ${it.image?`<button class="btn ghost sm" id="irm" type="button" style="justify-content:center">إزالة الصورة</button>`:""}
+          <span class="muted" id="istat" style="font-size:12px"></span>
+        </div></div>
+      <input id="iimg" type="hidden" value="${esc(it.image||"")}"></div>
     <div style="display:flex;gap:18px;flex-wrap:wrap"><label style="display:flex;gap:8px;align-items:center"><span class="switch"><input type="checkbox" id="iact" ${it.active!==false?"checked":""}><span></span></span>متاح للبيع</label>
     <label style="display:flex;gap:8px;align-items:center"><span class="switch"><input type="checkbox" id="ifeat" ${it.featured?"checked":""}><span></span></span>صنف مميز</label></div>
     <div class="err" id="ierr"></div>
-    <div class="mact"><button class="btn ghost" data-x>إلغاء</button><button class="btn" id="isave">💾 حفظ</button></div>`);
+    <div class="mact">${it.id?`<button class="btn ghost" id="idel" style="color:var(--bad);margin-inline-end:auto">🗑 حذف الصنف</button>`:""}<button class="btn ghost" data-x>إلغاء</button><button class="btn" id="isave">💾 حفظ</button></div>`);
+  let uploading=false;
+  m.querySelector("#ifile").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; uploading=true; $("#isave").disabled=true; $("#istat").textContent="جارِ رفع الصورة…";
+    try{ const url=await uploadImage(f); $("#iimg").value=url; const pv=$("#iprev"); pv.src=url; pv.hidden=false; $("#istat").textContent="✓ تم رفع الصورة — اضغط حفظ"; }
+    catch(err){ $("#istat").textContent="تعذّر رفع الصورة"; }
+    finally{ uploading=false; $("#isave").disabled=false; } };
+  const rm=m.querySelector("#irm"); if(rm) rm.onclick=()=>{ $("#iimg").value=""; $("#iprev").hidden=true; $("#istat").textContent="الصورة بتنشال بعد الحفظ"; };
+  const del=m.querySelector("#idel"); if(del) del.onclick=async()=>{
+    if(!del.dataset.ok){ del.dataset.ok=1; del.textContent="اضغط مرة ثانية للتأكيد"; setTimeout(()=>{ if(del.isConnected){ delete del.dataset.ok; del.textContent="🗑 حذف الصنف"; } },3500); return; }
+    try{ const r=await rpc("pos_menu_delete_item",{p_token:token,p_id:it.id}); closeModal(); toast(r&&r.deleted===false?"تم إيقاف الصنف (مرتبط بطلبات سابقة)":"تم حذف "+it.name); pMenu(); }
+    catch(e){ toast("تعذّر الحذف"); } };
   m.querySelector("#isave").onclick=async()=>{
     const p={id:it.id||"",name:$("#iname").value.trim(),category_id:$("#icat").value,price:parseFloat($("#iprice").value),ingredients:$("#ing").value.trim(),image:$("#iimg").value.trim(),active:$("#iact").checked,featured:$("#ifeat").checked};
     if(!p.name){$("#ierr").textContent="اكتب اسم الصنف";return} if(isNaN(p.price)||p.price<0){$("#ierr").textContent="اكتب السعر";return}
+    if(uploading) return;
     $("#isave").disabled=true;
     try{ await rpc("pos_menu_save_item",{p_token:token,p_it:p}); closeModal(); toast("تم الحفظ ✓"); pMenu(); }
     catch(e){ $("#ierr").textContent="تعذّر الحفظ"; $("#isave").disabled=false; }
   };
+}
+async function uploadImage(file){
+  const bmp=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file); });
+  const M=1000, k=Math.min(1, M/Math.max(bmp.naturalWidth,bmp.naturalHeight)), c=document.createElement("canvas");
+  c.width=Math.round(bmp.naturalWidth*k); c.height=Math.round(bmp.naturalHeight*k); c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  let type="image/webp", url=c.toDataURL(type,0.85); if(!url.startsWith("data:image/webp")){ type="image/jpeg"; url=c.toDataURL(type,0.86); }
+  const r=await fetch(SB+"/functions/v1/menu-upload",{method:"POST",headers:{"Content-Type":"application/json",apikey:KEY,Authorization:"Bearer "+KEY},body:JSON.stringify({token,type,data:url.split(",")[1]})});
+  const j=await r.json().catch(()=>({})); if(!r.ok||!j.url) throw new Error(j.error||"upload"); return j.url;
 }
 function catModal(){
   const m=modal(`<h3>تصنيف جديد<button class="x" data-x>✕</button></h3>
@@ -611,6 +641,40 @@ function catModal(){
     try{ const r=await rpc("pos_menu_save_category",{p_token:token,p_c:{name_ar:$("#can").value.trim(),name_en:$("#cen").value.trim()}}); menuCat=r.id; LS.set("con.mcat",menuCat); closeModal(); toast("تمت الإضافة ✓"); pMenu(); }
     catch(e){ $("#cerr").textContent="تعذّر الحفظ"; }
   };
+}
+
+// ---------- PAYMENT METHODS ----------
+let editPays=null;
+async function pPays(){
+  if(!editPays) editPays=JSON.parse(JSON.stringify(pays)).map(p=>Object.assign({on:true,branches:[]},p));
+  const bs=branches;
+  $("#main").innerHTML=`<div class="card">
+    <h2>طرق الدفع في الكاشير<span class="sp"></span><button class="btn ghost sm" id="padd">＋ طريقة دفع</button><button class="btn sm" id="psave">💾 حفظ</button></h2>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">كل طريقة تظهر كزر في شاشة الدفع بالكاشير. اختر الفروع اللي تظهر فيها (بدون اختيار = كل الفروع). الكاش هو الوحيد اللي يدخل حساب الدرج.</div>
+    <div id="plist"></div></div>`;
+  const draw=()=>{ $("#plist").innerHTML=editPays.map((p,i)=>`<div class="card" style="margin-bottom:10px;padding:12px 14px" data-pi="${i}">
+      <div class="toolbar" style="margin-bottom:8px">
+        <label class="switch"><input type="checkbox" data-k="on" ${p.on!==false?"checked":""}><span></span></label>
+        <input type="text" data-k="name" value="${esc(p.name)}" style="flex:1;min-width:140px;font-weight:600">
+        <span class="pill ${p.id==="cash"?"on":"new"}">${p.id==="cash"?"💵 كاش — يدخل الدرج":"💳 بدون كاش"}</span>
+        ${p.id==="cash"||p.id==="visa"?"":`<button class="btn ghost sm" data-del="${i}">حذف</button>`}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:13px"><span class="muted">يظهر في:</span>
+        ${bs.map(b=>`<label class="pill ${(p.branches||[]).includes(b.id)?"on":"off"}" style="cursor:pointer"><input type="checkbox" data-br="${esc(b.id)}" ${(p.branches||[]).includes(b.id)?"checked":""} style="display:none">${esc(b.name)}</label>`).join("")}
+        <span class="muted">${(p.branches||[]).length?"":"(كل الفروع)"}</span></div></div>`).join(""); };
+  draw();
+  $("#plist").oninput=e=>{ const c=e.target.closest("[data-pi]"); if(!c) return; const p=editPays[+c.dataset.pi]; if(e.target.dataset.k==="name") p.name=e.target.value; };
+  $("#plist").onchange=e=>{ const c=e.target.closest("[data-pi]"); if(!c) return; const p=editPays[+c.dataset.pi];
+    if(e.target.dataset.k==="on") p.on=e.target.checked;
+    if(e.target.dataset.br){ const id=e.target.dataset.br; p.branches=(p.branches||[]).filter(x=>x!==id); if(e.target.checked) p.branches.push(id); draw(); } };
+  $("#plist").onclick=e=>{ const d=e.target.closest("[data-del]"); if(d){ editPays.splice(+d.dataset.del,1); draw(); } };
+  $("#padd").onclick=()=>{ editPays.push({id:"p"+Math.random().toString(36).slice(2,8),name:"طريقة جديدة",on:true,branches:[]}); draw(); const ins=document.querySelectorAll('[data-k="name"]'); const l=ins[ins.length-1]; l.focus(); l.select(); };
+  $("#psave").onclick=async()=>{
+    const clean=editPays.map(p=>({id:p.id,name:(p.name||"").trim(),on:p.on!==false,branches:p.branches||[]}));
+    if(clean.some(p=>!p.name)) return toast("اكتب اسم لكل طريقة دفع");
+    if(!clean.some(p=>p.on)) return toast("لازم طريقة دفع وحدة على الأقل");
+    try{ await rpc("pos_save_pays",{p_token:token,p_pays:clean}); pays=clean; settings.pays=JSON.stringify(clean); editPays=null; toast("تم حفظ طرق الدفع ✓ — تظهر في الكاشير خلال دقيقة"); pPays(); }
+    catch(e){ toast("تعذّر الحفظ"); } };
 }
 
 // ---------- DELIVERY APPS ----------
