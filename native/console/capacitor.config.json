@@ -1,0 +1,29 @@
+{
+  "appId": "com.rqkitchen.console",
+  "appName": "RQ Console",
+  "webDir": "www",
+  "backgroundColor": "#1D1813",
+  "server": {
+    "url": "https://console.rqkitchen.app/",
+    "cleartext": false,
+    "errorPath": "offline.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Console",
+    "webContentsDebuggingEnabled": false,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#1D1813",
+      "showSpinner": false,
+      "launchAutoHide": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "overlaysWebView": false
+    }
+  }
+}

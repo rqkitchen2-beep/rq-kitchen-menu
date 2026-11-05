@@ -10,6 +10,7 @@ on:
       - 'native/cashier/**'
       - 'native/attendance/**'
       - 'native/inventory/**'
+      - 'native/console/**'
       - 'native/plugins/**'
       - 'native/loader/**'
       - 'native/scripts/build-android.sh'
@@ -110,6 +111,10 @@ jobs:
             apk: RQ-Inventory.apk
             title: "RQ Inventory (Android)"
             notes: "RQ Kitchen stock count app for Android phones and tablets. Download the APK and install it."
+          - app: console
+            apk: RQ-Console.apk
+            title: "RQ Console (Android)"
+            notes: "RQ Kitchen back-office console (sales, orders, reports, menu) for Android. Download the APK and install it."
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
