@@ -757,7 +757,9 @@ async function pSettings(){
 }
 
 // ---------- boot ----------
-try{ const m=location.hash.match(/[#&?]t=([0-9a-f]{20,})/); if(m){ token=m[1]; LS.set("con.token",token); history.replaceState(null,"",location.pathname+"#home"); } }catch(e){}
+try{ const h=location.hash, m=h.match(/[#&?]t=([0-9a-f]{20,})/), pg=(h.match(/[#&?]p=([a-z]+)/)||[])[1];
+  if(m){ token=m[1]; LS.set("con.token",token); }
+  if(m||pg) history.replaceState(null,"",location.pathname+"#"+(pg||"home")); }catch(e){}
 if("serviceWorker" in navigator && !window.RQ_NATIVE && /^console\./.test(location.hostname)) navigator.serviceWorker.register("/console-sw.js",{scope:"/"}).catch(()=>{});
 if(token) start(); else setTimeout(()=>$("#pin").focus(),50);
 </script>
