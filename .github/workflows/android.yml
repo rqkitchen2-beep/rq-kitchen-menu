@@ -11,6 +11,12 @@ on:
       - 'native/attendance/**'
       - 'native/inventory/**'
       - 'native/console/**'
+      - 'native/customer/**'
+      - 'native/driver/**'
+      - 'native/expenses/**'
+      - 'native/sauces/**'
+      - 'native/shawarma/**'
+      - 'native/track/**'
       - 'native/plugins/**'
       - 'native/loader/**'
       - 'native/scripts/build-android.sh'
@@ -115,6 +121,30 @@ jobs:
             apk: RQ-Console.apk
             title: "RQ Console (Android)"
             notes: "RQ Kitchen back-office console (sales, orders, reports, menu) for Android. Download the APK and install it."
+          - app: customer
+            apk: RQ-Kitchen.apk
+            title: "RQ Kitchen ordering app (Android)"
+            notes: "RQ Kitchen customer ordering app (delivery and pickup) for Android. Download the APK and install it."
+          - app: driver
+            apk: RQ-Driver.apk
+            title: "RQ Driver (Android)"
+            notes: "RQ Kitchen delivery driver app for Android. Download the APK and install it."
+          - app: expenses
+            apk: RQ-Expenses.apk
+            title: "RQ Expenses (Android)"
+            notes: "RQ Expenses app for Android. Download the APK and install it."
+          - app: sauces
+            apk: RQ-Sauces.apk
+            title: "RQ Sauces (Android)"
+            notes: "RQ Sauces app for Android. Download the APK and install it."
+          - app: shawarma
+            apk: RQ-Shawarma.apk
+            title: "RQ Shawarma (Android)"
+            notes: "RQ Shawarma app for Android. Download the APK and install it."
+          - app: track
+            apk: RQ-Track.apk
+            title: "RQ Track (Android)"
+            notes: "RQ Track app for Android. Download the APK and install it."
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

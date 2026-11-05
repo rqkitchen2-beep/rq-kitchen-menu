@@ -1,0 +1,29 @@
+{
+  "appId": "com.rqkitchen.expenses",
+  "appName": "RQ Expenses",
+  "webDir": "www",
+  "backgroundColor": "#F8F5F1",
+  "server": {
+    "url": "https://expenses.rqkitchen.app/",
+    "cleartext": false,
+    "errorPath": "offline.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Expenses",
+    "webContentsDebuggingEnabled": false,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#F8F5F1",
+      "showSpinner": false,
+      "launchAutoHide": true
+    },
+    "StatusBar": {
+      "style": "DEFAULT",
+      "overlaysWebView": false
+    }
+  }
+}

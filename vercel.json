@@ -29,6 +29,83 @@
   },
   "redirects": [
     {
+      "source": "/track",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-track/RQ-Track.apk",
+      "permanent": false
+    },
+    {
+      "source": "/shawarma",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-shawarma/RQ-Shawarma.apk",
+      "permanent": false
+    },
+    {
+      "source": "/sauces",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-sauces/RQ-Sauces.apk",
+      "permanent": false
+    },
+    {
+      "source": "/expenses",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-expenses/RQ-Expenses.apk",
+      "permanent": false
+    },
+    {
+      "source": "/branch",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-branch/RQ-Branch.apk",
+      "permanent": false
+    },
+    {
+      "source": "/driver",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-driver/RQ-Driver.apk",
+      "permanent": false
+    },
+    {
+      "source": "/order",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-customer/RQ-Kitchen.apk",
+      "permanent": false
+    },
+    {
       "source": "/console",
       "has": [
         {

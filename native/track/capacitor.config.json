@@ -1,0 +1,29 @@
+{
+  "appId": "com.rqkitchen.track",
+  "appName": "RQ Track",
+  "webDir": "www",
+  "backgroundColor": "#F8F5F1",
+  "server": {
+    "url": "https://track.rqkitchen.app/",
+    "cleartext": false,
+    "errorPath": "offline.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Track",
+    "webContentsDebuggingEnabled": false,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#F8F5F1",
+      "showSpinner": false,
+      "launchAutoHide": true
+    },
+    "StatusBar": {
+      "style": "DEFAULT",
+      "overlaysWebView": false
+    }
+  }
+}
