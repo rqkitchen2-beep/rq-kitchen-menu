@@ -694,7 +694,7 @@ async function pSettings(){
 
 // ---------- boot ----------
 try{ const m=location.hash.match(/[#&?]t=([0-9a-f]{20,})/); if(m){ token=m[1]; LS.set("con.token",token); history.replaceState(null,"",location.pathname+"#home"); } }catch(e){}
-if("serviceWorker" in navigator && !window.RQ_NATIVE) navigator.serviceWorker.register("/console-sw.js",{scope:"/"}).catch(()=>{});
+if("serviceWorker" in navigator && !window.RQ_NATIVE && /^console\./.test(location.hostname)) navigator.serviceWorker.register("/console-sw.js",{scope:"/"}).catch(()=>{});
 if(token) start(); else setTimeout(()=>$("#pin").focus(),50);
 </script>
 </body>
