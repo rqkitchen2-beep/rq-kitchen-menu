@@ -44,7 +44,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-
 input,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;width:100%}
 input:focus,select:focus{border-color:var(--or)}
 .num{font-variant-numeric:tabular-nums}
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.app{display:flex;flex-direction:column;height:calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 [hidden]{display:none!important}
 
 /* login */
@@ -190,6 +190,8 @@ main{flex:1;min-height:0;position:relative}
 .appsel b{flex:1;font-size:17px;color:var(--or2)}
 .pbtn.later{height:50px;font-size:15px;background:var(--panel2);border:1px solid var(--line)}
 .pbtn.appb{background:var(--or);color:#fff}
+.pbtn.pm{background:#7c3aed;color:#fff}
+.pay.many{flex-wrap:wrap}.pay.many .pbtn{flex:1 1 calc(50% - 6px);height:54px;font-size:16px}
 #payLaterRow{margin-top:-6px}
 .tag.unpaid{background:var(--redbg);color:var(--red)} .tag.appt{background:var(--orbg);color:var(--or2)}
 .oc.unpaid-o{border-color:rgba(239,68,68,.45)}
@@ -333,7 +335,7 @@ main{flex:1;min-height:0;position:relative}
   html.split .item .pr{font-size:12px}
   html.split .item .pr small{font-size:10px}
   html.split .item .q{min-width:22px;height:22px;font-size:12px;top:5px;inset-inline-end:5px}
-  html.split .cart{position:static;transform:none;transition:none;flex:0 0 44%;width:44%;max-width:360px;overflow:hidden;border-inline-start:1px solid var(--line);padding:0 0 env(safe-area-inset-bottom);z-index:auto}
+  html.split .cart{position:static;transform:none;transition:none;flex:0 0 44%;width:44%;max-width:360px;overflow:hidden;border-inline-start:1px solid var(--line);padding:0 0 6px;z-index:auto}
   html.split .mbar,html.split #closeCart{display:none!important}
   html.split .cart-h{padding:8px 10px}
   html.split .cart-h h3{font-size:13px}
@@ -368,7 +370,12 @@ main{flex:1;min-height:0;position:relative}
   html.split .pay{padding:0 8px 8px;gap:6px}
   html.split .pbtn{height:48px;font-size:15px;border-radius:12px;gap:5px}
   html.split .pbtn svg{display:none}
-  html.split .pbtn.later{height:42px;font-size:11px;line-height:1.2;padding:0 4px}
+  html.split .pbtn.later{height:40px;font-size:12px;line-height:1.2;padding:0 4px}
+  html.split .pay{padding:6px 8px 0;gap:6px}
+  html.split .pay.many .pbtn{height:42px;font-size:13px;flex-basis:calc(50% - 3px)}
+  html.split .totals{padding:6px 10px}
+  html.split .totals .tr:not(.big){display:none}
+  html.split .totals .tr.big{font-size:16px;margin:0}
   html.split .pbtn.editb,html.split .pbtn.appb{font-size:13px}
   html.split #payLaterRow{margin-top:-2px}
 }
@@ -480,14 +487,15 @@ main{flex:1;min-height:0;position:relative}
           <div class="seg" id="modeSeg">
             <button data-m="car" class="on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-6h12l2 6v4H4z"/></svg>رقم السيارة</button>
             <button data-m="phone"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>رقم الهاتف</button>
+            <button data-m="pickup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>بيك أب</button>
           </div>
           <div id="carBox">
             <div class="row">
               <select id="emirate" style="flex:0 0 105px"><option>أبوظبي</option><option>دبي</option><option>الشارقة</option><option>عجمان</option><option>رأس الخيمة</option><option>الفجيرة</option><option>أم القيوين</option></select>
               <input id="pnum" class="plate-in num" placeholder="الرقم" inputmode="numeric" maxlength="6" autocomplete="off">
             </div>
-            <div class="colors" id="colors"></div>
           </div>
+          <div id="pickBox" hidden><input id="pkName" class="plate-in" placeholder="اسم العميل (اختياري)" maxlength="30" autocomplete="off"></div>
           <div id="phoneBox" hidden><input id="phone" class="plate-in num" placeholder="05X XXX XXXX" inputmode="tel" maxlength="14" dir="ltr" autocomplete="off"></div>
           </div>
           <input id="note" class="note" placeholder="ملاحظة على الطلب (اختياري)" autocomplete="off">
@@ -499,11 +507,8 @@ main{flex:1;min-height:0;position:relative}
           <div class="tr"><span>ضريبة القيمة المضافة 5%</span><span class="num" id="tVat">0.00</span></div>
           <div class="tr big"><span>الإجمالي</span><span class="num" id="tTot">0.00 د.إ</span></div>
         </div>
-        <div class="pay" id="payDirect">
-          <button class="pbtn cash" id="payCash" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>كاش</button>
-          <button class="pbtn visa" id="payVisa" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>فيزا</button>
-        </div>
-        <div class="pay" id="payLaterRow"><button class="pbtn later" id="payLater" disabled>🖨 حفظ وطباعة — الدفع عند الاستلام</button></div>
+        <div class="pay" id="payDirect"></div>
+        <div class="pay" id="payLaterRow"><button class="pbtn later" id="payLater" disabled>🖨 طباعة الإيصال — الدفع لاحقًا</button></div>
         <div class="pay" id="payEditRow" hidden><button class="pbtn editb" id="saveEdit" disabled>💾 حفظ التعديل</button></div>
         <div class="pay" id="payAppRow" hidden><button class="pbtn appb" id="payApp" disabled>تأكيد الطلب</button></div>
       </aside>
@@ -572,9 +577,10 @@ main{flex:1;min-height:0;position:relative}
       <div class="page-h">
         <h2>الأصناف المتوفرة في الفرع</h2>
         <div class="sp"></div>
+        <a class="abtn pri" href="https://console.rqkitchen.app/#menu" target="_blank" rel="noopener" style="text-decoration:none">➕ إضافة / حذف أصناف وصور</a>
         <button class="abtn" id="reloadMenu">تحديث المنيو</button>
       </div>
-      <div style="color:var(--dim);font-size:13px;margin:-6px 0 14px">أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. الأسعار والأصناف الجديدة تتعدل من لوحة المنيو وتوصل هنا تلقائيًا.</div>
+      <div style="color:var(--dim);font-size:13px;margin:-6px 0 14px">أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. الأسعار والأصناف الجديدة والصور تتعدل من لوحة التحكم (قسم المنيو) وتوصل هنا تلقائيًا.</div>
       <div class="avl" id="avl"></div>
       <div class="box" id="appsAdmin" style="margin-top:16px" hidden>
         <h3>🛵 أسعار التطبيقات (المدير)</h3>
@@ -776,7 +782,7 @@ async function loadMenu(manual){
 }
 const CAT_COLORS = ["#f47a20","#b45309","#eab308","#e11d48","#8b5cf6","#22c55e","#0ea5e9","#14b8a6","#ec4899"];
 function catColor(id){ const i=menu.cats.findIndex(c=>c.id===id); return CAT_COLORS[(i<0?0:i)%CAT_COLORS.length]; }
-function imgUrl(i){ if(!i.image) return null; return LOCAL_IMGS.has(i.image) ? SELF+"img/"+i.image : MENU_IMG_BASE+encodeURIComponent(i.image); }
+function imgUrl(i){ if(!i.image) return null; if(/^https?:\/\//.test(i.image)) return i.image; return LOCAL_IMGS.has(i.image) ? SELF+"img/"+i.image : MENU_IMG_BASE+encodeURIComponent(i.image); }
 const DRINK_SVG='<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M7 4h10l-1 16a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/><path d="M7.4 9h9.2M12 4V2h3"/></svg>';
 function photo(i){
   const u=imgUrl(i), col=catColor(i.cat);
@@ -908,8 +914,18 @@ function appsList(){ let a=ctx&&ctx.settings&&ctx.settings.apps; if(typeof a==="
 function appById(id){ return appsList().find(a=>a.id===id); }
 function appPrice(itemId, base){ const a=appById(channel); if(!a) return base; const ov=a.prices&&a.prices[itemId]; if(ov!=null && ov!=="" && !isNaN(+ov)) return +ov; return +money(base*(1+(+a.pct||0)/100)); }
 const priceNow = it => channel ? appPrice(it.id, +it.price) : +it.price;
-function payLabel(o){ if(o.pay==="cash") return "كاش"; if(o.pay==="visa") return "فيزا"; if(o.pay==="unpaid") return "غير مدفوع"; const a=appById(o.channel||o.pay); return a?a.name:(o.pay||""); }
-const payCls = o => o.pay==="cash"||o.pay==="visa"||o.pay==="unpaid" ? o.pay : "appt";
+const DEF_PAYS=[{id:"cash",name:"كاش"},{id:"visa",name:"فيزا"}];
+function allPays(){ try{ const p=JSON.parse((ctx&&ctx.settings&&ctx.settings.pays)||"null"); if(Array.isArray(p)&&p.length) return p; }catch(e){} return DEF_PAYS; }
+function branchPays(){ const l=allPays().filter(p=>p.on!==false&&(!p.branches||!p.branches.length||p.branches.includes(branch))); return l.length?l:DEF_PAYS; }
+function payNameOf(id){ const p=allPays().find(x=>x.id===id); return p?p.name:(id==="cash"?"كاش":id==="visa"?"فيزا":null); }
+const PAY_CLS=id=>id==="cash"?"cash":id==="visa"?"visa":"pm";
+const PAY_SVG={cash:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>`,card:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>`};
+let payKey="";
+function renderPayBtns(){ const l=branchPays(), k=JSON.stringify(l); if(k===payKey) return; payKey=k;
+  $("#payDirect").innerHTML=l.map(p=>`<button class="pbtn ${PAY_CLS(p.id)}" data-pm="${esc(p.id)}" ${p.id==="cash"?'id="payCash"':p.id==="visa"?'id="payVisa"':""} disabled>${p.id==="cash"?PAY_SVG.cash:PAY_SVG.card}<span>${esc(p.name)}</span></button>`).join("");
+  $("#payDirect").classList.toggle("many", l.length>2); }
+function payLabel(o){ if(o.pay==="unpaid") return "غير مدفوع"; if(!o.channel){ const n=payNameOf(o.pay); if(n) return n; } if(o.pay==="cash") return "كاش"; if(o.pay==="visa") return "فيزا"; if(o.pay==="unpaid") return "غير مدفوع"; const a=appById(o.channel||o.pay); return a?a.name:(o.pay||""); }
+const payCls = o => o.pay==="cash"||o.pay==="visa"||o.pay==="unpaid" ? o.pay : (!o.channel&&payNameOf(o.pay)) ? "visa" : "appt";
 function setChannel(id){
   channel=id||null;
   cart.forEach(c=>{ const it=menu.items.find(i=>i.id===c.id); const base=it?+it.price:(c.base||c.price); c.base=base; c.price=channel?appPrice(c.id,base):base; });
@@ -944,13 +960,13 @@ function renderCart(){
   $("#lines").innerHTML = cart.length ? cart.map(c=>`<div class="line"><div class="info"><div class="n">${esc(c.name)}</div><div class="p num">${money(c.price)}</div></div><div class="step"><button data-d="-1" data-id="${esc(c.id)}">−</button><span class="num">${c.qty}</span><button data-d="1" data-id="${esc(c.id)}">+</button></div><div class="t num">${money(c.price*c.qty)}</div></div>`).join("") : `<div class="cart-empty">اضغط على الأصناف لإضافتها للطلب</div>`;
   const t=totals();
   $("#tSub").textContent=money(t.sub); $("#tVat").textContent=money(t.vat); $("#tTot").textContent=money(t.tot)+" د.إ";
-  $("#payCash").disabled=$("#payVisa").disabled=$("#payLater").disabled=$("#payApp").disabled=$("#saveEdit").disabled=!cart.length;
+  renderPayBtns(); document.querySelectorAll("#payDirect [data-pm]").forEach(b=>b.disabled=!cart.length); $("#payLater").disabled=$("#payApp").disabled=$("#saveEdit").disabled=!cart.length;
   $("#mbarCount").textContent=t.count+" "+(t.count===1?"صنف":"أصناف"); $("#mbarTot").textContent=money(t.tot)+" د.إ";
   $("#mbar").classList.toggle("hide",!cart.length);
 }
 const CAR_COLORS=[["أبيض","#fff"],["أسود","#111"],["فضي","#c0c0c0"],["رمادي","#6b7280"],["أحمر","#dc2626"],["أزرق","#2563eb"],["بني","#7c4a24"],["أخرى","linear-gradient(45deg,#f47a20,#8b5cf6)"]];
-function renderColors(){ $("#colors").innerHTML=CAR_COLORS.map(([n,c])=>`<button class="chip ${carColor===n?"on":""}" data-col="${n}"><i style="background:${c}"></i>${n}</button>`).join(""); }
-function setMode(m){ mode=m; document.querySelectorAll("#modeSeg button").forEach(b=>b.classList.toggle("on",b.dataset.m===m)); $("#carBox").hidden=m!=="car"; $("#phoneBox").hidden=m!=="phone"; $("#identErr").textContent=""; }
+function renderColors(){}
+function setMode(m){ mode=m; document.querySelectorAll("#modeSeg button").forEach(b=>b.classList.toggle("on",b.dataset.m===m)); $("#carBox").hidden=m!=="car"; $("#phoneBox").hidden=m!=="phone"; $("#pickBox").hidden=m!=="pickup"; $("#identErr").textContent=""; }
 $("#cats").addEventListener("click", e=>{ const b=e.target.closest("[data-c]"); if(!b) return; curCat=b.dataset.c; renderMenuSide(); $("#grid").scrollTop=0; });
 $("#q").addEventListener("input", e=>{ q=e.target.value; renderGrid(); });
 $("#grid").addEventListener("click", e=>{
@@ -963,7 +979,6 @@ $("#grid").addEventListener("click", e=>{
 $("#lines").addEventListener("click", e=>{ const b=e.target.closest("[data-d]"); if(!b) return; const c=cart.find(x=>x.id===b.dataset.id); if(!c) return; c.qty+=+b.dataset.d; if(c.qty<=0) cart=cart.filter(x=>x!==c); renderCart(); renderGrid(); });
 $("#clearCart").addEventListener("click", ()=>{ cart=[]; renderCart(); renderGrid(); });
 $("#modeSeg").addEventListener("click", e=>{ const b=e.target.closest("[data-m]"); if(b) setMode(b.dataset.m); });
-$("#colors").addEventListener("click", e=>{ const b=e.target.closest("[data-col]"); if(!b) return; carColor=carColor===b.dataset.col?"":b.dataset.col; renderColors(); });
 $("#pnum").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[^\d٠-٩]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)); $("#identErr").textContent=""; });
 $("#phone").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d+ ]/g,""); $("#identErr").textContent=""; });
 const QNOTES=["No onion","No pickles","No tomato","No sauce","Extra sauce","Sauce on side","Spicy","No spicy","Extra cheese","No cheese","Well done","Cut in half","No sesame","Takeaway bag"];
@@ -977,14 +992,15 @@ function readIdent(){
   if(mode==="car"){
     const num=$("#pnum").value.trim();
     if(!num){ $("#identErr").textContent="اكتب رقم السيارة (أو اختر رقم الهاتف)"; return null; }
-    return {mode:"car", car:{em:$("#emirate").value, num, color:carColor}};
+    return {mode:"car", car:{em:$("#emirate").value, num}};
   }
+  if(mode==="pickup"){ return {mode:"pickup", phone:$("#pkName").value.trim()}; }
   const ph=$("#phone").value.replace(/\s/g,"");
   if(ph.replace(/\D/g,"").length<9){ $("#identErr").textContent="اكتب رقم هاتف صحيح"; return null; }
   return {mode:"phone", phone:ph};
 }
-const identText = o => o.mode==="app" ? (payLabel(o)+(o.app_ref?" #"+o.app_ref:"")) : o.mode==="car"&&o.car ? [o.car.code,o.car.num].filter(Boolean).join(" ") : (o.phone||"");
-const identSub = o => o.mode==="app" ? "🛵 تطبيق توصيل" : o.mode==="car"&&o.car ? "🚗 "+[o.car.em,o.car.color].filter(Boolean).join(" · ") : "📱 هاتف";
+const identText = o => o.mode==="pickup" ? ("بيك أب"+(o.phone?" · "+o.phone:"")) : o.mode==="app" ? (payLabel(o)+(o.app_ref?" #"+o.app_ref:"")) : o.mode==="car"&&o.car ? [o.car.code,o.car.num].filter(Boolean).join(" ") : (o.phone||"");
+const identSub = o => o.mode==="pickup" ? "🛍 بيك أب" : o.mode==="app" ? "🛵 تطبيق توصيل" : o.mode==="car"&&o.car ? "🚗 "+[o.car.em,o.car.color].filter(Boolean).join(" · ") : "📱 هاتف";
 
 
 // ---------- edit an open order ----------
@@ -994,7 +1010,7 @@ function renderEditUI(){
   $("#payDirect").hidden=on||!!channel; $("#payLaterRow").hidden=on||!!channel; $("#payAppRow").hidden=on||!channel; $("#payEditRow").hidden=!on;
   $("#chanBar").style.display=on?"none":"";
 }
-function clearCartFields(){ cart=[]; $("#pnum").value=""; $("#phone").value=""; $("#note").value=""; $("#appRef").value=""; carColor=""; renderColors(); }
+function clearCartFields(){ cart=[]; $("#pnum").value=""; $("#phone").value=""; $("#pkName").value=""; $("#note").value=""; $("#appRef").value=""; carColor=""; renderColors(); }
 function startEdit(o){
   if(o.status!=="new"&&o.status!=="ready"){ toast("الطلب مقفل — ما يمكن تعديله"); return; }
   if(cart.length && !editing){ toast("أكمل الطلب الحالي أو امسحه أولًا"); goView("pos"); $("#cart").classList.add("open"); return; }
@@ -1003,6 +1019,7 @@ function startEdit(o){
   cart=o.items.map(i=>({id:i.id,name:i.name,base:+i.price,price:+i.price,qty:+i.qty}));
   if(o.mode==="car"&&o.car){ setMode("car"); $("#emirate").value=o.car.em||"أبوظبي"; $("#pnum").value=o.car.num||""; carColor=o.car.color||""; renderColors(); }
   else if(o.mode==="phone"){ setMode("phone"); $("#phone").value=o.phone||""; }
+  else if(o.mode==="pickup"){ setMode("pickup"); $("#pkName").value=o.phone||""; }
   if(o.channel) $("#appRef").value=o.app_ref||"";
   $("#note").value=o.note||"";
   goView("pos"); renderEditUI(); renderCart(); renderGrid(); $("#cart").classList.add("open");
@@ -1020,7 +1037,7 @@ $("#saveEdit").addEventListener("click", ()=>{
   const qOld={}, qNew={}, nm={}; o.items.forEach(i=>{ qOld[i.id]=(qOld[i.id]||0)+(+i.qty); nm[i.id]=i.name; }); items.forEach(i=>{ qNew[i.id]=(qNew[i.id]||0)+i.qty; nm[i.id]=i.name; });
   const chg=[...new Set([...Object.keys(qOld),...Object.keys(qNew)])].map(k=>({name:nm[k],d:(qNew[k]||0)-(qOld[k]||0)})).filter(x=>x.d);
   const note=$("#note").value.trim();
-  if(!chg.length && note===(o.note||"") && JSON.stringify(id)===JSON.stringify(o.channel?{app_ref:o.app_ref||""}:(o.mode==="car"?{mode:"car",car:o.car}:{mode:"phone",phone:o.phone}))){ cancelEdit(); toast("ما فيه تغيير"); return; }
+  if(!chg.length && note===(o.note||"") && JSON.stringify(id)===JSON.stringify(o.channel?{app_ref:o.app_ref||""}:(o.mode==="car"?{mode:"car",car:o.car}:o.mode==="pickup"?{mode:"pickup",phone:o.phone||""}:{mode:"phone",phone:o.phone}))){ cancelEdit(); toast("ما فيه تغيير"); return; }
   Object.assign(o, id, {items, total:nt, vat:+money(t.vat), note, edits:(o.edits||0)+1, edited_by:(ctx&&ctx.cashier)||""});
   if(o.pay==="cash"&&o.received!=null&&diff){ const rec=Math.max(+o.received, nt); o.received=+money(rec); o.change=+money(rec-nt); }
   Object.defineProperty(o,"_chg",{value:chg,writable:true,configurable:true,enumerable:false});
@@ -1040,14 +1057,14 @@ $("#saveEdit").addEventListener("click", ()=>{
   if(prefs.autoPrint) setTimeout(()=>printOrder(o), 150);
 });
 // ---------- payment ----------
-$("#payCash").addEventListener("click", ()=>startPay("cash"));
-$("#payVisa").addEventListener("click", ()=>startPay("visa"));
+$("#payDirect").addEventListener("click", e=>{ const b=e.target.closest("[data-pm]"); if(b&&!b.disabled) startPay(b.dataset.pm); });
 function payModal(total, method, onPaid){
-  if(method==="visa"){
-    modal(`<h3>الدفع بالفيزا</h3><div class="sub">مرّر البطاقة على جهاز البنك ثم أكّد هنا</div>
+  if(method!=="cash"){
+    const pn=payNameOf(method)||method;
+    modal(`<h3>الدفع — ${esc(pn)}</h3><div class="sub">${method==="visa"?"مرّر البطاقة على جهاز البنك ثم أكّد هنا":"تأكد من استلام المبلغ ثم أكّد هنا"}</div>
       <div class="due"><div class="l">المبلغ المطلوب</div><div class="v num">${money(total)} <small style="font-size:16px">د.إ</small></div></div>
       <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok bl" id="okPay">تمّ الدفع ✓</button></div>`);
-    $("#modal [data-x]").onclick=closeModal; $("#okPay").onclick=()=>onPaid("visa",{}); return;
+    $("#modal [data-x]").onclick=closeModal; $("#okPay").onclick=()=>onPaid(method,{}); return;
   }
   const opts=[...new Set([total,Math.ceil(total/5)*5,Math.ceil(total/10)*10,Math.ceil(total/50)*50,Math.ceil(total/100)*100,200,500].filter(v=>v>=total-1e-9))].sort((a,b)=>a-b).slice(0,6);
   modal(`<h3>الدفع كاش</h3><div class="sub">اختر المبلغ المستلم أو اكتبه</div>
@@ -1077,19 +1094,19 @@ $("#payApp").addEventListener("click", ()=>{ if(!cart.length||!channel) return; 
 function kickDrawer(){ if(prefs.drawer && prefs.printer && (prefs.printer.type==="lan"||prefs.printer.type==="bt"||prefs.printer.type==="usb"||prefs.printer.type==="serial")){ reconnect().then(ok=>{ if(ok) rawSend(new Uint8Array([0x1b,0x40,0x1b,0x70,0,25,250])).catch(()=>{}); }); } }
 function collect(o, after){
   modal(`<h3>تحصيل الطلب #${o.no}</h3><div class="sub">${esc(identText(o))} — المبلغ <b class="num">${money(o.total)}</b> د.إ</div>
-    <div class="pay" style="padding:0"><button class="pbtn cash" id="cC">كاش</button><button class="pbtn visa" id="cV">فيزا</button></div>
+    <div class="pay ${branchPays().length>2?"many":""}" style="padding:0" id="cPays">${branchPays().map(p=>`<button class="pbtn ${PAY_CLS(p.id)}" data-cp="${esc(p.id)}">${esc(p.name)}</button>`).join("")}</div>
     <div class="mact"><button class="b-cancel" data-x>رجوع</button></div>`);
   $("#modal [data-x]").onclick=closeModal;
   const go=m=>payModal(o.total, m, (method,extra)=>{
     o.pay=method; Object.assign(o, extra); saveLocal(); const s=clone(o); delete s._local; enqueue(s);
     if(method==="cash") kickDrawer();
     if(after) after(); else renderAll();
-    modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم تحصيل الطلب</div><div class="big-no num">#${o.no}</div><div class="mt">${method==="cash"?"كاش":"فيزا"} · <span class="num">${money(o.total)}</span> د.إ</div>${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}
+    modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم تحصيل الطلب</div><div class="big-no num">#${o.no}</div><div class="mt">${esc(payNameOf(method)||method)} · <span class="num">${money(o.total)}</span> د.إ</div>${method==="cash"&&o.change>0?`<div class="chg">الباقي للزبون: <span class="num">${money(o.change)}</span> د.إ</div>`:""}
       ${(!o.channel&&trackOn())?(()=>{ const qc=qrCanvas(trackUrl(o),220); return qc?`<div style="margin-top:12px;text-align:center"><img src="${qc.toDataURL()}" style="width:150px;height:150px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:12px"><div class="mt" style="font-size:13px">امسح الكود ونبّهك أول ما يجهز طلبك</div></div>`:""; })():""}</div>
       <div class="mact"><button class="b-cancel" id="rePrint">🖨 طباعة فاتورة</button><button class="b-ok" data-x>تم</button></div>`);
     $("#modal [data-x]").onclick=closeModal; $("#rePrint").onclick=()=>printOrder(o);
   });
-  $("#cC").onclick=()=>go("cash"); $("#cV").onclick=()=>go("visa");
+  $("#cPays").onclick=e=>{ const b=e.target.closest("[data-cp]"); if(b) go(b.dataset.cp); };
 }
 let finishing=false;
 function finish(method,id,extra){
@@ -1102,7 +1119,7 @@ function finish(method,id,extra){
     o.cashier=(ctx&&ctx.cashier)||""; if(shift) o.shift_id=shift.id;
     orders.push(o); saveLocal();
     const send=clone(o); delete send._local; enqueue(send);
-    cart=[]; $("#pnum").value=""; $("#phone").value=""; $("#note").value=""; $("#appRef").value=""; carColor=""; renderColors();
+    cart=[]; $("#pnum").value=""; $("#phone").value=""; $("#pkName").value=""; $("#note").value=""; $("#appRef").value=""; carColor=""; renderColors();
     if(channel) setChannel(null);
     $("#cart").classList.remove("open"); renderAll();
     modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div>
@@ -1545,7 +1562,7 @@ async function loadShift(prompt){
 function shiftLocalStats(){
   const os=orders.filter(o=>shift && o.shift_id===shift.id);
   const ok=os.filter(o=>o.status!=="cancelled"), sum=f=>ok.filter(f).reduce((s,o)=>s+(+o.total),0);
-  return {orders:ok.length,cash:sum(o=>o.pay==="cash"),card:sum(o=>o.pay==="visa"),apps:sum(o=>!!o.channel),unpaid:sum(o=>o.pay==="unpaid"),unpaid_n:ok.filter(o=>o.pay==="unpaid").length,cancelled:os.length-ok.length,total:sum(()=>1)};
+  return {orders:ok.length,cash:sum(o=>o.pay==="cash"),card:sum(o=>!o.channel&&o.pay!=="cash"&&o.pay!=="unpaid"),apps:sum(o=>!!o.channel),unpaid:sum(o=>o.pay==="unpaid"),unpaid_n:ok.filter(o=>o.pay==="unpaid").length,cancelled:os.length-ok.length,total:sum(()=>1)};
 }
 function curStats(){ const l=shiftLocalStats(); if(shiftStats && (+shiftStats.orders||0)>l.orders) return Object.fromEntries(Object.entries(shiftStats).map(([k,v])=>[k,+v])); return l; }
 function renderShift(){
@@ -1555,7 +1572,7 @@ function renderShift(){
   el.innerHTML=`<div class="tr"><span>فُتح بواسطة</span><b>${esc(shift.opened_by||"")} · <span class="num" dir="ltr">${hm(new Date(shift.opened_at).getTime())}</span></b></div>
     <div class="tr"><span>رصيد الافتتاح</span><b class="num">${money(shift.opening_cash)}</b></div>
     <div class="tr"><span>مبيعات الكاش</span><b class="num">${money(st.cash)}</b></div>
-    <div class="tr"><span>فيزا</span><b class="num">${money(st.card)}</b></div>
+    <div class="tr"><span>${branchPays().length>2?"فيزا وطرق أخرى":"فيزا"}</span><b class="num">${money(st.card)}</b></div>
     <div class="tr"><span>تطبيقات</span><b class="num">${money(st.apps)}</b></div>
     ${st.unpaid_n?`<div class="tr" style="color:var(--red)"><span>غير محصّل (${st.unpaid_n})</span><b class="num">${money(st.unpaid)}</b></div>`:""}
     <div class="tr big" style="font-size:18px"><span>المتوقع في الدرج</span><span class="num">${money(exp)}</span></div>
@@ -1584,7 +1601,7 @@ function openCloseModal(){
   modal(`<h3>🔒 إغلاق اليوم</h3><div class="sub">عدّ الكاش اللي في الدرج واكتبه.</div>
     <div class="tr"><span>رصيد الافتتاح</span><b class="num">${money(shift.opening_cash)}</b></div>
     <div class="tr"><span>مبيعات الكاش</span><b class="num">${money(st.cash)}</b></div>
-    <div class="tr"><span>فيزا</span><b class="num">${money(st.card)}</b></div>
+    <div class="tr"><span>${branchPays().length>2?"فيزا وطرق أخرى":"فيزا"}</span><b class="num">${money(st.card)}</b></div>
     <div class="tr"><span>تطبيقات</span><b class="num">${money(st.apps)}</b></div>
     <div class="tr"><span>عدد الطلبات</span><b class="num">${st.orders}</b></div>
     ${st.unpaid_n?`<div class="hint-b" style="margin:8px 0">⚠️ فيه ${st.unpaid_n} طلب غير محصّل (${money(st.unpaid)} د.إ). حصّلها قبل الإغلاق إذا ممكن.</div>`:""}
@@ -1606,19 +1623,19 @@ function openCloseModal(){
     if(queue.length){ await sync(); if(queue.length){ toast("فيه طلبات ما ارتفعت — تأكد من الإنترنت قبل الإغلاق"); return; } }
     try{ const r=await rpc("pos_shift_close",{p_token:token,p_shift:shift.id,p_counted:+money(c),p_keep:+money(parseFloat($("#clKeep").value)||0),p_note:$("#clNote").value.trim()});
       const closed=r.shift, cst=r.stats; shift=null; shiftStats=null; lastFloat=+closed.float_left||0; LS.set(shKey(),{shift:null,lastFloat});
-      renderShift(); printZ(closed,cst);
+      renderShift(); let rep=null; try{ rep=await rpc("pos_shift_report",{p_token:token,p_shift:closed.id}); }catch(e){} printZ(closed,cst,rep);
       modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم إغلاق اليوم</div>
         <div class="id num">${Math.abs(+closed.diff)<.01?"✓ الدرج مطابق":(+closed.diff<0?"نقص ":"زيادة ")+money(Math.abs(+closed.diff))+" د.إ"}</div>
         <div class="mt">يتسلّم للمدير: <b class="num">${money(closed.deposit)}</b> · يبقى في الدرج: <b class="num">${money(closed.float_left)}</b></div></div>
         <div class="mact"><button class="b-cancel" id="zAgain">🖨 طباعة التقرير</button><button class="b-ok g" id="zOpen">فتح يوم جديد</button></div>`);
-      $("#zAgain").onclick=()=>printZ(closed,cst); $("#zOpen").onclick=openDayModal;
+      $("#zAgain").onclick=()=>printZ(closed,cst,rep); $("#zOpen").onclick=openDayModal;
     }catch(e){ toast("تعذّر الإغلاق — تأكد من الإنترنت"); } };
   setTimeout(()=>{ if(matchMedia("(min-width:821px)").matches) $("#clCount").focus(); },50);
 }
 // generic printing of a text report (Z report etc.)
 async function linesCanvas(title, rows){
   const EN_R=(prefs.rlang||"en")==="en", T=s=>EN_R?tr(String(s)):String(s);
-  const W=(prefs.width===58?384:576), PAD=8, sc=W/576, cv=document.createElement("canvas"); cv.width=W; cv.height=2400;
+  const W=(prefs.width===58?384:576), PAD=8, sc=W/576, cv=document.createElement("canvas"); cv.width=W; cv.height=Math.max(800, rows.length*48+400);
   const x=cv.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,W,cv.height); x.fillStyle="#000"; x.textBaseline="top";
   const F=(s,b)=>`${b?"700":"500"} ${s}px "IBM Plex Sans Arabic", Tahoma, Arial, sans-serif`; let y=8;
   const DIR=EN_R?"ltr":"rtl", A0=EN_R?"left":"right", A1=EN_R?"right":"left", S0=EN_R?PAD:W-PAD, S1=EN_R?W-PAD:PAD;
@@ -1629,6 +1646,7 @@ async function linesCanvas(title, rows){
   y+=12; const out=document.createElement("canvas"); out.width=W; out.height=Math.ceil(y); out.getContext("2d").drawImage(cv,0,0); return out;
 }
 async function printCanvases(cvs, fallbackHtml){
+  if(window.__rqCapture) return window.__rqCapture(cvs);
   const t=prefs.printer&&prefs.printer.type;
   try{
     if(!t||t==="system"){ if(NATIVE){ toast("اربط الطابعة أولًا من زر 🖨"); return; } doPrint(fallbackHtml); return; }
@@ -1640,14 +1658,30 @@ async function printCanvases(cvs, fallbackHtml){
     await rawSend(concat(ch));
   }catch(e){ toast("تعذّرت الطباعة — تأكد من الطابعة"); }
 }
-async function printZ(s, st){
-  const rows=[["Branch / الفرع",branchName(s.branch_id)],["Opened / الافتتاح",dt(new Date(s.opened_at).getTime())],["By / بواسطة",s.opened_by||""],["Closed / الإغلاق",s.closed_at?dt(new Date(s.closed_at).getTime()):""],["By / بواسطة",s.closed_by||""],"-",
-    ["Orders / الطلبات",String(s.orders??st.orders)],["Cash sales / الكاش",money(s.cash_sales)],["Card / فيزا",money(s.card_sales)],["Apps / تطبيقات",money(s.apps_sales)],["Unpaid / غير محصّل",money(s.unpaid)],["Cancelled / ملغاة",String(s.cancelled||0)],"-",
-    ["Opening cash / رصيد الافتتاح",money(s.opening_cash)],["Expected / المتوقع",money(s.expected_cash),1],["Counted / المعدود",money(s.counted_cash),1],["Difference / الفرق",(+s.diff>0?"+":"")+money(s.diff),1],"-",
-    ["To manager / للمدير",money(s.deposit)],["Kept in drawer / يبقى",money(s.float_left)]];
-  const EN_R=(prefs.rlang||"en")==="en"; const R=rows.map(r=>r==="-"?r:[EN_R?r[0].split(" / ")[0]:r[0].split(" / ")[1],r[1],r[2]]);
-  const cv=await linesCanvas(EN_R?"RQ KITCHEN\nDAY CLOSE (Z REPORT)":"RQ KITCHEN\nتقرير إغلاق اليوم", R);
-  printCanvases([cv], `<div class="pg"><div class="c hd">RQ KITCHEN — Z</div><hr>${R.map(r=>r==="-"?"<hr>":`<div class="t ${r[2]?"b":""}"><span>${esc(r[0])}</span><span class="num">${esc(r[1])}</span></div>`).join("")}</div>`);
+async function printZ(s, st, rep){
+  const EN_R=(prefs.rlang||"en")==="en", L=(en,ar)=>EN_R?en:ar;
+  const pl=p=>p.app?((appById(p.pay)||{}).name||p.pay):(p.pay==="unpaid"?L("Unpaid","غير محصّل"):(payNameOf(p.pay)||p.pay));
+  const head=[[L("Branch","الفرع"),branchName(s.branch_id)],[L("Opened","الافتتاح"),dt(new Date(s.opened_at).getTime())],[L("Closed","الإغلاق"),s.closed_at?dt(new Date(s.closed_at).getTime()):""],[L("Closed by","أغلقه"),s.closed_by||""],"-"];
+  const cvs=[], html=[];
+  const H=(title,R)=>`<div class="pg"><div class="c hd">${esc(title).replace(/\n/g,"<br>")}</div><hr>${R.map(r=>r==="-"?"<hr>":`<div class="t ${r[2]?"b":""}"><span>${esc(r[0])}</span><span class="num">${esc(r[1])}</span></div>`).join("")}</div>`;
+  // 1) items sold
+  if(rep&&rep.products){
+    const ps=rep.products, q=ps.reduce((a,p)=>a+ +p.qty,0), t=ps.reduce((a,p)=>a+ +p.sales,0);
+    const R1=head.concat(ps.map(p=>[`${+p.qty}× ${String(p.name).slice(0,28)}`,money(p.sales)]),["-",[L("Items sold","عدد الأصناف"),String(q),1],[L("Total sales","إجمالي المبيعات"),money(t),1]]);
+    const t1=L("RQ KITCHEN\nITEMS SOLD","RQ KITCHEN\nتقرير المنتجات المباعة");
+    cvs.push(await linesCanvas(t1,R1)); html.push(H(t1,R1));
+  }
+  // 2) payments + cash
+  const pays=rep&&rep.by_pay?rep.by_pay.map(p=>[`${pl(p)} (${p.n})`,money(p.total)]):[[L("Cash","كاش"),money(s.cash_sales)],[L("Card","فيزا"),money(s.card_sales)],[L("Apps","تطبيقات"),money(s.apps_sales)]];
+  const tot=(+s.cash_sales||0)+(+s.card_sales||0)+(+s.apps_sales||0)+(+s.unpaid||0);
+  const R2=head.concat([[L("Orders","الطلبات"),String(s.orders??st.orders)],...pays,[L("Total sales","إجمالي المبيعات"),money(tot),1],[L("Cancelled","ملغاة"),String(s.cancelled||0)],"-",
+    [L("Opening cash","مبلغ فتح اليوم"),money(s.opening_cash),1],[L("Cash sales","مبيعات الكاش"),money(s.cash_sales)],[L("Expected in drawer","المتوقع في الدرج"),money(s.expected_cash)],[L("Closing cash (counted)","مبلغ الإغلاق (المعدود)"),money(s.counted_cash),1],[L("Difference","الفرق"),(+s.diff>0?"+":"")+money(s.diff),1],
+    [L("To manager","يتسلّم للمدير"),money(s.deposit)],[L("Kept in drawer","يبقى في الدرج"),money(s.float_left)]]);
+  if(rep&&rep.month){ const m=rep.month;
+    R2.push("-",[L("Month to date","من بداية الشهر"),`${String(m.from).slice(5)} → ${String(m.to).slice(5)}`,1],[L("Cash sales","مبيعات الكاش"),money(m.cash_sales),1],[L("Card & other","فيزا وطرق أخرى"),money(m.other_sales)],[L("Apps","تطبيقات"),money(m.apps_sales)],[L("Total sales","إجمالي المبيعات"),money(m.total),1],[L("Cash handed to manager","الكاش المسلّم للمدير"),money(m.deposits)],[L("Drawer differences","فروقات الدرج"),(+m.diff>0?"+":"")+money(m.diff)]); }
+  const t2=L("RQ KITCHEN\nDAY CLOSE (Z REPORT)","RQ KITCHEN\nتقرير إغلاق اليوم");
+  cvs.push(await linesCanvas(t2,R2)); html.push(H(t2,R2));
+  printCanvases(cvs, html.join('<div style="page-break-after:always"></div>'));
 }
 
 // ---------- report ----------
@@ -1711,7 +1745,7 @@ $("#printRep").addEventListener("click", ()=>{
 });
 function csv(list){
   const rows=[["رقم الطلب","التاريخ","الوقت","الفرع","النوع","رقم السيارة/الهاتف","الإمارة","اللون","الأصناف","الإجمالي","الضريبة","الدفع","المستلم","الباقي","الحالة","ملاحظة"]];
-  list.slice().sort((a,b)=>a.no-b.no).forEach(o=>rows.push([o.no,o.day,hm(o.ts),branchName(o.branch_id),o.mode==="app"?"تطبيق":o.mode==="car"?"سيارة":"هاتف",identText(o),o.car?o.car.em:"",o.car?o.car.color:"",o.items.map(i=>i.qty+"x "+i.name).join(" | "),money(o.total),money(o.vat),payLabel(o),o.received!=null?money(o.received):"",o.change!=null?money(o.change):"",STATUS[o.status],o.note||""]));
+  list.slice().sort((a,b)=>a.no-b.no).forEach(o=>rows.push([o.no,o.day,hm(o.ts),branchName(o.branch_id),o.mode==="app"?"تطبيق":o.mode==="car"?"سيارة":o.mode==="pickup"?"بيك أب":"هاتف",identText(o),o.car?o.car.em:"",o.car?o.car.color:"",o.items.map(i=>i.qty+"x "+i.name).join(" | "),money(o.total),money(o.vat),payLabel(o),o.received!=null?money(o.received):"",o.change!=null?money(o.change):"",STATUS[o.status],o.note||""]));
   return "﻿"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
 }
 function download(name, text){
@@ -1917,6 +1951,7 @@ function startApp(){
   loadMenu(false); sync(); loadShift(true); updPrinterBtn(); if(prefs.printer&&prefs.printer.type!=="system") reconnect().then(updPrinterBtn);
   // refresh session info (branches / receipt settings)
   rpc("pos_ctx",{p_token:token}).then(c=>{ if(c){ ctx=Object.assign(ctx||{},c); LS.set("pos.ctx",ctx); if(ctx.role==="branch" && branch!==ctx.branch_id){ switchBranch(ctx.branch_id); } renderBranch(); } }).catch(e=>{ if(isAuthErr(e)){ showLogin(); } });
+  setInterval(()=>{ if(!token||document.hidden) return; rpc("pos_ctx",{p_token:token}).then(c=>{ if(c&&c.settings){ ctx.settings=c.settings; LS.set("pos.ctx",ctx); renderCart(); } }).catch(()=>{}); }, 60000);
 }
 
 // boot
@@ -1925,7 +1960,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611051700";
+const BUILD="202611060330";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
@@ -1939,6 +1974,7 @@ setInterval(()=>{ if(checkUpdate.pending){ if(!(cart&&cart.length)&&!$("#ov").cl
 setTimeout(checkUpdate, 15000);
 document.addEventListener("click",e=>{ const l=e.target.closest("#dashLink"); if(!l) return; l.href=(NATIVE?SELF:"/")+"dashboard"+(token?"#t="+encodeURIComponent(token):""); });
 if(!NATIVE && "serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")) navigator.serviceWorker.register("/sw.js").catch(()=>{});
+window.__rq={printZ,payLabel,identText,get orders(){return orders}};
 })();
 </script>
 </body>
