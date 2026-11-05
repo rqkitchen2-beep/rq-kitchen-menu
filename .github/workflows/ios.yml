@@ -2,6 +2,9 @@ name: iOS build
 
 on:
   workflow_dispatch:
+  schedule:
+    # fresh TestFlight builds every month so installs never hit the 90-day expiry
+    - cron: '17 0 1 * *'
   push:
     branches: [main]
     paths:
