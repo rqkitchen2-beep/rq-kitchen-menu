@@ -349,6 +349,58 @@ def testflight(app):
                " beta " + str([x['attributes'].get('internalBuildState') for x in j.get('included', [])]))
     ann(app, " | ".join(out))
 
+def publiclink(app):
+    """External TestFlight group with a public link: install on any iPhone/iPad via the TestFlight app (Beta App Review, not App Store review)."""
+    c = APPS[app]; aid = find_app(c["bundle"])["id"]; out = []
+    # beta app info + review details
+    s, j = call("GET", f"/v1/apps/{aid}/betaAppLocalizations")
+    desc = ("RQ Kitchen internal staff app. " + c["promo"])[:4000]
+    locs = j.get("data", [])
+    if locs:
+        s, j = call("PATCH", f"/v1/betaAppLocalizations/{locs[0]['id']}", {"data": {"type": "betaAppLocalizations", "id": locs[0]["id"],
+            "attributes": {"feedbackEmail": CONTACT["contactEmail"], "description": desc, "privacyPolicyUrl": PRIVACY, "marketingUrl": "https://www.rqkitchen.ae"}}})
+    else:
+        s, j = call("POST", "/v1/betaAppLocalizations", {"data": {"type": "betaAppLocalizations", "attributes": {"locale": "en-US",
+            "feedbackEmail": CONTACT["contactEmail"], "description": desc, "privacyPolicyUrl": PRIVACY, "marketingUrl": "https://www.rqkitchen.ae"},
+            "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
+    out.append(f"loc {s}" + ("" if s < 300 else " " + err(j)[:200]))
+    attrs = dict(CONTACT, demoAccountRequired=True, demoAccountName=c["demo_name"], notes=(INFO[app] + COMMON)[:3990])
+    pw = os.environ.get("DEMO_" + app.upper(), "")
+    if pw: attrs["demoAccountPassword"] = pw
+    s, j = call("PATCH", f"/v1/betaAppReviewDetails/{aid}", {"data": {"type": "betaAppReviewDetails", "id": aid, "attributes": attrs}})
+    out.append(f"review-detail {s}" + ("" if s < 300 else " " + err(j)[:200]))
+    # group
+    s, j = call("GET", f"/v1/apps/{aid}/betaGroups?limit=20")
+    g = next((d for d in j.get("data", []) if not d["attributes"].get("isInternalGroup") and d["attributes"].get("name") == "RQ Staff"), None)
+    if not g:
+        s, j = call("POST", "/v1/betaGroups", {"data": {"type": "betaGroups", "attributes": {"name": "RQ Staff", "publicLinkEnabled": True, "publicLinkLimitEnabled": False},
+            "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
+        out.append(f"group {s}" + ("" if s < 300 else " " + err(j)[:200])); g = j.get("data")
+    elif not g["attributes"].get("publicLinkEnabled"):
+        s, j = call("PATCH", f"/v1/betaGroups/{g['id']}", {"data": {"type": "betaGroups", "id": g["id"], "attributes": {"publicLinkEnabled": True, "publicLinkLimitEnabled": False}}})
+        g = j.get("data") or g
+    if not g: ann(app, " | ".join(out)); return
+    # latest valid build
+    b = first(f"/v1/builds?filter[app]={aid}&filter[processingState]=VALID&sort=-uploadedDate&limit=1")
+    if b:
+        bid = b["id"]; ver = b["attributes"].get("version")
+        s, j = call("GET", f"/v1/builds/{bid}/betaBuildLocalizations")
+        bl = j.get("data", [])
+        wn = "Latest RQ Kitchen build."
+        if bl: call("PATCH", f"/v1/betaBuildLocalizations/{bl[0]['id']}", {"data": {"type": "betaBuildLocalizations", "id": bl[0]["id"], "attributes": {"whatsNew": wn}}})
+        else: call("POST", "/v1/betaBuildLocalizations", {"data": {"type": "betaBuildLocalizations", "attributes": {"locale": "en-US", "whatsNew": wn},
+                   "relationships": {"build": {"data": {"type": "builds", "id": bid}}}}})
+        s, j = call("POST", f"/v1/betaGroups/{g['id']}/relationships/builds", {"data": [{"type": "builds", "id": bid}]})
+        out.append(f"build {ver} add {s}" + ("" if s < 300 else " " + err(j)[:200]))
+        s, j = call("POST", "/v1/betaAppReviewSubmissions", {"data": {"type": "betaAppReviewSubmissions", "relationships": {"build": {"data": {"type": "builds", "id": bid}}}}})
+        out.append(f"beta-review submit {s}" + ("" if s < 300 else " " + err(j)[:250]))
+        s, j = call("GET", f"/v1/builds/{bid}/buildBetaDetail")
+        d = j.get("data") or {}
+        out.append(f"external state {d.get('attributes', {}).get('externalBuildState')}")
+    s, j = call("GET", f"/v1/betaGroups/{g['id']}")
+    out.append(f"LINK {(j.get('data') or {}).get('attributes', {}).get('publicLink')}")
+    ann(app, " | ".join(out))
+
 for app in ONLY:
-    try: testflight(app) if MODE == "testflight" else status(app) if MODE == "status" else submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
+    try: publiclink(app) if MODE == "publiclink" else testflight(app) if MODE == "testflight" else status(app) if MODE == "status" else submit(app) if MODE == "submit" else probe(app) if MODE == "probe" else do(app)
     except Exception as e: ann(app, "EXC " + repr(e)[:500])
