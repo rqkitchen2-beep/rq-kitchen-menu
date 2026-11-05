@@ -560,7 +560,8 @@ main{flex:1;min-height:0;position:relative}
     </section>
 
     <section class="view page" id="v-admin">
-      <div class="page-h"><h2>🔐 لوحة التحكم</h2><div class="sp"></div><span style="color:var(--dim);font-size:13px">للمدير فقط · لكل الفروع</span><a class="abtn pri" id="dashLink" href="/dashboard" target="_blank" rel="noopener" style="text-decoration:none;margin-inline-start:10px">📊 لوحة البيانات</a></div>
+      <div class="page-h"><h2>🔐 لوحة التحكم</h2><div class="sp"></div><span style="color:var(--dim);font-size:13px">للمدير فقط · لكل الفروع</span><a class="abtn pri" data-con="home" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none;margin-inline-start:10px">📊 لوحة التحكم الكاملة</a></div>
+      <div class="filters" style="margin-bottom:10px"><a class="abtn" data-con="menu" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">🍔 إضافة / حذف أصناف وصور</a><a class="abtn" data-con="pays" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">💳 طرق الدفع</a><a class="abtn" data-con="orders" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">🧾 كل الطلبات</a></div>
       <div class="filters" id="admTabs" style="margin-bottom:14px">
         <button class="cat on" data-at="cash">👤 الكاشيرية</button>
         <button class="cat" data-at="apps">🛵 أسعار التطبيقات</button>
@@ -577,7 +578,7 @@ main{flex:1;min-height:0;position:relative}
       <div class="page-h">
         <h2>الأصناف المتوفرة في الفرع</h2>
         <div class="sp"></div>
-        <a class="abtn pri" href="https://console.rqkitchen.app/#menu" target="_blank" rel="noopener" style="text-decoration:none">➕ إضافة / حذف أصناف وصور</a>
+        <a class="abtn pri" data-con="menu" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">➕ إضافة / حذف أصناف وصور</a>
         <button class="abtn" id="reloadMenu">تحديث المنيو</button>
       </div>
       <div style="color:var(--dim);font-size:13px;margin:-6px 0 14px">أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. الأسعار والأصناف الجديدة والصور تتعدل من لوحة التحكم (قسم المنيو) وتوصل هنا تلقائيًا.</div>
@@ -1960,7 +1961,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611060330";
+const BUILD="202611060340";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
@@ -1972,6 +1973,7 @@ async function checkUpdate(){
 }
 setInterval(()=>{ if(checkUpdate.pending){ if(!(cart&&cart.length)&&!$("#ov").classList.contains("on")) location.reload(); } else checkUpdate(); }, 120000);
 setTimeout(checkUpdate, 15000);
+document.addEventListener("click",e=>{ const c=e.target.closest("[data-con]"); if(c){ c.href="https://console.rqkitchen.app/#"+(token?"t="+encodeURIComponent(token)+"&":"")+"p="+c.dataset.con; } });
 document.addEventListener("click",e=>{ const l=e.target.closest("#dashLink"); if(!l) return; l.href=(NATIVE?SELF:"/")+"dashboard"+(token?"#t="+encodeURIComponent(token):""); });
 if(!NATIVE && "serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")) navigator.serviceWorker.register("/sw.js").catch(()=>{});
 window.__rq={printZ,payLabel,identText,get orders(){return orders}};
