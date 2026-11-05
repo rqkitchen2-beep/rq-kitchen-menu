@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RQ Kitchen — لوحة تحكم الكاشير</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#E07A1F">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;
+  --bg:#F6F3EF;--card:#FFFFFF;--line:#E8E1D9;--ink:#1D1813;--ink2:#5A524B;--mute:#8A8179;
+  --brand:#E07A1F;--brand-soft:#FCEBDD;--grid:#EEE8E1;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;
+  --good:#1a8a4a;--good-bg:#E5F4EA;--bad:#c93a3a;--bad-bg:#FBE7E7;--warn:#a96a00;--warn-bg:#FDF1DA}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#141210;--card:#1E1B18;--line:#332E29;--ink:#F3EEE8;--ink2:#C9C0B6;--mute:#958C83;
+  --brand:#F08A2A;--brand-soft:#3A2614;--grid:#2A2622;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;
+  --good:#4cc47e;--good-bg:#173323;--bad:#ef6b6b;--bad-bg:#3a1b1b;--warn:#e7a73a;--warn-bg:#3a2c12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;font-size:14px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.hidden{display:none!important}
+/* login */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.lbox{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px 24px;width:100%;max-width:360px;text-align:center}
+.lbox img{height:46px}
+.lbox h1{font-size:20px;margin:12px 0 4px}.lbox p{color:var(--mute);margin:0 0 16px;font-size:13px}
+.pin{width:100%;font-size:26px;letter-spacing:.35em;text-align:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.btn{border:0;border-radius:12px;padding:10px 16px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+.lbox .btn{width:100%;margin-top:12px;padding:13px;font-size:16px}
+.err{color:var(--bad);min-height:20px;margin-top:8px;font-size:13px}
+/* app */
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.hin{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hin img{height:30px}.hin h1{font-size:16px;margin:0;flex:1;white-space:nowrap}
+.hin .upd{color:var(--mute);font-size:12px}
+.filters{max-width:1280px;margin:0 auto;padding:10px 16px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;flex-wrap:wrap}
+.chips button{border:0;background:transparent;padding:6px 11px;border-radius:9px;cursor:pointer;color:var(--ink2)}
+.chips button.on{background:var(--brand);color:#fff;font-weight:600}
+select,input[type=date]{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+main{max-width:1280px;margin:0 auto;padding:12px 16px 40px}
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;min-width:0}
+.card h2{font-size:14px;margin:0 0 10px;color:var(--ink2);font-weight:600;display:flex;align-items:center;gap:8px}
+.card h2 .sp{flex:1}
+.kpi .l{color:var(--mute);font-size:12.5px}.kpi .v{font-size:26px;font-weight:700;margin-top:2px}.kpi .v small{font-size:13px;color:var(--mute);font-weight:500}
+.delta{direction:ltr;unicode-bidi:isolate;display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:20px;margin-inline-start:6px;vertical-align:middle}
+.delta.up{background:var(--good-bg);color:var(--good)}.delta.down{background:var(--bad-bg);color:var(--bad)}.delta.flat{background:var(--grid);color:var(--mute)}
+.two{grid-template-columns:2fr 1fr}.half{grid-template-columns:1fr 1fr}
+@media (max-width:900px){.two,.half{grid-template-columns:1fr}}
+.live{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+@media (max-width:600px){.live{grid-template-columns:1fr 1fr}.live .card{padding:10px 12px}.lv b{font-size:13px}.lv .row{font-size:12px}.kpi .v{font-size:21px}.hb{grid-template-columns:70px 1fr auto}.hin h1{font-size:14px}}
+.lv{display:flex;flex-direction:column;gap:4px}
+.lv b{font-size:15px}.lv .row{display:flex;justify-content:space-between;color:var(--ink2);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px}
+.pill.open{background:var(--good-bg);color:var(--good)}.pill.closed{background:var(--grid);color:var(--mute)}
+.pill.new{background:var(--warn-bg);color:var(--warn)}.pill.ready{background:var(--good-bg);color:var(--good)}.pill.done{background:var(--grid);color:var(--ink2)}.pill.cancelled{background:var(--bad-bg);color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--mute);font-weight:500;text-align:start;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.scroll{overflow:auto;max-height:430px}
+.bar{height:8px;border-radius:4px;background:var(--brand);min-width:2px}
+.hb{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin:7px 0}
+.hb .t{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb .track{background:var(--grid);border-radius:4px;height:10px;overflow:hidden}
+.hb .fill{height:100%;border-radius:4px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px}
+svg.chart{width:100%;height:240px;display:block;overflow:visible}
+svg.chart text{fill:var(--mute);font-size:11px;font-family:inherit}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;border-radius:10px;padding:7px 10px;z-index:20;line-height:1.5;white-space:nowrap;opacity:0;transition:opacity .1s}
+.empty{color:var(--mute);text-align:center;padding:24px 0}
+.muted{color:var(--mute)}
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="lbox">
+    <img src="/logo.png" alt="RQ Kitchen">
+    <h1>لوحة تحكم الكاشير</h1>
+    <p>ادخل برمز المدير (أو رمز الفرع لعرض فرعه فقط)</p>
+    <input id="pin" class="pin num" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="••••">
+    <button class="btn" id="go">دخول</button>
+    <div class="err" id="lerr"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+<header><div class="hin">
+  <img src="/logo.png" alt="RQ Kitchen"><h1>لوحة تحكم الكاشير</h1>
+  <span class="upd" id="upd"></span>
+  <button class="btn ghost" id="refresh" title="تحديث">↻</button>
+  <button class="btn ghost" id="theme" title="الوضع الليلي">🌙</button>
+  <a class="btn ghost" href="/" style="text-decoration:none">الكاشير</a>
+  <button class="btn ghost" id="out">خروج</button>
+</div></header>
+<div class="filters">
+  <select id="branch"></select>
+  <div class="chips" id="per">
+    <button data-p="today" class="on">اليوم</button><button data-p="yest">أمس</button><button data-p="7">آخر ٧ أيام</button>
+    <button data-p="month">هذا الشهر</button><button data-p="last">الشهر الماضي</button><button data-p="custom">مخصص</button>
+  </div>
+  <span id="custom" class="hidden"><input type="date" id="d1"> — <input type="date" id="d2"></span>
+</div>
+<main>
+  <div class="grid live" id="live" style="margin-bottom:12px"></div>
+  <div class="grid kpis" id="kpis"></div>
+  <div class="grid two" style="margin-top:12px">
+    <div class="card"><h2 id="t1">المبيعات حسب اليوم</h2><div class="legend" id="lg1"></div><svg class="chart" id="c1"></svg></div>
+    <div class="card"><h2>طرق الدفع</h2><div id="pays"></div><h2 style="margin-top:14px">نوع الطلب</h2><div id="modes"></div></div>
+  </div>
+  <div class="grid half" style="margin-top:12px">
+    <div class="card"><h2>المبيعات حسب الساعة</h2><svg class="chart" id="c2"></svg></div>
+    <div class="card"><h2>الفروع</h2><div class="scroll"><table id="tbr"></table></div></div>
+  </div>
+  <div class="grid half" style="margin-top:12px">
+    <div class="card"><h2>أكثر الأصناف مبيعاً</h2><div class="scroll"><table id="tpr"></table></div></div>
+    <div class="card"><h2>الكاشيرية</h2><div class="scroll"><table id="tca"></table></div></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h2>آخر الطلبات<span class="sp"></span><span class="muted" style="font-weight:400;font-size:12px">آخر ٦٠ طلب في الفترة</span></h2><div class="scroll"><table id="tor"></table></div></div>
+</main>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const SB="https://dhqgorvtwgzekmmjztyr.supabase.co", KEY="sb_publishable_yAYV8YXgiq3DxyJZPqELXw_QbzvL5Fe";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+async function rpc(fn,args){
+  const r=await fetch(`${SB}/rest/v1/rpc/${fn}`,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(args||{})});
+  const t=await r.text(); let j=null; try{j=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok){const e=new Error((j&&j.message)||t||r.status);e.server=true;throw e}
+  return j;
+}
+const money=n=>(+n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const int=n=>(+n||0).toLocaleString("en-US");
+const short=n=>{n=+n||0;return n>=1000?(n/1000).toFixed(n>=10000?0:1)+"k":String(Math.round(n))};
+// theme
+const setTheme=t=>{document.documentElement.dataset.theme=t;LS.set("dash.theme",t)};
+setTheme(LS.get("dash.theme",matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+$("#theme").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// business day (5am cutoff, Dubai)
+const dubai=()=>new Date(Date.now()+4*3600e3);
+const ymd=d=>d.toISOString().slice(0,10);
+const today=()=>ymd(new Date(dubai().getTime()-5*3600e3));
+const addDays=(s,n)=>{const d=new Date(s+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return ymd(d)};
+
+let token=LS.get("dash.token",null), role=null, myBranch=null, apps={}, branches=[], per="today", timer=null;
+const BR_COLOR={b1:"--s1",b2:"--s2",b3:"--s3",b4:"--s4",bdemo:"--s5"};
+const bName=id=>(branches.find(b=>b.id===id)||{}).name||id;
+const payName=k=>k==="cash"?"كاش":k==="visa"?"فيزا":k==="unpaid"?"غير مدفوع":k&&k.startsWith("app:")?(apps[k.slice(4)]||k.slice(4)):k;
+const STATUS={new:"جديد",ready:"جاهز",done:"تم التسليم",cancelled:"ملغي"};
+
+// login
+async function login(){
+  const p=$("#pin").value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,"");
+  if(p.length<4){$("#lerr").textContent="اكتب الرمز";return}
+  $("#go").disabled=true; $("#lerr").textContent="";
+  try{
+    const r=await rpc("inv_login",{p_pin:p});
+    if(!r){$("#lerr").textContent="الرمز غير صحيح";return}
+    if(r.role!=="admin"&&r.role!=="branch"){$("#lerr").textContent="هذا الرمز ما له صلاحية على لوحة التحكم";return}
+    token=r.token; LS.set("dash.token",token); start();
+  }catch(e){$("#lerr").textContent=/locked/.test(e.message)?"محاولات كثيرة — انتظر ١٥ دقيقة":"تعذّر الاتصال، حاول مرة ثانية"}
+  finally{$("#go").disabled=false}
+}
+$("#go").onclick=login; $("#pin").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
+$("#out").onclick=()=>{LS.del("dash.token");token=null;location.reload()};
+
+async function start(){
+  try{
+    const c=await rpc("pos_ctx",{p_token:token});
+    role=c.role; myBranch=c.branch_id; branches=c.branches||[];
+    try{ (JSON.parse((c.settings||{}).apps||"[]")||[]).forEach(a=>apps[a.id]=a.name) }catch(e){}
+  }catch(e){ LS.del("dash.token"); token=null; $("#login").classList.remove("hidden"); $("#app").classList.add("hidden"); return }
+  $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
+  const sel=$("#branch");
+  sel.innerHTML=(role==="admin"?`<option value="">كل الفروع</option>`:"")+branches.filter(b=>role==="admin"||b.id===myBranch).map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("");
+  sel.value=LS.get("dash.branch",""); if(sel.selectedIndex<0) sel.selectedIndex=0;
+  sel.onchange=()=>{LS.set("dash.branch",sel.value);load()};
+  load();
+  clearInterval(timer); timer=setInterval(()=>{ if(!document.hidden&&range()[1]>=today()) load(true) },60000);
+}
+
+function range(){
+  const t=today();
+  if(per==="today") return [t,t];
+  if(per==="yest") return [addDays(t,-1),addDays(t,-1)];
+  if(per==="7") return [addDays(t,-6),t];
+  if(per==="month") return [t.slice(0,8)+"01",t];
+  if(per==="last"){const f=t.slice(0,8)+"01";const e=addDays(f,-1);return [e.slice(0,8)+"01",e]}
+  return [$("#d1").value||t,$("#d2").value||t];
+}
+$("#per").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;per=b.dataset.p;
+  $("#per").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  $("#custom").classList.toggle("hidden",per!=="custom");
+  if(per==="custom"){const [a,z]=[addDays(today(),-6),today()];$("#d1").value=$("#d1").value||a;$("#d2").value=$("#d2").value||z}
+  load()};
+$("#d1").onchange=$("#d2").onchange=()=>load();
+$("#refresh").onclick=()=>load();
+
+let busy=false;
+async function load(quiet){
+  if(busy) return; busy=true;
+  const [d1,d2]=range(); const br=$("#branch").value||null;
+  if(!quiet) $("#upd").textContent="جارِ التحميل…";
+  try{
+    const r=await rpc("pos_dashboard",{p_token:token,p_branch:br,p_d1:d1,p_d2:d2});
+    render(r,d1,d2,br);
+    $("#upd").textContent="آخر تحديث "+new Date().toLocaleTimeString("ar-AE",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){
+    if(/forbidden|session/i.test(e.message)){LS.del("dash.token");location.reload();return}
+    $("#upd").textContent="تعذّر التحديث";
+  }finally{busy=false}
+}
+
+function delta(cur,prev){
+  if(!prev) return cur?`<span class="delta flat">جديد</span>`:"";
+  const p=Math.round((cur-prev)/prev*100);
+  return `<span class="delta ${p>0?"up":p<0?"down":"flat"}">${p>0?"▲":p<0?"▼":""} ${Math.abs(p)}%</span>`;
+}
+
+function render(r,d1,d2,br){
+  // live
+  $("#live").innerHTML=(r.live||[]).map(l=>`<div class="card lv">
+    <div style="display:flex;align-items:center;gap:8px"><b>فرع ${esc(l.name)}</b><span class="sp" style="flex:1"></span>
+    <span class="pill ${l.shift?"open":"closed"}">${l.shift?"● اليوم مفتوح":"اليوم مقفل"}</span></div>
+    <div class="row"><span>طلبات قيد التحضير</span><b class="num">${int(l.open_orders)}</b></div>
+    <div class="row"><span>غير مدفوعة</span><b class="num">${int(l.unpaid)}</b></div>
+    ${l.shift?`<div class="row muted"><span>فتحه ${esc(l.shift.by||"")}</span><span class="num">${new Date(l.shift.opened_at).toLocaleString("en-GB",{timeZone:"Asia/Dubai",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span></div>`:""}
+  </div>`).join("");
+  // kpis
+  const k=r.kpi||{}, pv=r.prev||{}, cx=r.cancel||{};
+  const avg=k.orders?k.sales/k.orders:0, pavg=pv.orders?pv.sales/pv.orders:0;
+  const tile=(l,v,extra="")=>`<div class="card kpi"><div class="l">${l}</div><div class="v">${v}${extra}</div></div>`;
+  $("#kpis").innerHTML=
+    tile("صافي المبيعات",`<span class="num">${money(k.sales)}</span> <small>د.إ</small>`,delta(+k.sales,+pv.sales))+
+    tile("عدد الطلبات",`<span class="num">${int(k.orders)}</span>`,delta(+k.orders,+pv.orders))+
+    tile("متوسط الفاتورة",`<span class="num">${money(avg)}</span> <small>د.إ</small>`,delta(avg,pavg))+
+    tile("الأصناف المباعة",`<span class="num">${int(k.items)}</span>`)+
+    tile("الضريبة (٥٪)",`<span class="num">${money(k.vat)}</span> <small>د.إ</small>`)+
+    tile("الملغاة",`<span class="num">${int(cx.n)}</span> <small class="num">${money(cx.amount)} د.إ</small>`)+
+    tile("غير مدفوع",`<span class="num">${int(k.unpaid_n)}</span> <small class="num">${money(k.unpaid)} د.إ</small>`);
+
+  // chart 1: by day (stacked by branch when all)
+  const days=[]; for(let d=d1; d<=d2; d=addDays(d,1)) days.push(d);
+  const brs=[...new Set((r.by_day||[]).map(x=>x.branch_id))].sort();
+  const single=days.length===1;
+  $("#t1").textContent=single?"المبيعات حسب الفرع":"المبيعات حسب اليوم";
+  const series=(br?[br]:brs.length?brs:["-"]);
+  $("#lg1").innerHTML=series.length>1?series.map(b=>`<span><i style="background:var(${BR_COLOR[b]||"--s5"})"></i>${esc(bName(b))}</span>`).join(""):"";
+  const cats=single?series:days;
+  const val=(c,b)=>{const x=(r.by_day||[]).find(y=>(single?y.branch_id===c&&y.day===d1:y.day===c&&y.branch_id===b));return x?+x.sales:0};
+  stackBars($("#c1"),cats.map(c=>({label:single?bName(c):c.slice(8)+"/"+c.slice(5,7),title:single?bName(c):c,parts:(single?[c]:series).map(b=>({k:b,v:val(c,b),color:single?"--brand":(series.length>1?(BR_COLOR[b]||"--s5"):"--brand")}))})));
+
+  // chart 2: by hour (from 10:00 to 03:00 business order)
+  const hrs=[]; for(let i=0;i<24;i++) hrs.push((i+5)%24);
+  const hv=h=>{const x=(r.by_hour||[]).find(y=>+y.h===h);return x?{v:+x.sales,n:+x.orders}:{v:0,n:0}};
+  const used=hrs.filter(h=>hv(h).v>0); let a=0,z=23;
+  if(used.length){a=Math.max(0,hrs.indexOf(used[0])-1);z=Math.min(23,hrs.indexOf(used[used.length-1])+1)}
+  const hs=hrs.slice(a,z+1);
+  stackBars($("#c2"),hs.map(h=>({label:String(h).padStart(2,"0"),title:`${String(h).padStart(2,"0")}:00 — ${int(hv(h).n)} طلب`,parts:[{k:"s",v:hv(h).v,color:"--brand"}]})));
+
+  // pays
+  const pays=r.by_pay||[]; const pmax=Math.max(1,...pays.map(p=>+p.sales)); const ptot=pays.reduce((s,p)=>s+ +p.sales,0)||1;
+  $("#pays").innerHTML=pays.length?pays.map(p=>`<div class="hb"><span class="t">${esc(payName(p.k))}</span><div class="track"><div class="fill" style="width:${(+p.sales/pmax*100).toFixed(1)}%;background:var(--brand)"></div></div><span class="num">${money(p.sales)} <span class="muted">(${Math.round(p.sales/ptot*100)}%)</span></span></div>`).join(""):`<div class="empty">لا يوجد</div>`;
+  const MODE={car:"سيارة",phone:"هاتف","-":"تطبيقات"};
+  const modes=r.by_mode||[]; const mmax=Math.max(1,...modes.map(p=>+p.orders));
+  $("#modes").innerHTML=modes.length?modes.map(p=>`<div class="hb"><span class="t">${esc(MODE[p.mode]||p.mode)}</span><div class="track"><div class="fill" style="width:${(+p.orders/mmax*100).toFixed(1)}%;background:var(--s1)"></div></div><span class="num">${int(p.orders)} طلب</span></div>`).join(""):`<div class="empty">لا يوجد</div>`;
+
+  // tables
+  const T=(el,head,rows,empty)=>{el.innerHTML=rows.length?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`+rows.join(""):`<tr><td class="empty">${empty||"لا يوجد بيانات في هذه الفترة"}</td></tr>`};
+  const bt=(r.by_branch||[]); const btot=bt.reduce((s,b)=>s+ +b.sales,0)||1;
+  T($("#tbr"),["الفرع","المبيعات","الطلبات","المتوسط","ملغاة","النسبة"],bt.map(b=>`<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:var(${BR_COLOR[b.branch_id]||"--s5"});margin-inline-end:6px"></i>${esc(bName(b.branch_id))}</td><td class="num">${money(b.sales)}</td><td class="num">${int(b.orders)}</td><td class="num">${money(b.orders?b.sales/b.orders:0)}</td><td class="num">${int(b.cancelled)}</td><td class="num">${Math.round(b.sales/btot*100)}%</td></tr>`));
+  const pr=r.products||[]; const qmax=Math.max(1,...pr.map(p=>+p.qty));
+  T($("#tpr"),["#","الصنف","الكمية","المبيعات",""],pr.map((p,i)=>`<tr><td class="muted num">${i+1}</td><td>${esc(p.name)}</td><td class="num">${int(p.qty)}</td><td class="num">${money(p.sales)}</td><td style="width:22%"><div class="bar" style="width:${(+p.qty/qmax*100).toFixed(1)}%"></div></td></tr>`));
+  T($("#tca"),["الكاشير","الفرع","المبيعات","الطلبات","المتوسط"],(r.by_cashier||[]).map(c=>`<tr><td>👤 ${esc(c.cashier)}</td><td>${esc(bName(c.branch_id))}</td><td class="num">${money(c.sales)}</td><td class="num">${int(c.orders)}</td><td class="num">${money(c.orders?c.sales/c.orders:0)}</td></tr>`));
+  const ident=o=>o.mode==="car"&&o.car?[o.car.em,o.car.num,o.car.color].filter(Boolean).join(" "):o.phone||"";
+  T($("#tor"),["#","الوقت","الفرع","العميل","الأصناف","المبلغ","الدفع","الحالة","الكاشير"],(r.recent||[]).map(o=>`<tr>
+    <td class="num">${o.no}</td>
+    <td class="num">${new Date(o.created_at).toLocaleString("en-GB",{timeZone:"Asia/Dubai",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</td>
+    <td>${esc(bName(o.branch_id))}</td><td class="num">${esc(ident(o))}</td>
+    <td style="min-width:180px">${esc(o.items||"")}${o.edits>0?` <span class="pill new">معدّل</span>`:""}${o.status==="cancelled"&&o.cancelled_by?`<div class="muted" style="font-size:12px">ألغاه ${esc(o.cancelled_by)}${o.cancel_reason?" — "+esc(o.cancel_reason):""}</div>`:""}</td>
+    <td class="num">${money(o.total)}</td><td>${esc(payName(o.channel?"app:"+o.channel:o.pay))}</td>
+    <td><span class="pill ${o.status}">${STATUS[o.status]||o.status}</span></td><td>${esc(o.cashier||"")}</td></tr>`));
+}
+
+// stacked bar chart (SVG) with hover tooltip
+function stackBars(svg,data){
+  const W=svg.clientWidth||600,H=240,pl=4,pr=38,pt=10,pb=26;
+  const max=Math.max(1,...data.map(d=>d.parts.reduce((s,p)=>s+p.v,0)));
+  const nice=(()=>{const e=Math.pow(10,Math.floor(Math.log10(max)));const m=max/e;return (m<=1?1:m<=2?2:m<=5?5:10)*e})();
+  const iw=W-pl-pr, ih=H-pt-pb, n=data.length, bw=Math.max(4,Math.min(46,iw/n*0.62)), step=iw/n;
+  const y=v=>pt+ih-v/nice*ih;
+  let g="";
+  for(let i=0;i<=4;i++){const v=nice/4*i, yy=y(v);
+    g+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${css("--grid")}" stroke-width="1"/>`+
+       `<text x="${W-pr+6}" y="${yy+4}" text-anchor="start">${short(v)}</text>`}
+  const every=Math.ceil(n/12);
+  data.forEach((d,i)=>{
+    // RTL reading: first category on the right
+    const cx=W-pr-step*(i+.5); let acc=0; const tot=d.parts.reduce((s,p)=>s+p.v,0);
+    const segs=d.parts.filter(p=>p.v>0);
+    segs.forEach((p,j)=>{const y0=y(acc), y1=y(acc+p.v); acc+=p.v; const h=Math.max(0,y0-y1-(j<segs.length-1?2:0));
+      const top=j===segs.length-1;
+      g+= top? `<path d="${roundTop(cx-bw/2,y1,bw,y0-y1,Math.min(4,bw/2))}" fill="${css(p.color)}"/>`
+             : `<rect x="${cx-bw/2}" y="${y1+2}" width="${bw}" height="${Math.max(0,h)}" fill="${css(p.color)}"/>`});
+    if(i%every===0) g+=`<text x="${cx}" y="${H-8}" text-anchor="middle">${esc(d.label)}</text>`;
+    g+=`<rect class="hit" data-i="${i}" x="${cx-step/2}" y="${pt}" width="${step}" height="${ih}" fill="transparent"/>`;
+  });
+  g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="${css("--line")}" stroke-width="1"/>`;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.innerHTML=g;
+  if(!data.some(d=>d.parts.some(p=>p.v>0))) svg.innerHTML+=`<text x="${W/2}" y="${H/2}" text-anchor="middle" style="font-size:13px">لا توجد مبيعات في هذه الفترة</text>`;
+  const tip=$("#tip");
+  svg.onmousemove=e=>{const h=e.target.closest(".hit"); if(!h){tip.style.opacity=0;return}
+    const d=data[+h.dataset.i]; const tot=d.parts.reduce((s,p)=>s+p.v,0);
+    tip.innerHTML=`<b>${esc(d.title)}</b><br>`+(d.parts.length>1?d.parts.map(p=>`${esc(bName(p.k))}: <span class="num">${money(p.v)}</span>`).join("<br>")+"<br>":"")+`الإجمالي: <span class="num">${money(tot)}</span> د.إ`;
+    tip.style.opacity=1; tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+12)+"px"; tip.style.top=(e.clientY-tip.offsetHeight-10)+"px"};
+  svg.onmouseleave=()=>tip.style.opacity=0;
+  svg.ontouchstart=e=>svg.onmousemove(Object.assign(e.touches[0],{target:e.target}));
+}
+function roundTop(x,y,w,h,r){if(h<=0)return"";r=Math.min(r,h);return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`}
+addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>load(true),250)});
+
+try{ const m=location.hash.match(/^#t=([^&]+)/); if(m){ token=decodeURIComponent(m[1]); LS.set("dash.token",token); history.replaceState(null,"",location.pathname); } }catch(e){}
+if(token) start(); else setTimeout(()=>$("#pin").focus(),50);
+</script>
+</body>
+</html>
