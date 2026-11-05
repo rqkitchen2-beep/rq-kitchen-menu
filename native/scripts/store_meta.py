@@ -393,10 +393,12 @@ def publiclink(app):
         s, j = call("POST", f"/v1/betaGroups/{g['id']}/relationships/builds", {"data": [{"type": "builds", "id": bid}]})
         out.append(f"build {ver} add {s}" + ("" if s < 300 else " " + err(j)[:200]))
         s, j = call("POST", "/v1/betaAppReviewSubmissions", {"data": {"type": "betaAppReviewSubmissions", "relationships": {"build": {"data": {"type": "builds", "id": bid}}}}})
-        out.append(f"beta-review submit {s}" + ("" if s < 300 else " " + err(j)[:250]))
+        out.append(f"beta-review submit {s}" + ("" if s < 300 else " " + err(j)[150:420]))
         s, j = call("GET", f"/v1/builds/{bid}/buildBetaDetail")
         d = j.get("data") or {}
         out.append(f"external state {d.get('attributes', {}).get('externalBuildState')}")
+    s, j = call("GET", f"/v1/builds?filter[app]={aid}&sort=-uploadedDate&limit=4&include=buildBetaDetail")
+    out.append("builds " + str([b['attributes'].get('version') for b in j.get('data', [])]) + " ext " + str([x['attributes'].get('externalBuildState') for x in j.get('included', []) if x.get('type') == 'buildBetaDetails']))
     s, j = call("GET", f"/v1/betaGroups/{g['id']}")
     out.append(f"LINK {(j.get('data') or {}).get('attributes', {}).get('publicLink')}")
     ann(app, " | ".join(out))
