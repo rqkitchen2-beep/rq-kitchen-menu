@@ -968,7 +968,7 @@ $("#appClear").addEventListener("click", ()=>setChannel(null));
 
 // ---------- cart ----------
 function totals(){ const tot=cart.reduce((s,c)=>s+c.price*c.qty,0); const vat=tot-tot/(1+VAT); return {tot, vat, sub:tot-vat, count:cart.reduce((s,c)=>s+c.qty,0)}; }
-function nextNo(){ return orders.reduce((m,o)=>Math.max(m,o.no||0),0)+1; }
+function nextNo(){ if(!shift) return 1; return orders.filter(o=>o.shift_id===shift.id).reduce((m,o)=>Math.max(m,o.no||0),0)+1; } // numbering restarts with every new day (shift)
 function renderCart(){
   $("#nextNo").textContent=editing?editing.no:nextNo();
   $("#lines").innerHTML = cart.length ? cart.map(c=>`<div class="line"><div class="info"><div class="n">${esc(c.name)}</div><div class="p num">${money(c.price)}</div></div><div class="step"><button data-d="-1" data-id="${esc(c.id)}">−</button><span class="num">${c.qty}</span><button data-d="1" data-id="${esc(c.id)}">+</button></div><div class="t num">${money(c.price*c.qty)}</div></div>`).join("") : `<div class="cart-empty">اضغط على الأصناف لإضافتها للطلب</div>`;
@@ -1586,7 +1586,7 @@ function shiftLocalStats(){
 }
 function curStats(){ const l=shiftLocalStats(); if(shiftStats && (+shiftStats.orders||0)>l.orders) return Object.fromEntries(Object.entries(shiftStats).map(([k,v])=>[k,+v])); return l; }
 function renderShift(){
-  const db=$("#dayBar"); if(db) db.hidden=!(shiftLoaded&&!shift);
+  const db=$("#dayBar"); if(db) db.hidden=!(shiftLoaded&&!shift); { const nn=$("#nextNo"); if(nn&&!editing) nn.textContent=nextNo(); }
   const el=$("#shiftBox"); if(!el) return;
   if(!shift){ el.innerHTML=`<div style="color:var(--mute);font-size:14px;margin-bottom:10px">اليوم غير مفتوح.</div><button class="abtn pri" id="shOpen" style="width:100%;padding:12px">🔓 فتح اليوم</button>`; $("#shOpen").onclick=openDayModal; return; }
   const st=curStats(), exp=(+shift.opening_cash)+st.cash;
@@ -2077,7 +2077,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611061920";
+const BUILD="202611062000";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
