@@ -698,7 +698,7 @@ async function pBranches(){
   brList=await rpc("pos_branches_admin",{p_token:token})||[];
   $("#main").innerHTML=`<div class="card">
     <h2>الفروع<span class="sp"></span><button class="btn sm" id="badd">＋ فرع جديد</button></h2>
-    <div class="muted" style="font-size:12.5px;margin-bottom:12px">الفرع اللي تضيفه هنا يظهر مباشرة في <b>الكاشير</b> و<b>الجرد</b> و<b>الحضور</b> و<b>المنيو الإلكتروني</b> و<b>تطبيق الطلبات</b> و<b>تتبع الطلبات</b>. رمز الفرع (PIN) هو اللي يدخل فيه الكاشير والجرد.</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">الفرع اللي تضيفه هنا يظهر مباشرة في <b>الكاشير</b> و<b>الجرد</b> و<b>الحضور</b> و<b>المنيو الإلكتروني</b> و<b>تطبيق الطلبات</b> و<b>تتبع الطلبات</b>. رمز الفرع (PIN) هو اللي يدخل فيه الكاشير والجرد وتطبيق الفرع.</div>
     <div class="scroll" style="max-height:none"><table><thead><tr><th>الفرع</th><th>الواتساب</th><th>الأوقات</th><th>الموقع</th><th>الحالة</th><th></th></tr></thead><tbody>
     ${brList.map(b=>`<tr><td><b>${esc(b.name_ar)}</b><div class="muted" style="font-size:12px">${esc(b.name_en||"")} · ${esc(b.id)}</div></td>
       <td class="num">${esc(b.whatsapp||"—")}</td>
@@ -768,6 +768,7 @@ function branchDone(r,p){
   modal(`<h3>✅ الفرع جاهز<button class="x" data-x>✕</button></h3>
     <div style="font-size:14px;line-height:1.9">
       <div>🧾 <b>الكاشير والجرد:</b> سجّل دخول برمز الفرع <b class="num">${esc(p.pin)}</b></div>
+      <div>🛎 <b>تطبيق الفرع (استقبال طلبات المنيو):</b> نفس الرمز <b class="num">${esc(p.pin)}</b></div>
       <div>🍔 <b>المنيو وتطبيق الطلبات:</b> الفرع ظاهر للعملاء${p.whatsapp?"":" — <span style='color:var(--bad)'>ضيف رقم واتساب عشان توصله الطلبات</span>"}</div>
       <div>🕒 <b>الحضور:</b> ${p.lat!=null?"الفرع مضاف بموقعه ونطاق "+p.radius+" متر — اربط الموظفين فيه من إدارة الحضور":"<span style='color:var(--bad)'>ضيف موقع الفرع عشان يظهر في الحضور</span>"}</div>
       <div>📲 <b>التتبع:</b> <a href="${track}" target="_blank" rel="noopener" dir="ltr">${track}</a></div>
