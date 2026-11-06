@@ -596,10 +596,10 @@ main{flex:1;min-height:0;position:relative}
       <div class="page-h">
         <h2>الأصناف المتوفرة في الفرع</h2>
         <div class="sp"></div>
-        <a class="abtn pri" data-con="menu" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">➕ إضافة / حذف أصناف وصور</a>
+        <a class="abtn pri" id="menuAdd" hidden data-con="menu" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">➕ إضافة / حذف أصناف وصور</a>
         <button class="abtn" id="reloadMenu">تحديث المنيو</button>
       </div>
-      <div style="color:var(--dim);font-size:13px;margin:-6px 0 14px">أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. الأسعار والأصناف الجديدة والصور تتعدل من لوحة التحكم (قسم المنيو) وتوصل هنا تلقائيًا.</div>
+      <div style="color:var(--dim);font-size:13px;margin:-6px 0 14px">أوقف أي صنف خلص من الفرع وراح يختفي من شاشة البيع. <span id="menuAddNote" hidden>الأسعار والأصناف الجديدة والصور تتعدل من لوحة التحكم (قسم المنيو) وتوصل هنا تلقائيًا.</span></div>
       <div class="avl" id="avl"></div>
       <div class="box" id="appsAdmin" style="margin-top:16px" hidden>
         <h3>🛵 أسعار التطبيقات (المدير)</h3>
@@ -829,7 +829,7 @@ function renderGrid(){
   } else g.innerHTML = list.map(tile).join("");
 }
 function renderMenuSide(){ renderCats(); renderGrid(); }
-function renderAvail(){
+function renderAvail(){ { const adm=!!(ctx&&ctx.role==="admin"); const b=$("#menuAdd"), n=$("#menuAddNote"); if(b) b.hidden=!adm; if(n) n.hidden=!adm; }
   $("#avl").innerHTML = menu.items.map(i=>{ const u=imgUrl(i); return `<div class="r">${u?`<img src="${esc(u)}" alt="" loading="lazy">`:`<span class="ph0"></span>`}<span class="n">${esc(i.name)}</span><span class="p num">${money(i.price)}</span><button class="sw ${offItems.has(i.id)?"":"on"}" data-av="${esc(i.id)}" aria-label="متوفر"></button></div>`; }).join("") || `<div class="empty">لا توجد أصناف</div>`;
 }
 $("#avl").addEventListener("click", e=>{
@@ -2162,7 +2162,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611062015";
+const BUILD="202611062020";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
