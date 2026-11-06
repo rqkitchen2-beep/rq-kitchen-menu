@@ -242,6 +242,7 @@ const PAGES=[
   {id:"reports",t:"التقارير",i:"📈",filters:true},
   {id:"menu",t:"المنيو",i:"🍔"},
   {id:"pays",t:"طرق الدفع",i:"💳",admin:true},
+  {id:"hours",t:"أوقات الفروع",i:"⏰",admin:true},
   {id:"apps",t:"التطبيقات",i:"🛵",admin:true},
   {id:"cashiers",t:"الكاشيرية",i:"👤",admin:true},
   {id:"settings",t:"الإعدادات",i:"⚙️"},
@@ -316,7 +317,7 @@ async function route(quiet){
   $("#gf").classList.toggle("hidden",!pg.filters); $("#refresh").classList.toggle("hidden",!pg.filters);
   if(!quiet) $("#upd").textContent="جارِ التحميل…";
   try{
-    await ({home:pHome,orders:pOrders,reports:pReports,menu:pMenu,pays:pPays,apps:pApps,cashiers:pCashiers,settings:pSettings})[id](quiet);
+    await ({home:pHome,orders:pOrders,reports:pReports,menu:pMenu,pays:pPays,hours:pHours,apps:pApps,cashiers:pCashiers,settings:pSettings})[id](quiet);
     $("#upd").textContent=pg.filters?"آخر تحديث "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):"";
   }catch(e){
     if(e.server&&/\bauth\b/.test(e.message)){LS.del("con.token");location.reload();return}
@@ -675,6 +676,28 @@ async function pPays(){
     if(!clean.some(p=>p.on)) return toast("لازم طريقة دفع وحدة على الأقل");
     try{ await rpc("pos_save_pays",{p_token:token,p_pays:clean}); pays=clean; settings.pays=JSON.stringify(clean); editPays=null; toast("تم حفظ طرق الدفع ✓ — تظهر في الكاشير خلال دقيقة"); pPays(); }
     catch(e){ toast("تعذّر الحفظ"); } };
+}
+
+// ---------- BRANCH HOURS + AUTO CLOSE ----------
+async function pHours(){
+  let h={}; try{ h=JSON.parse(settings.hours||"{}")||{}; }catch(e){}
+  const bs=branches.filter(b=>b.id!=="bdemo");
+  bs.forEach(b=>{ h[b.id]=Object.assign({open:"15:00",close:"00:30",auto:false,close_at:"04:00"},h[b.id]||{}); });
+  $("#main").innerHTML=`<div class="card">
+    <h2>أوقات الفروع والإغلاق التلقائي<span class="sp"></span><button class="btn sm" id="hsave">💾 حفظ</button></h2>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">وقت الفتح والإغلاق يظهر للعملاء في المنيو الإلكتروني وتطبيق الطلبات. <b>الإغلاق التلقائي</b>: إذا الكاشير نسي يغلق اليوم، النظام يغلقه بروحه في الوقت اللي تحدده — يسلّم الطلبات المفتوحة ويحسب الكاش على المتوقع (بدون عدّ)، ويكتب في التقرير «إغلاق تلقائي».</div>
+    <div class="scroll" style="max-height:none"><table><thead><tr><th>الفرع</th><th>يفتح</th><th>يقفل</th><th>إغلاق تلقائي للكاشير</th><th>الساعة</th></tr></thead><tbody>
+    ${bs.map(b=>`<tr data-hb="${esc(b.id)}"><td><b>${esc(b.name)}</b></td>
+      <td><input type="time" data-k="open" value="${esc(h[b.id].open)}"></td>
+      <td><input type="time" data-k="close" value="${esc(h[b.id].close)}"></td>
+      <td><label class="switch"><input type="checkbox" data-k="auto" ${h[b.id].auto?"checked":""}><span></span></label></td>
+      <td><input type="time" data-k="close_at" value="${esc(h[b.id].close_at)}"></td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px">مثال: الفرع يقفل 12:30 بالليل، خلّ الإغلاق التلقائي 4:00 الفجر — لو الكاشير ما أغلق، يتقفل بروحه.</div></div>`;
+  $("#hsave").onclick=async()=>{ const out={};
+    document.querySelectorAll("[data-hb]").forEach(tr=>{ const g=k=>tr.querySelector(`[data-k="${k}"]`); out[tr.dataset.hb]={open:g("open").value,close:g("close").value,auto:g("auto").checked,close_at:g("close_at").value}; });
+    if(Object.values(out).some(x=>!/^\d{2}:\d{2}$/.test(x.open)||!/^\d{2}:\d{2}$/.test(x.close)||!/^\d{2}:\d{2}$/.test(x.close_at))) return toast("اكتب كل الأوقات");
+    try{ await rpc("pos_save_hours",{p_token:token,p_hours:out}); settings.hours=JSON.stringify(out); toast("تم حفظ الأوقات ✓"); }catch(e){ toast("تعذّر الحفظ"); } };
 }
 
 // ---------- DELIVERY APPS ----------
