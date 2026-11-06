@@ -1,4 +1,4 @@
-app: cashier  run: 68  rc: 0  Thu Nov  5 23:34:57 UTC 2026
+app: cashier  run: 69  rc: 0  Fri Nov  6 00:32:41 UTC 2026
 STEP: select xcode
 STEP: npm install
 STEP: prepare www
@@ -16,17 +16,17 @@ STEP: signing settings
 RESULT: Apple Pay not in profile (link merchant ID to the app ID to enable)
 STEP: archive
 STEP: export + upload
-RESULT: uploaded cashier version 1.0 build 68
+RESULT: uploaded cashier version 1.0 build 69
 ---- errors ----
    2 				CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = Z34R6L55G2; PROVISIONING_PROFILE_SPECIFIER = "RQ AppStore com.rqkitchen.cashier"; CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 GatherProvisioningInputs
-    builtin-productPackagingUtility /Users/runner/Library/MobileDevice/Provisioning\ Profiles/501b64f0-5ea8-485e-92f0-14752aeddcb8.mobileprovision -o /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/embedded.mobileprovision
+    builtin-productPackagingUtility /Users/runner/Library/MobileDevice/Provisioning\ Profiles/99c24b53-34b6-4084-a28b-829bea0da1d4.mobileprovision -o /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/embedded.mobileprovision
     Provisioning Profile: "RQ AppStore com.rqkitchen.cashier"
     Provisioning Profile: "RQ AppStore com.rqkitchen.cashier"
     Provisioning Profile: "RQ AppStore com.rqkitchen.cashier"
 ---- tail ----
 
-    builtin-infoPlistUtility /Users/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/cashier/ios/App/App/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/PkgInfo -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Base.lproj/LaunchScreen-SBPartialInfo.plist -additionalcontentfile /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Base.lproj/Main-SBPartialInfo.plist -additionalcontentfile /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/assetcatalog_generated_info.plist -scanforprivacyfile /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Frameworks/Capacitor.framework -scanforprivacyfile /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Frameworks/Cordova.framework -requiredArchitecture arm64 -o /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Info.plist
+SwiftExplicitDependencyCompileModuleFromInterface arm64 /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/SwiftExplicitPrecompiledModules/Capacitor-39GPPIL8RB7OC.swiftmodule
 
 
     
@@ -36,24 +36,24 @@ GatherProvisioningInputs
 
     builtin-swiftHeaderTool -arch arm64 /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Objects-normal/arm64/App-Swift.h -o /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/DerivedSources/App-Swift.h
 
-    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Objects-normal/arm64/App.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/Release-iphoneos/App.swiftmodule/arm64-apple-ios.swiftmodule
-
     builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Objects-normal/arm64/App.swiftdoc /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/Release-iphoneos/App.swiftmodule/arm64-apple-ios.swiftdoc
+
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Objects-normal/arm64/App.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/Release-iphoneos/App.swiftmodule/arm64-apple-ios.swiftmodule
 
     builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/Objects-normal/arm64/App.abi.json /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/Release-iphoneos/App.swiftmodule/arm64-apple-ios.abi.json
 
 
+
 ExtractAppIntentsMetadata (in target 'App' from project 'App')
-2026-11-05 23:33:27.040 appintentsmetadataprocessor[6386:23252] Starting appintentsmetadataprocessor export
-2026-11-05 23:33:27.043 appintentsmetadataprocessor[6386:23252] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+2026-11-06 00:30:54.038 appintentsmetadataprocessor[3472:14241] Starting appintentsmetadataprocessor export
+2026-11-06 00:30:54.047 appintentsmetadataprocessor[3472:14241] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
 
-
-    builtin-swiftStdLibTool --copy --verbose --sign A76D8B957C0FB4761C005D12240C24BECEF5BC71 --Xcodesign --keychain --Xcodesign /Users/runner/work/_temp/build.keychain-db --scan-executable /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/App --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Frameworks --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/PlugIns --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/SystemExtensions --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Extensions --platform iphoneos --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.6.109.0.6KpUJw/Metal.xctoolchain --toolchain /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Frameworks --unsigned-destination /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/SwiftSupport --strip-bitcode --strip-bitcode-tool /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+    builtin-swiftStdLibTool --copy --verbose --sign FE90F9DADEF52BA1DCDB1D18DF3DED1172E8E944 --Xcodesign --keychain --Xcodesign /Users/runner/work/_temp/build.keychain-db --scan-executable /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/App --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Frameworks --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/PlugIns --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/SystemExtensions --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Extensions --platform iphoneos --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.6.109.0.rNqBx9/Metal.xctoolchain --toolchain /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/Frameworks --unsigned-destination /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/BuildProductsPath/SwiftSupport --strip-bitcode --strip-bitcode-tool /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
 
 AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-11-05 23:33:27.081 appintentsnltrainingprocessor[6388:23254] Parsing options for appintentsnltrainingprocessor
-2026-11-05 23:33:27.082 appintentsnltrainingprocessor[6388:23254] Starting AppIntents SSU YAML Generation
-2026-11-05 23:33:27.088 appintentsnltrainingprocessor[6388:23254] No AppShortcuts found - Skipping.
+2026-11-06 00:30:54.121 appintentsnltrainingprocessor[3474:14249] Parsing options for appintentsnltrainingprocessor
+2026-11-06 00:30:54.123 appintentsnltrainingprocessor[3474:14249] Starting AppIntents SSU YAML Generation
+2026-11-06 00:30:54.130 appintentsnltrainingprocessor[3474:14249] No AppShortcuts found - Skipping.
 
 Strip /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app/App (in target 'App' from project 'App')
 
@@ -66,9 +66,9 @@ SetMode u+w,go-w,a+rX /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqq
     
     Signing Identity:     "Apple Distribution: Ahmed Deiab (Z34R6L55G2)"
     Provisioning Profile: "RQ AppStore com.rqkitchen.cashier"
-                          (501b64f0-5ea8-485e-92f0-14752aeddcb8)
+                          (99c24b53-34b6-4084-a28b-829bea0da1d4)
     
-    /usr/bin/codesign --force --sign A76D8B957C0FB4761C005D12240C24BECEF5BC71 --keychain /Users/runner/work/_temp/build.keychain-db --entitlements /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/App.app.xcent --generate-entitlement-der /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app
+    /usr/bin/codesign --force --sign FE90F9DADEF52BA1DCDB1D18DF3DED1172E8E944 --keychain /Users/runner/work/_temp/build.keychain-db --entitlements /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/IntermediateBuildFilesPath/App.build/Release-iphoneos/App.build/App.app.xcent --generate-entitlement-der /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app
 
     builtin-RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqqupmowlwmfbazfhxhvvgubavz/Build/Intermediates.noindex/ArchiveIntermediates/App/InstallationBuildProductsLocation/Applications/App.app
 
@@ -79,29 +79,29 @@ SetMode u+w,go-w,a+rX /Users/runner/Library/Developer/Xcode/DerivedData/App-dzqq
 ** ARCHIVE SUCCEEDED **
 
 STEP: export + upload
-2026-11-05 23:33:28.740 xcodebuild[6398:23293] [MT] IDEDistribution: -[IDEDistributionLogging _createLoggingBundleAtPath:]: Created bundle at path "/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/App_2026-11-05_23-33-28.737.xcdistributionlogs".
-2026-11-05 23:33:43.579 xcodebuild[6398:23293] Starting upload
-2026-11-05 23:33:44.845 xcodebuild[6398:23477] Progress 0%: Making copy of ‘App.ipa’…
-2026-11-05 23:33:44.845 xcodebuild[6398:23477] Progress 0%: Making copy of ‘App.ipa’…
-2026-11-05 23:33:44.847 xcodebuild[6398:23477] Progress 0%: Preparing to upload ‘App.ipa’…
-2026-11-05 23:34:04.901 xcodebuild[6398:23296] Progress 0%: Analyzing package…
-2026-11-05 23:34:06.053 xcodebuild[6398:23296] Progress 0%: Sending analysis to App Store Connect…
-2026-11-05 23:34:07.406 xcodebuild[6398:23296] Progress 0%: Waiting for App Store Connect analysis response…
-2026-11-05 23:34:09.030 xcodebuild[6398:23296] Progress 0%: Waiting for App Store Connect analysis response…
-2026-11-05 23:34:25.637 xcodebuild[6398:23296] Progress 0%: Sending SPI analysis to App Store Connect…
-2026-11-05 23:34:26.362 xcodebuild[6398:23296] Progress 0%: Waiting for App Store Connect SPI analysis response…
-2026-11-05 23:34:27.998 xcodebuild[6398:23296] Progress 0%: Waiting for App Store Connect SPI analysis response…
-2026-11-05 23:34:54.068 xcodebuild[6398:23296] Progress 0%: Requesting upload instructions from App Store Connect…
-2026-11-05 23:34:54.944 xcodebuild[6398:23296] Progress 0%: Preparing file for upload to App Store Connect…
-2026-11-05 23:34:54.954 xcodebuild[6398:23296] Progress 0%: Preparing file for upload to App Store Connect…
-2026-11-05 23:34:54.955 xcodebuild[6398:23296] Progress 0%: Uploading to App Store Connect…
-2026-11-05 23:34:55.271 xcodebuild[6398:23296] Progress 100%: Uploading to App Store Connect…
-2026-11-05 23:34:55.271 xcodebuild[6398:23296] Progress 100%: Uploading to App Store Connect…
-2026-11-05 23:34:56.016 xcodebuild[6398:23296] Progress 100%: Completing upload…
-2026-11-05 23:34:57.345 xcodebuild[6398:23296] Progress 100%: Waiting for package to begin processing…
-2026-11-05 23:34:57.499 xcodebuild[6398:23296] Progress 100%: Uploaded package is processing.
-2026-11-05 23:34:57.502 xcodebuild[6398:23296] Progress 100%: Upload succeeded.
+2026-11-06 00:30:58.247 xcodebuild[3489:14322] [MT] IDEDistribution: -[IDEDistributionLogging _createLoggingBundleAtPath:]: Created bundle at path "/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/App_2026-11-06_00-30-58.243.xcdistributionlogs".
+2026-11-06 00:31:11.095 xcodebuild[3489:14322] Starting upload
+2026-11-06 00:31:12.352 xcodebuild[3489:14425] Progress 0%: Making copy of ‘App.ipa’…
+2026-11-06 00:31:12.354 xcodebuild[3489:14425] Progress 0%: Making copy of ‘App.ipa’…
+2026-11-06 00:31:12.356 xcodebuild[3489:14425] Progress 0%: Preparing to upload ‘App.ipa’…
+2026-11-06 00:31:40.069 xcodebuild[3489:14425] Progress 0%: Analyzing package…
+2026-11-06 00:31:41.425 xcodebuild[3489:14421] Progress 0%: Sending analysis to App Store Connect…
+2026-11-06 00:31:42.738 xcodebuild[3489:14421] Progress 0%: Waiting for App Store Connect analysis response…
+2026-11-06 00:31:44.733 xcodebuild[3489:14421] Progress 0%: Waiting for App Store Connect analysis response…
+2026-11-06 00:32:12.347 xcodebuild[3489:14421] Progress 0%: Sending SPI analysis to App Store Connect…
+2026-11-06 00:32:13.790 xcodebuild[3489:14421] Progress 0%: Waiting for App Store Connect SPI analysis response…
+2026-11-06 00:32:16.390 xcodebuild[3489:14421] Progress 0%: Waiting for App Store Connect SPI analysis response…
+2026-11-06 00:32:37.668 xcodebuild[3489:14421] Progress 0%: Requesting upload instructions from App Store Connect…
+2026-11-06 00:32:38.934 xcodebuild[3489:14421] Progress 0%: Preparing file for upload to App Store Connect…
+2026-11-06 00:32:38.949 xcodebuild[3489:14421] Progress 0%: Preparing file for upload to App Store Connect…
+2026-11-06 00:32:38.950 xcodebuild[3489:14421] Progress 0%: Uploading to App Store Connect…
+2026-11-06 00:32:39.043 xcodebuild[3489:14421] Progress 100%: Uploading to App Store Connect…
+2026-11-06 00:32:39.044 xcodebuild[3489:14421] Progress 100%: Uploading to App Store Connect…
+2026-11-06 00:32:39.409 xcodebuild[3489:14421] Progress 100%: Completing upload…
+2026-11-06 00:32:41.202 xcodebuild[3489:14421] Progress 100%: Waiting for package to begin processing…
+2026-11-06 00:32:41.648 xcodebuild[3489:21172] Progress 100%: Uploaded package is processing.
+2026-11-06 00:32:41.652 xcodebuild[3489:21172] Progress 100%: Upload succeeded.
 Uploaded App
 ** EXPORT SUCCEEDED **
 
-RESULT: uploaded cashier version 1.0 build 68
+RESULT: uploaded cashier version 1.0 build 69
