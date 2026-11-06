@@ -568,7 +568,7 @@ main{flex:1;min-height:0;position:relative}
 
     <section class="view page" id="v-admin">
       <div class="page-h"><h2>🔐 لوحة التحكم</h2><div class="sp"></div><span style="color:var(--dim);font-size:13px">للمدير فقط · لكل الفروع</span><a class="abtn pri" data-con="home" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none;margin-inline-start:10px">📊 لوحة التحكم الكاملة</a></div>
-      <div class="filters" style="margin-bottom:10px"><a class="abtn" data-con="menu" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">🍔 إضافة / حذف أصناف وصور</a><a class="abtn" data-con="pays" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">💳 طرق الدفع</a><a class="abtn" data-con="orders" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">🧾 كل الطلبات</a></div>
+      <div class="filters" style="margin-bottom:10px"><a class="abtn" data-con="menu" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">🍔 إضافة / حذف أصناف وصور</a><a class="abtn" data-con="pays" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">💳 طرق الدفع</a><a class="abtn" data-con="hours" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">⏰ أوقات الفروع والإغلاق التلقائي</a><a class="abtn" data-con="orders" href="https://console.rqkitchen.app/" target="_blank" rel="noopener" style="text-decoration:none">🧾 كل الطلبات</a></div>
       <div class="filters" id="admTabs" style="margin-bottom:14px">
         <button class="cat on" data-at="cash">👤 الكاشيرية</button>
         <button class="cat" data-at="apps">🛵 أسعار التطبيقات</button>
@@ -1587,6 +1587,7 @@ function renderShift(){
     <div class="tr"><span>تطبيقات</span><b class="num">${money(st.apps)}</b></div>
     ${st.unpaid_n?`<div class="tr" style="color:var(--red)"><span>غير محصّل (${st.unpaid_n})</span><b class="num">${money(st.unpaid)}</b></div>`:""}
     <div class="tr big" style="font-size:18px"><span>المتوقع في الدرج</span><span class="num">${money(exp)}</span></div>
+    ${(()=>{ try{ const h=JSON.parse((ctx.settings||{}).hours||"{}")[branch]; return h&&h.auto?`<div style="color:var(--mute);font-size:13px;margin:6px 0">⏰ إغلاق تلقائي الساعة <b class="num" dir="ltr">${esc(h.close_at)}</b> إذا ما انقفل قبلها</div>`:""; }catch(e){ return ""; } })()}
     <button class="abtn pri" id="shClose" style="width:100%;padding:12px;background:var(--red);border-color:var(--red)">🔒 إغلاق اليوم وعدّ الكاش</button>`;
   $("#shClose").onclick=openCloseModal;
 }
@@ -1612,8 +1613,16 @@ function openDayModal(){
       delete $("#modal").dataset.lock; closeModal(); toast("تم فتح اليوم ✓"); renderShift(); }
     catch(e){ toast("تعذّر فتح اليوم — تأكد من الإنترنت"); } };
 }
+function openOrdersOf(sid){ return orders.filter(o=>o.shift_id===sid&&o.status!=="cancelled"&&(o.status==="new"||o.status==="ready"||o.pay==="unpaid")); }
+function blockClose(list){
+  modal(`<h3>⛔ ما تقدر تغلق اليوم</h3><div class="sub">فيه ${list.length} طلبات مفتوحة. سلّمها وحصّل غير المدفوع أول، بعدها أغلق اليوم.</div>
+    <div style="max-height:40vh;overflow:auto">${list.map(o=>`<div class="tr"><span><b class="num">#${o.no}</b> · ${esc(identText(o))}</span><span>${o.pay==="unpaid"?'<span class="tag unpaid">غير مدفوع</span>':""} ${o.status==="new"?"قيد التحضير":o.status==="ready"?"جاهز":""}</span></div>`).join("")}</div>
+    <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok" id="goOpen">عرض الطلبات المفتوحة</button></div>`);
+  $("#modal [data-x]").onclick=closeModal; $("#goOpen").onclick=()=>{ closeModal(); ofilter="active"; goView("orders"); renderOrders(); };
+}
 function openCloseModal(){
   if(!shift) return;
+  { const op=openOrdersOf(shift.id); if(op.length) return blockClose(op); }
   const st=curStats(), exp=(+shift.opening_cash)+st.cash;
   modal(`<h3>🔒 إغلاق اليوم</h3><div class="sub">عدّ الكاش اللي في الدرج واكتبه.</div>
     <div class="tr"><span>رصيد الافتتاح</span><b class="num">${money(shift.opening_cash)}</b></div>
@@ -1621,7 +1630,6 @@ function openCloseModal(){
     <div class="tr"><span>${branchPays().length>2?"فيزا وطرق أخرى":"فيزا"}</span><b class="num">${money(st.card)}</b></div>
     <div class="tr"><span>تطبيقات</span><b class="num">${money(st.apps)}</b></div>
     <div class="tr"><span>عدد الطلبات</span><b class="num">${st.orders}</b></div>
-    ${(()=>{ const n=orders.filter(o=>o.shift_id===shift.id&&(o.status==="new"||o.status==="ready")).length; return n?`<div class="hint-b" style="margin:8px 0">ℹ️ ${n} طلبات قيد التحضير بتتسجّل «تم التسليم» عند الإغلاق</div>`:""; })()}
     ${st.unpaid_n?`<div class="hint-b" style="margin:8px 0">⚠️ فيه ${st.unpaid_n} طلب غير محصّل (${money(st.unpaid)} د.إ). حصّلها قبل الإغلاق إذا ممكن.</div>`:""}
     <div class="due" style="margin-top:10px"><div class="l">المتوقع في الدرج</div><div class="v num">${money(exp)}</div></div>
     <input id="clCount" class="recv num" inputmode="decimal" placeholder="الكاش الموجود فعليًا">
@@ -1647,7 +1655,7 @@ function openCloseModal(){
         <div class="mt">يبقى في الدرج لليوم الجاي: <b class="num">${money(closed.float_left)}</b>${+closed.deposit>0?` · للمدير: <b class="num">${money(closed.deposit)}</b>`:""}</div></div>
         <div class="mact"><button class="b-cancel" id="zAgain">📄 عرض التقارير وطباعتها</button><button class="b-ok g" id="zOpen">فتح يوم جديد</button></div>`);
       $("#zAgain").onclick=()=>reportsModal({shiftId:closed.id, rep, list:orders.filter(o=>o.shift_id===closed.id), day:closed.opened_at?bizDayOf(new Date(closed.opened_at).getTime()):day, tab:"till"}); $("#zOpen").onclick=openDayModal;
-    }catch(e){ toast("تعذّر الإغلاق — تأكد من الإنترنت"); } };
+    }catch(e){ const m=String(e&&e.message||"").match(/open_orders:(\d+)/); if(m){ await pull().catch(()=>{}); const op=openOrdersOf(shift.id); if(op.length) return blockClose(op); toast("فيه "+m[1]+" طلبات مفتوحة على جهاز ثاني — سلّمها أول"); return; } toast("تعذّر الإغلاق — تأكد من الإنترنت"); } };
   setTimeout(()=>{ if(matchMedia("(min-width:821px)").matches) $("#clCount").focus(); },50);
 }
 // generic printing of a text report (Z report etc.)
@@ -2050,7 +2058,7 @@ function startApp(){
   loadMenu(false); sync(); loadShift(true); updPrinterBtn(); if(prefs.printer&&prefs.printer.type!=="system") reconnect().then(updPrinterBtn);
   // refresh session info (branches / receipt settings)
   rpc("pos_ctx",{p_token:token}).then(c=>{ if(c){ ctx=Object.assign(ctx||{},c); LS.set("pos.ctx",ctx); if(ctx.role==="branch" && branch!==ctx.branch_id){ switchBranch(ctx.branch_id); } renderBranch(); } }).catch(e=>{ if(isAuthErr(e)){ showLogin(); } });
-  setInterval(()=>{ if(!token||document.hidden) return; rpc("pos_ctx",{p_token:token}).then(c=>{ if(c&&c.settings){ ctx.settings=c.settings; LS.set("pos.ctx",ctx); renderCart(); } }).catch(()=>{}); }, 60000);
+  setInterval(()=>{ if(!token||document.hidden) return; rpc("pos_ctx",{p_token:token}).then(c=>{ if(c&&c.settings){ ctx.settings=c.settings; LS.set("pos.ctx",ctx); renderCart(); } }).catch(()=>{}); loadShift(false); }, 60000);
 }
 
 // boot
@@ -2059,7 +2067,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611060445";
+const BUILD="202611060500";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
