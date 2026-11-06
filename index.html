@@ -1562,7 +1562,7 @@ const TRACK_API="https://dhqgorvtwgzekmmjztyr.supabase.co/functions/v1/track";
 const TRACK_BRANCH={b1:"Al Nahyan",b2:"Al Ain",b3:"Al Wathba",b4:"MBZ"};
 const trackOn=()=>prefs.track!==false && !!TRACK_BRANCH[branch];
 const TRACK_SLUG={b1:"nahyan",b2:"alain",b3:"wathba",b4:"mbz"};
-const trackUrl=o=>{ const tb=TRACK_SLUG[o.branch_id||branch]; return tb?`https://track.rqkitchen.app/b/${tb}?n=${o.no}`:""; };
+const trackUrl=o=>{ const bid=o.branch_id||branch; const tb=((ctx&&ctx.branches||[]).find(x=>x.id===bid)||{}).slug||TRACK_SLUG[bid]; return tb?`https://track.rqkitchen.app/b/${tb}?n=${o.no}`:""; };
 async function trackCall(a, num, tries){
   if(!trackOn()||!token) return null;
   try{
@@ -2310,7 +2310,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611062140";
+const BUILD="202611062230";
 async function checkUpdate(){
   try{
     if(document.hidden) return;

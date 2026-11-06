@@ -241,6 +241,7 @@ const PAGES=[
   {id:"orders",t:"الطلبات",i:"🧾",filters:true},
   {id:"reports",t:"التقارير",i:"📈",filters:true},
   {id:"menu",t:"المنيو",i:"🍔"},
+  {id:"branches",t:"الفروع",i:"🏪",admin:true},
   {id:"pays",t:"طرق الدفع",i:"💳",admin:true},
   {id:"hours",t:"أوقات الفروع",i:"⏰",admin:true},
   {id:"apps",t:"التطبيقات",i:"🛵",admin:true},
@@ -317,7 +318,7 @@ async function route(quiet){
   $("#gf").classList.toggle("hidden",!pg.filters); $("#refresh").classList.toggle("hidden",!pg.filters);
   if(!quiet) $("#upd").textContent="جارِ التحميل…";
   try{
-    await ({home:pHome,orders:pOrders,reports:pReports,menu:pMenu,pays:pPays,hours:pHours,apps:pApps,cashiers:pCashiers,settings:pSettings})[id](quiet);
+    await ({home:pHome,orders:pOrders,reports:pReports,menu:pMenu,branches:pBranches,pays:pPays,hours:pHours,apps:pApps,cashiers:pCashiers,settings:pSettings})[id](quiet);
     $("#upd").textContent=pg.filters?"آخر تحديث "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):"";
   }catch(e){
     if(e.server&&/\bauth\b/.test(e.message)){LS.del("con.token");location.reload();return}
@@ -689,6 +690,90 @@ async function pPays(){
     if(!clean.some(p=>p.on)) return toast("لازم طريقة دفع وحدة على الأقل");
     try{ await rpc("pos_save_pays",{p_token:token,p_pays:clean}); pays=clean; settings.pays=JSON.stringify(clean); editPays=null; toast("تم حفظ طرق الدفع ✓ — تظهر في الكاشير خلال دقيقة"); pPays(); }
     catch(e){ toast("تعذّر الحفظ"); } };
+}
+
+// ---------- BRANCHES (one place → cashier, inventory, attendance, e-menu, ordering app, tracking) ----------
+let brList=[];
+async function pBranches(){
+  brList=await rpc("pos_branches_admin",{p_token:token})||[];
+  $("#main").innerHTML=`<div class="card">
+    <h2>الفروع<span class="sp"></span><button class="btn sm" id="badd">＋ فرع جديد</button></h2>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">الفرع اللي تضيفه هنا يظهر مباشرة في <b>الكاشير</b> و<b>الجرد</b> و<b>الحضور</b> و<b>المنيو الإلكتروني</b> و<b>تطبيق الطلبات</b> و<b>تتبع الطلبات</b>. رمز الفرع (PIN) هو اللي يدخل فيه الكاشير والجرد.</div>
+    <div class="scroll" style="max-height:none"><table><thead><tr><th>الفرع</th><th>الواتساب</th><th>الأوقات</th><th>الموقع</th><th>الحالة</th><th></th></tr></thead><tbody>
+    ${brList.map(b=>`<tr><td><b>${esc(b.name_ar)}</b><div class="muted" style="font-size:12px">${esc(b.name_en||"")} · ${esc(b.id)}</div></td>
+      <td class="num">${esc(b.whatsapp||"—")}</td>
+      <td class="num">${esc(b.open||"—")} – ${esc(b.close||"—")}</td>
+      <td>${b.lat!=null?`<a href="https://maps.google.com/?q=${b.lat},${b.lng}" target="_blank" rel="noopener">📍 الخريطة</a>${b.radius?` <span class="muted" style="font-size:12px">(${b.radius}م)</span>`:""}`:`<span class="muted">بدون موقع</span>`}</td>
+      <td>${b.active?`<span style="color:var(--good)">● شغّال</span>`:`<span style="color:var(--bad)">● موقوف</span>`}</td>
+      <td><button class="btn sm ghost" data-bed="${esc(b.id)}">✏️ تعديل</button></td></tr>`).join("")||`<tr><td colspan="6" class="muted">ما في فروع</td></tr>`}
+    </tbody></table></div></div>`;
+  $("#badd").onclick=()=>branchModal({active:true,delivery:true,pickup:true,open:"15:00",close:"00:30",radius:50});
+  $("#main").querySelectorAll("[data-bed]").forEach(x=>x.onclick=()=>branchModal(brList.find(b=>b.id===x.dataset.bed)));
+}
+function parseLatLng(t){ t=String(t||"");
+  const m=t.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)||t.match(/[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/)||t.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)||t.match(/^\s*(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)\s*$/);
+  return m?{lat:+(+m[1]).toFixed(6),lng:+(+m[2]).toFixed(6)}:null; }
+function branchModal(b){
+  const isNew=!b.id;
+  const m=modal(`<h3>${isNew?"فرع جديد":"تعديل "+esc(b.name_ar)}<button class="x" data-x>✕</button></h3>
+    <div class="frow"><div class="fld"><label>الاسم بالعربي</label><input id="bar" value="${esc(b.name_ar||"")}" placeholder="مثال: دبي مارينا"></div>
+    <div class="fld"><label>الاسم بالإنجليزي</label><input id="ben" dir="ltr" value="${esc(b.name_en||"")}" placeholder="Dubai Marina"></div></div>
+    <div class="frow"><div class="fld"><label>${isNew?"رمز دخول الفرع (PIN) ٤–٨ أرقام":"رمز دخول جديد (اتركه فاضي إذا ما تبي تغيّره)"}</label><input id="bpin" class="num" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="${isNew?"مثال: 4821":"••••"}"></div>
+    <div class="fld"><label>رقم الواتساب للطلبات</label><input id="bwa" class="num" dir="ltr" inputmode="tel" value="${esc(b.whatsapp||"")}" placeholder="9715xxxxxxxx"></div></div>
+    <div class="fld"><label>العنوان (يظهر للعملاء)</label><input id="badr" value="${esc(b.address||"")}"></div>
+    <div class="fld"><label>موقع الفرع — الصق رابط قوقل ماب أو الإحداثيات (للحضور والتوصيل)</label>
+      <div style="display:flex;gap:8px"><input id="bloc" dir="ltr" style="flex:1" value="${b.lat!=null?b.lat+", "+b.lng:""}" placeholder="https://maps.google.com/... أو 24.45, 54.37"><button class="btn sm ghost" id="bgeo" type="button">📍 موقعي</button></div>
+      <span class="muted" id="blocs" style="font-size:12px"></span></div>
+    <div class="frow"><div class="fld"><label>يفتح</label><input id="bopen" type="time" value="${esc(b.open||"15:00")}"></div>
+    <div class="fld"><label>يقفل</label><input id="bclose" type="time" value="${esc(b.close||"00:30")}"></div>
+    <div class="fld"><label>نطاق الحضور (متر)</label><input id="brad" class="num" type="number" min="20" max="1000" value="${b.radius||50}"></div></div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin:4px 0 8px">
+      <label style="display:flex;gap:8px;align-items:center"><span class="switch"><input type="checkbox" id="bdel" ${b.delivery!==false?"checked":""}><span></span></span>توصيل</label>
+      <label style="display:flex;gap:8px;align-items:center"><span class="switch"><input type="checkbox" id="bpick" ${b.pickup!==false?"checked":""}><span></span></span>استلام من الفرع</label>
+      <label style="display:flex;gap:8px;align-items:center"><span class="switch"><input type="checkbox" id="bact" ${b.active!==false?"checked":""}><span></span></span>الفرع شغّال</label></div>
+    ${isNew?"":`<div class="muted" style="font-size:12px">إيقاف الفرع يخفيه من الكاشير والتتبع ويقفل الطلب منه في المنيو — وتبقى تقاريره وطلباته القديمة محفوظة.</div>`}
+    <div class="err" id="berr"></div>
+    <div class="mact"><button class="btn ghost" data-x>إلغاء</button><button class="btn" id="bsave">💾 ${isNew?"إضافة الفرع":"حفظ"}</button></div>`);
+  const showLoc=()=>{ const v=$("#bloc").value.trim(); const ll=parseLatLng(v); $("#blocs").textContent=!v?"":ll?`✓ ${ll.lat}, ${ll.lng}`:"ما قدرت أقرأ الإحداثيات — افتح الموقع في قوقل ماب واضغط مطولاً على الفرع وانسخ الأرقام"; };
+  m.querySelector("#bloc").oninput=showLoc; showLoc();
+  m.querySelector("#bgeo").onclick=()=>{ if(!navigator.geolocation) return toast("الجهاز ما يدعم تحديد الموقع");
+    $("#blocs").textContent="جارِ تحديد موقعك…";
+    navigator.geolocation.getCurrentPosition(p=>{ $("#bloc").value=p.coords.latitude.toFixed(6)+", "+p.coords.longitude.toFixed(6); showLoc(); },()=>{ $("#blocs").textContent="ما قدرت أحدد الموقع — الصق الرابط بدلها"; },{enableHighAccuracy:true,timeout:15000}); };
+  m.querySelector("#bsave").onclick=async()=>{
+    const pin=$("#bpin").value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,"");
+    const locv=$("#bloc").value.trim(), ll=parseLatLng(locv);
+    const p={id:b.id||"",name_ar:$("#bar").value.trim(),name_en:$("#ben").value.trim(),pin,whatsapp:$("#bwa").value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,""),address:$("#badr").value.trim(),
+      open:$("#bopen").value,close:$("#bclose").value,radius:parseInt($("#brad").value)||50,delivery:$("#bdel").checked,pickup:$("#bpick").checked,active:$("#bact").checked};
+    if(ll){p.lat=ll.lat;p.lng=ll.lng}
+    const err=t=>{$("#berr").textContent=t};
+    if(!p.name_ar) return err("اكتب اسم الفرع بالعربي");
+    if(!/[a-z]/i.test(p.name_en)) return err("اكتب اسم الفرع بالإنجليزي (يُستخدم في الرابط والتتبع)");
+    if(isNew&&!/^\d{4,8}$/.test(pin)) return err("اكتب رمز دخول من ٤ إلى ٨ أرقام");
+    if(!isNew&&pin&&!/^\d{4,8}$/.test(pin)) return err("الرمز لازم ٤ إلى ٨ أرقام");
+    if(locv&&!ll) return err("رابط الموقع غير مفهوم");
+    if(!/^\d{2}:\d{2}$/.test(p.open)||!/^\d{2}:\d{2}$/.test(p.close)) return err("اكتب وقت الفتح والإغلاق");
+    $("#bsave").disabled=true;
+    try{
+      const r=await rpc("pos_branch_save",{p_token:token,p:p});
+      closeModal();
+      toast(isNew?`تمت إضافة الفرع ✓ — رمز دخوله ${pin}`:"تم حفظ الفرع ✓");
+      try{ const c=await rpc("pos_ctx",{p_token:token}); branches=c.branches||branches; settings=c.settings||settings; }catch(e){}
+      pBranches();
+      if(isNew) setTimeout(()=>branchDone(r,p),300);
+    }catch(e){ const msg=String(e.message||""); err(/pin_taken/.test(msg)?"هذا الرمز مستخدم لفرع أو مستخدم ثاني — اختر رمز غيره":/pin_format/.test(msg)?"الرمز لازم ٤ إلى ٨ أرقام":"تعذّر الحفظ"); $("#bsave").disabled=false; }
+  };
+}
+function branchDone(r,p){
+  const track=`https://track.rqkitchen.app/b/${r.slug}`;
+  modal(`<h3>✅ الفرع جاهز<button class="x" data-x>✕</button></h3>
+    <div style="font-size:14px;line-height:1.9">
+      <div>🧾 <b>الكاشير والجرد:</b> سجّل دخول برمز الفرع <b class="num">${esc(p.pin)}</b></div>
+      <div>🍔 <b>المنيو وتطبيق الطلبات:</b> الفرع ظاهر للعملاء${p.whatsapp?"":" — <span style='color:var(--bad)'>ضيف رقم واتساب عشان توصله الطلبات</span>"}</div>
+      <div>🕒 <b>الحضور:</b> ${p.lat!=null?"الفرع مضاف بموقعه ونطاق "+p.radius+" متر — اربط الموظفين فيه من إدارة الحضور":"<span style='color:var(--bad)'>ضيف موقع الفرع عشان يظهر في الحضور</span>"}</div>
+      <div>📲 <b>التتبع:</b> <a href="${track}" target="_blank" rel="noopener" dir="ltr">${track}</a></div>
+      <div>⏰ <b>الإغلاق التلقائي:</b> فعّله للفرع من صفحة «أوقات الفروع»</div>
+    </div>
+    <div class="mact"><button class="btn" data-x>تمام</button></div>`);
 }
 
 // ---------- BRANCH HOURS + AUTO CLOSE ----------
