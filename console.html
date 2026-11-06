@@ -495,7 +495,7 @@ async function exportOrders(){
 }
 
 // ---------- REPORTS ----------
-const RTABS=[["daily","المبيعات اليومية"],["products","الأصناف"],["payments","طرق الدفع"],["cashiers","الكاشيرية"],["shifts","إغلاقات اليوم"],["cancelled","الملغاة"]];
+const RTABS=[["daily","المبيعات اليومية"],["products","الأصناف"],["payments","طرق الدفع"],["cashiers","الكاشيرية"],["shifts","إغلاقات اليوم"],["drawer","عمليات الدرج"],["cancelled","الملغاة"]];
 async function pReports(){
   const qs=new URLSearchParams((location.hash.split("?")[1])||""); let tab=qs.get("t")||LS.get("con.rt","daily");
   if(!RTABS.some(t=>t[0]===tab)) tab="daily";
@@ -540,6 +540,14 @@ async function pReports(){
       n0(s.orders),n2(s.cash_sales),n2(s.card_sales),n2(s.apps_sales),n2(s.expected_cash),s.counted_cash!=null?n2(s.counted_cash):"—",
       s.diff!=null?`<b class="num" style="color:${+s.diff<0?"var(--bad)":+s.diff>0?"var(--warn)":"var(--good)"}">${+s.diff>0?"+":""}${money(s.diff)}</b>`:"—",s.deposit!=null?n2(s.deposit):"—",s.float_left!=null?n2(s.float_left):"—"]);
     xl=[["الفرع","فتح","فتحه","إغلاق","أغلقه","الطلبات","كاش","بطاقة","تطبيقات","الكاش المتوقع","المعدود","الفرق","المودع","المتبقي","ملاحظة"]].concat(ss.map(s=>[bName(s.branch_id),dt(s.opened_at),s.opened_by||"",s.closed_at?dt(s.closed_at):"مفتوح",s.closed_by||"",s.orders||0,money(s.cash_sales),money(s.card_sales),money(s.apps_sales),money(s.expected_cash),s.counted_cash??"",s.diff??"",s.deposit??"",s.float_left??"",s.close_note||""]));
+  }else if(tab==="drawer"){
+    const os=await rpc("pos_drawer_ops_range",{p_token:token,p_branch:br,p_d1:d1,p_d2:d2})||[];
+    const KN={in:"➕ إيداع",out:"➖ مصروف",drop:"⬆️ تسليم للمدير"}, KX={in:"إيداع",out:"مصروف",drop:"تسليم للمدير"};
+    head=["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"];
+    rows=os.map(o=>[`<span class="num">${o.day}</span>`,`<span class="num">${hm(o.at)}</span>`,esc(bName(o.branch_id)),KN[o.kind]||o.kind,n2(o.amount),esc(o.note||""),esc(o.by_name||"")]);
+    const S=k=>os.filter(o=>o.kind===k).reduce((t,o)=>t+ +o.amount,0);
+    foot=["الإجمالي","","",`إيداع ${money(S("in"))} · مصروف ${money(S("out"))} · تسليم ${money(S("drop"))}`,"","",""];
+    xl=[["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"]].concat(os.map(o=>[o.day,hm(o.at),bName(o.branch_id),KX[o.kind]||o.kind,money(o.amount),o.note||"",o.by_name||""]));
   }else if(tab==="cancelled"){
     const cs=await rpc("pos_cancelled",{p_token:token,p_branch:br,p_d1:d1,p_d2:d2})||[];
     head=["اليوم","الوقت","الفرع","#","الأصناف","المبلغ","الكاشير","ألغاه","السبب"];
