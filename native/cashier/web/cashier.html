@@ -1747,10 +1747,11 @@ function openDrawerOps(){
       <div style="color:var(--mute);font-size:13px;margin-bottom:6px" id="opHint">${K[kind][1]}</div>
       <input id="opAmt" class="num" inputmode="decimal" placeholder="المبلغ" style="font-size:22px;text-align:center">
       <input id="opNote" placeholder="السبب (اختياري)" style="margin-top:8px">
-      <div class="mact"><button class="b-cancel" data-x>إغلاق</button>${drawerOps.length?`<button class="b-cancel" id="opCsv">⬇ Excel</button>`:""}<button class="b-ok" id="opGo">تسجيل</button></div>
+      <div class="mact"><button class="b-cancel" data-x>إغلاق</button><button class="b-cancel" id="opRep">📒 تقرير بفترة</button><button class="b-ok" id="opGo">تسجيل</button></div>
       <div style="margin-top:14px;max-height:30vh;overflow:auto">${drawerOps.length?drawerOps.slice().reverse().map(o=>`<div class="tr"><span>${K[o.kind][0]} · <span class="num" dir="ltr">${hm(new Date(o.at).getTime())}</span>${o.by_name?" · "+esc(o.by_name):""}${o.note?`<br><small style="color:var(--mute)">${esc(o.note)}</small>`:""}</span><b class="num">${money(o.amount)}</b></div>`).join(""):`<div style="color:var(--mute);text-align:center">ما فيه عمليات اليوم</div>`}</div>
       <div class="tr big" style="margin-top:8px"><span>المتوقع في الدرج الحين</span><span class="num">${money(expCash(shift.opening_cash,st))}</span></div>`);
     $("#modal [data-x]").onclick=closeModal;
+    $("#opRep").onclick=()=>drawerReport();
     if($("#opCsv")) $("#opCsv").onclick=()=>{ const KX={in:"إيداع",out:"مصروف",drop:"تسليم للمدير"};
       const rows=[["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"]].concat(drawerOps.map(o=>[day,hm(new Date(o.at).getTime()),branchName(),KX[o.kind],money(o.amount),o.note||"",o.by_name||""]));
       const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
@@ -1764,6 +1765,35 @@ function openDrawerOps(){
   };
   draw();
 }
+
+function drawerReport(){
+  const KN={in:"➕ إيداع",out:"➖ مصروف",drop:"⬆️ تسليم للمدير"}, KX={in:"إيداع",out:"مصروف",drop:"تسليم للمدير"};
+  const t=day, m1=t.slice(0,8)+"01";
+  modal(`<h3>📒 تقرير عمليات الدرج</h3><div class="sub">اختر أي فترة — ${esc(branchName())}</div>
+    <div class="rtabs" id="drQ"><button class="cat" data-q="today">اليوم</button><button class="cat" data-q="7">٧ أيام</button><button class="cat on" data-q="month">هذا الشهر</button><button class="cat" data-q="last">الشهر الماضي</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><label style="min-width:0;color:var(--mute);font-size:13px">من<input type="date" id="drD1" value="${m1}" style="width:100%;min-width:0;margin-top:4px"></label><label style="min-width:0;color:var(--mute);font-size:13px">إلى<input type="date" id="drD2" value="${t}" style="width:100%;min-width:0;margin-top:4px"></label></div>
+    <div id="drSum" style="margin-bottom:8px"></div>
+    <div id="drList" style="max-height:42vh;overflow:auto"><div style="color:var(--mute);text-align:center">جارِ التحميل…</div></div>
+    <div class="mact"><button class="b-cancel" data-x>إغلاق</button><button class="b-ok" id="drCsv" disabled>⬇ تصدير Excel</button></div>`);
+  $("#modal [data-x]").onclick=closeModal;
+  let rows=[];
+  const addD=(d,n)=>{ const x=new Date(d+"T00:00:00Z"); x.setUTCDate(x.getUTCDate()+n); return x.toISOString().slice(0,10); };
+  const load=async()=>{ const d1=$("#drD1").value, d2=$("#drD2").value; if(!d1||!d2) return;
+    $("#drList").innerHTML=`<div style="color:var(--mute);text-align:center">جارِ التحميل…</div>`;
+    try{ rows=(await rpc("pos_drawer_ops_range",{p_token:token,p_branch:branch,p_d1:d1,p_d2:d2}))||[]; }catch(e){ $("#drList").innerHTML=`<div style="color:var(--red);text-align:center">تعذّر التحميل — تأكد من الإنترنت</div>`; return; }
+    const S=k=>rows.filter(o=>o.kind===k).reduce((a,o)=>a+(+o.amount||0),0);
+    $("#drSum").innerHTML=`<div class="tr"><span>➕ إيداع</span><b class="num">${money(S("in"))}</b></div><div class="tr"><span>➖ مصروف</span><b class="num">${money(S("out"))}</b></div><div class="tr"><span>⬆️ تسليم للمدير</span><b class="num">${money(S("drop"))}</b></div>`;
+    $("#drList").innerHTML=rows.length?rows.map(o=>`<div class="tr"><span>${KN[o.kind]||o.kind} · <span class="num" dir="ltr">${esc(o.day)} ${hm(new Date(o.at).getTime())}</span>${o.by_name?" · "+esc(o.by_name):""}${o.note?`<br><small style="color:var(--mute)">${esc(o.note)}</small>`:""}</span><b class="num">${money(o.amount)}</b></div>`).join(""):`<div style="color:var(--mute);text-align:center">ما فيه عمليات في هذه الفترة</div>`;
+    $("#drCsv").disabled=!rows.length; };
+  $("#drQ").onclick=e=>{ const b=e.target.closest("[data-q]"); if(!b) return; document.querySelectorAll("#drQ [data-q]").forEach(x=>x.classList.toggle("on",x===b)); const q=b.dataset.q;
+    let a=t,z=t; if(q==="7") a=addD(t,-6); if(q==="month") a=m1; if(q==="last"){ z=addD(m1,-1); a=z.slice(0,8)+"01"; }
+    $("#drD1").value=a; $("#drD2").value=z; load(); };
+  $("#drD1").onchange=$("#drD2").onchange=()=>{ document.querySelectorAll("#drQ [data-q]").forEach(x=>x.classList.remove("on")); load(); };
+  $("#drCsv").onclick=()=>{ const out=[["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"]].concat(rows.map(o=>[o.day,hm(new Date(o.at).getTime()),branchName(o.branch_id),KX[o.kind]||o.kind,money(o.amount),o.note||"",o.by_name||""]));
+    const csv="﻿"+out.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=`RQ-drawer_${branchName()}_${$("#drD1").value}_${$("#drD2").value}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),500); };
+  load();
+}
 function askOpenDay(){
   modal(`<h3>🔒 ما فيه يوم مفتوح</h3><div class="sub">تبي تفتح اليوم الحين؟</div>
     <div class="mact"><button class="b-cancel" data-x>لا</button><button class="b-ok g" id="aoGo">🔓 فتح اليوم</button></div>`);
@@ -1774,6 +1804,7 @@ function openMore(){
     shift?["close","🔒","إغلاق اليوم","عدّ الكاش وقفل اليوم"]:["open","🔓","فتح اليوم","ابدأ يوم جديد"],
     ["ops","💵","عمليات الدرج","إيداع · مصروف · تسليم للمدير"],
     ["reports","📄","التقارير","ملخص الطلبات · المنتجات · الدرج"],
+    ["drep","📒","تقرير عمليات الدرج","أي يوم أو فترة · تصدير Excel"],
     ["avail","🍔","توفر المنتجات","إيقاف وتشغيل الأصناف"],
     ["sync","🔄","مزامنة البيانات","تحديث الطلبات والمنيو"],
     ["devices","🖨","الأجهزة","الطابعة"],
@@ -1783,7 +1814,7 @@ function openMore(){
     <div class="mact"><button class="b-cancel" data-x>إغلاق</button></div>`);
   $("#modal [data-x]").onclick=closeModal;
   $("#modal .morelist").onclick=async e=>{ const b=e.target.closest("[data-mo]"); if(!b) return; const k=b.dataset.mo; closeModal();
-    if(k==="open") openDayModal(); else if(k==="close") openCloseModal(); else if(k==="ops") openDrawerOps();
+    if(k==="open") openDayModal(); else if(k==="close") openCloseModal(); else if(k==="ops") openDrawerOps(); else if(k==="drep") drawerReport();
     else if(k==="reports") reportsModal({list:orders.filter(o=>shift?o.shift_id===shift.id||o.day===day:o.day===day), day});
     else if(k==="avail") goView("menu"); else if(k==="devices") openPrinter();
     else if(k==="sync"){ toast("جارِ المزامنة…"); try{ await pull(); await loadShift(false); if(typeof loadMenu==="function") await loadMenu(); toast("تمت المزامنة ✓"); }catch(err){ toast("تعذّرت المزامنة — تأكد من الإنترنت"); } }
@@ -2162,7 +2193,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611062020";
+const BUILD="202611062030";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
