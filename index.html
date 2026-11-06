@@ -151,6 +151,8 @@ main{flex:1;min-height:0;position:relative}
 .cscroll{display:block;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .lines{overflow:visible;padding:6px 10px;min-height:70px}
 .cart .totals{border-top:1px solid var(--line)}
+.line.flash{animation:lflash .7s ease}@keyframes lflash{0%{background:rgba(242,122,26,.25)}100%{background:transparent}}
+.cscroll{position:relative}
 @media (max-width:820px){ .lines{flex:0 0 auto;max-height:none;overflow:visible} }
 .line{display:flex;align-items:center;gap:10px;padding:10px 6px;border-bottom:1px dashed var(--line)}
 .line .info{flex:1;min-width:0}
@@ -986,8 +988,12 @@ $("#grid").addEventListener("click", e=>{
   const it=menu.items.find(i=>i.id===b.dataset.i); if(!it) return;
   const c=cart.find(x=>x.id===it.id); if(c) c.qty++; else cart.push({id:it.id,name:it.name,base:+it.price,price:priceNow(it),qty:1});
   if(navigator.vibrate) try{navigator.vibrate(10)}catch(e){}
-  renderCart(); renderGrid();
+  renderCart(); renderGrid(); showLine(it.id);
 });
+function showLine(id){ const i=cart.findIndex(x=>x.id===id), el=$("#lines").children[i], sc=$("#cscroll"); if(!el||!sc) return;
+  const top=el.offsetTop-6, bot=top+el.offsetHeight+12;
+  if(top<sc.scrollTop) sc.scrollTop=top; else if(bot>sc.scrollTop+sc.clientHeight) sc.scrollTop=bot-sc.clientHeight;
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
 $("#lines").addEventListener("click", e=>{ const b=e.target.closest("[data-d]"); if(!b) return; const c=cart.find(x=>x.id===b.dataset.id); if(!c) return; c.qty+=+b.dataset.d; if(c.qty<=0) cart=cart.filter(x=>x!==c); renderCart(); renderGrid(); });
 $("#clearCart").addEventListener("click", ()=>{ cart=[]; renderCart(); renderGrid(); });
 $("#dayBarGo").addEventListener("click", ()=>openDayModal());
@@ -2071,7 +2077,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611061740";
+const BUILD="202611061745";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
