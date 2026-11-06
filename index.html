@@ -191,6 +191,14 @@ main{flex:1;min-height:0;position:relative}
 .pbtn.later{height:50px;font-size:15px;background:var(--panel2);border:1px solid var(--line)}
 .pbtn.appb{background:var(--or);color:#fff}
 .pbtn.pm{background:#7c3aed;color:#fff}
+.daybar{background:var(--redbg);color:var(--red);font-size:12px;font-weight:600;padding:6px 10px;justify-content:space-between;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.daybar .link{color:var(--red);text-decoration:underline;font-weight:700}
+.rtabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.rpaper{background:#fff;color:#111;border-radius:10px;padding:14px 14px 18px;max-height:56vh;overflow:auto;font-size:13px;line-height:1.5}
+.rpaper .rh{text-align:center;font-weight:700;font-size:15px;white-space:pre-line}.rpaper .rs{text-align:center;font-weight:700;margin:10px 0 4px;border-bottom:1px solid #ccc;padding-bottom:3px}
+.rpaper .rr{display:grid;grid-template-columns:1fr 48px 92px;gap:6px;padding:2px 0}.rpaper .rr.b{font-weight:700;font-size:14px}
+.rpaper .rr span:nth-child(2),.rpaper .rr span:nth-child(3){text-align:end;font-variant-numeric:tabular-nums;direction:ltr}
+.rpaper hr{border:0;border-top:1px dashed #999;margin:6px 0}
 .pay.many{flex-wrap:wrap}.pay.many .pbtn{flex:1 1 calc(50% - 6px);height:54px;font-size:16px}
 #payLaterRow{margin-top:-6px}
 .tag.unpaid{background:var(--redbg);color:var(--red)} .tag.appt{background:var(--orbg);color:var(--or2)}
@@ -471,6 +479,7 @@ main{flex:1;min-height:0;position:relative}
         </div>
       </div>
       <aside class="cart" id="cart">
+        <div class="daybar" id="dayBar" hidden>🔒 اليوم غير مفتوح <button class="link" id="dayBarGo">فتح اليوم</button></div>
         <div class="cart-h">
           <div><h3>الطلب الحالي</h3><div class="next">رقم الطلب <b class="num" id="nextNo">1</b></div></div>
           <div><button class="link" id="clearCart">مسح</button><button class="link" id="closeCart">✕ إغلاق</button></div>
@@ -487,7 +496,6 @@ main{flex:1;min-height:0;position:relative}
           <div class="seg" id="modeSeg">
             <button data-m="car" class="on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-6h12l2 6v4H4z"/></svg>رقم السيارة</button>
             <button data-m="phone"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>رقم الهاتف</button>
-            <button data-m="pickup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>بيك أب</button>
           </div>
           <div id="carBox">
             <div class="row">
@@ -532,8 +540,7 @@ main{flex:1;min-height:0;position:relative}
         <input type="date" id="rDay" style="width:auto">
         <span id="rInfo" style="color:var(--mute);font-size:13px"></span>
         <div class="sp"></div>
-        <button class="abtn" id="copyRep">نسخ الملخص</button>
-        <button class="abtn" id="printRep">طباعة التقرير</button>
+        <button class="abtn pri" id="printRep">📄 التقارير — عرض وطباعة</button>
         <button class="abtn pri" id="dlCsv">تنزيل Excel</button>
       </div>
       <div class="kpis" id="kpis"></div>
@@ -979,6 +986,7 @@ $("#grid").addEventListener("click", e=>{
 });
 $("#lines").addEventListener("click", e=>{ const b=e.target.closest("[data-d]"); if(!b) return; const c=cart.find(x=>x.id===b.dataset.id); if(!c) return; c.qty+=+b.dataset.d; if(c.qty<=0) cart=cart.filter(x=>x!==c); renderCart(); renderGrid(); });
 $("#clearCart").addEventListener("click", ()=>{ cart=[]; renderCart(); renderGrid(); });
+$("#dayBarGo").addEventListener("click", ()=>openDayModal());
 $("#modeSeg").addEventListener("click", e=>{ const b=e.target.closest("[data-m]"); if(b) setMode(b.dataset.m); });
 $("#pnum").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[^\d٠-٩]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)); $("#identErr").textContent=""; });
 $("#phone").addEventListener("input", e=>{ e.target.value=e.target.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d+ ]/g,""); $("#identErr").textContent=""; });
@@ -1467,7 +1475,7 @@ function renderOrders(){
       <span class="st ${o.status}">${STATUS[o.status]||o.status}</span>${o.edits>0?`<span class="edtag">معدّل</span>`:""}</div>
     <div class="oitems">${o.items.map(i=>`${esc(i.name)} <b class="num">×${i.qty}</b>`).join(" · ")}${o.note?`<div style="color:var(--yellow);direction:rtl;text-align:right">ملاحظة: ${esc(o.note)}</div>`:""}${o.status==="cancelled"&&o.cancelled_by?`<div class="cxl">ألغاه: ${esc(o.cancelled_by)}${o.cancel_reason?" — السبب: "+esc(o.cancel_reason):""}</div>`:""}</div>
     <div class="oc-b"><div class="tot num">${money(o.total)} د.إ <span class="tag ${payCls(o)}">${esc(payLabel(o))}</span></div>
-      <button class="abtn" data-act="print" data-id="${esc(o.id)}">🖨</button>
+      <button class="abtn" data-act="print" data-id="${esc(o.id)}">🖨</button>${!o.channel&&o.status!=="cancelled"&&trackUrl(o)?`<button class="abtn" data-act="qr" data-id="${esc(o.id)}">▦ QR</button>`:""}
       ${o.pay==="unpaid"&&o.status!=="cancelled"?`<button class="abtn pri" style="background:var(--green);border-color:var(--green);color:#04210f" data-act="collect" data-id="${esc(o.id)}">💰 تحصيل</button>`:""}
       ${o.status==="new"?`<button class="abtn pri" data-act="ready" data-id="${esc(o.id)}">جاهز</button>`:""}
       ${o.status==="ready"?`<button class="abtn pri" data-act="done" data-id="${esc(o.id)}">تم التسليم</button>`:""}
@@ -1487,6 +1495,7 @@ $("#olist").addEventListener("click", e=>{
   const o=orders.find(x=>x.id===b.dataset.id); if(!o) return;
   const a=b.dataset.act;
   if(a==="print") return printOrder(o);
+  if(a==="qr") return showQR(o);
   if(a==="collect") return collect(o);
   if(a==="done" && o.pay==="unpaid"){ toast("حصّل المبلغ أولًا"); return collect(o, ()=>setStatus(o,"done")); }
   if(a==="edit") return startEdit(o);
@@ -1550,13 +1559,13 @@ function qrCanvas(text, size){
 }
 
 // ---------- day open / close (shifts) ----------
-let shift=null, shiftStats=null, lastFloat=0, shiftLoaded=false;
+let shift=null, shiftStats=null, lastFloat=0, shiftLoaded=false, lastShift=null;
 const shKey=()=> "pos.shift."+branch;
 async function loadShift(prompt){
   try{
     const r=await rpc("pos_shift_current",{p_token:token,p_branch:branch});
-    shift=r.shift; shiftStats=r.stats; lastFloat=+r.last_float||0; shiftLoaded=true; LS.set(shKey(),{shift,lastFloat});
-  }catch(e){ const c=LS.get(shKey(),null); if(c){ shift=c.shift; lastFloat=c.lastFloat||0; } if(isAuthErr(e)) return; }
+    shift=r.shift; shiftStats=r.stats; lastFloat=+r.last_float||0; lastShift=r.last||null; shiftLoaded=true; LS.set(shKey(),{shift,lastFloat,lastShift});
+  }catch(e){ const c=LS.get(shKey(),null); if(c){ shift=c.shift; lastFloat=c.lastFloat||0; lastShift=c.lastShift||null; } if(isAuthErr(e)) return; }
   renderShift();
   if(prompt && shiftLoaded && !shift) openDayModal();
 }
@@ -1567,6 +1576,7 @@ function shiftLocalStats(){
 }
 function curStats(){ const l=shiftLocalStats(); if(shiftStats && (+shiftStats.orders||0)>l.orders) return Object.fromEntries(Object.entries(shiftStats).map(([k,v])=>[k,+v])); return l; }
 function renderShift(){
+  const db=$("#dayBar"); if(db) db.hidden=!(shiftLoaded&&!shift);
   const el=$("#shiftBox"); if(!el) return;
   if(!shift){ el.innerHTML=`<div style="color:var(--mute);font-size:14px;margin-bottom:10px">اليوم غير مفتوح.</div><button class="abtn pri" id="shOpen" style="width:100%;padding:12px">🔓 فتح اليوم</button>`; $("#shOpen").onclick=openDayModal; return; }
   const st=curStats(), exp=(+shift.opening_cash)+st.cash;
@@ -1582,7 +1592,13 @@ function renderShift(){
 }
 function openDayModal(){
   modal(`<h3>🔓 فتح اليوم</h3><div class="sub">عدّ الكاش الموجود في الدرج قبل ما تبدأ البيع.</div>
-    <div class="due"><div class="l">الرصيد المتبقي من آخر إغلاق</div><div class="v num">${money(lastFloat)} <small style="font-size:16px">د.إ</small></div></div>
+    ${lastShift?`<div class="box" style="margin:0 0 12px;padding:12px 14px">
+      <div style="font-weight:700;margin-bottom:6px">🔒 آخر إغلاق — <span class="num" dir="ltr">${dt(new Date(lastShift.closed_at).getTime())}</span>${lastShift.closed_by?` · ${esc(lastShift.closed_by)}`:""}</div>
+      <div class="tr"><span>الكاش المعدود عند الإغلاق</span><b class="num">${money(lastShift.counted_cash)}</b></div>
+      <div class="tr"><span>الفرق وقتها</span><b class="num" style="color:${Math.abs(+lastShift.diff)<.01?"var(--green)":+lastShift.diff<0?"var(--red)":"var(--yellow)"}">${Math.abs(+lastShift.diff)<.01?"✓ مطابق":(+lastShift.diff<0?"نقص ":"زيادة ")+money(Math.abs(+lastShift.diff))}</b></div>
+      ${+lastShift.deposit>0?`<div class="tr"><span>اتسلّم للمدير</span><b class="num">${money(lastShift.deposit)}</b></div>`:""}
+      <div class="tr"><span>بقي في الدرج</span><b class="num">${money(lastShift.float_left)}</b></div></div>`:""}
+    <div class="due"><div class="l">لازم يكون في الدرج الحين</div><div class="v num">${money(lastFloat)} <small style="font-size:16px">د.إ</small></div></div>
     <input id="opCash" class="recv num" inputmode="decimal" value="${money(lastFloat)}" placeholder="الكاش الموجود في الدرج">
     <div class="change" id="opDiff" style="display:none"></div>
     <input id="opNote" class="note" placeholder="ملاحظة (اختياري)">
@@ -1590,7 +1606,7 @@ function openDayModal(){
   $("#modal").dataset.lock="1";
   const upd=()=>{ const v=parseFloat($("#opCash").value), d=$("#opDiff"); if(isNaN(v)||Math.abs(v-lastFloat)<.01){ d.style.display="none"; return; } d.style.display="flex"; d.classList.toggle("bad",v<lastFloat); d.innerHTML=`<span>${v<lastFloat?"نقص عن آخر إغلاق":"زيادة عن آخر إغلاق"}</span><span class="v num">${money(Math.abs(v-lastFloat))}</span>`; };
   $("#opCash").oninput=upd;
-  $("#opLater").onclick=()=>{ delete $("#modal").dataset.lock; closeModal(); toast("تقدر تفتح اليوم من تبويب التقرير"); };
+  $("#opLater").onclick=()=>{ delete $("#modal").dataset.lock; closeModal(); toast("تقدر تتصفح — لكن ما تقدر تسوي طلب قبل فتح اليوم"); renderShift(); };
   $("#opGo").onclick=async()=>{ const v=parseFloat($("#opCash").value); if(isNaN(v)||v<0){ toast("اكتب المبلغ"); return; }
     try{ const r=await rpc("pos_shift_open",{p_token:token,p_branch:branch,p_cash:+money(v),p_note:$("#opNote").value.trim()}); shift=r.shift; shiftStats=r.stats; lastFloat=+r.last_float||0; LS.set(shKey(),{shift,lastFloat});
       delete $("#modal").dataset.lock; closeModal(); toast("تم فتح اليوم ✓"); renderShift(); }
@@ -1609,12 +1625,12 @@ function openCloseModal(){
     <div class="due" style="margin-top:10px"><div class="l">المتوقع في الدرج</div><div class="v num">${money(exp)}</div></div>
     <input id="clCount" class="recv num" inputmode="decimal" placeholder="الكاش الموجود فعليًا">
     <div class="change" id="clDiff" style="display:none"></div>
-    <div style="margin-top:10px;font-size:13px;color:var(--mute)">المبلغ اللي يبقى في الدرج لليوم الجاي (الباقي يتسلّم للمدير)</div>
-    <input id="clKeep" class="num" inputmode="decimal" value="${money(shift.opening_cash)}" style="margin-top:6px">
+    <div style="margin-top:10px;font-size:13px;color:var(--mute)">الكاش اللي يبقى في الدرج ويفتح فيه اليوم الجاي (تلقائيًا = كل المعدود). غيّره بس إذا سلّمت جزء للمدير.</div>
+    <input id="clKeep" class="num" inputmode="decimal" placeholder="نفس المعدود" style="margin-top:6px">
     <div class="tr" style="margin-top:6px"><span>يتسلّم للمدير</span><b class="num" id="clDep">—</b></div>
     <input id="clNote" class="note" placeholder="ملاحظة (اختياري)">
     <div class="mact"><button class="b-cancel" data-x>رجوع</button><button class="b-ok rd" id="clGo">إغلاق اليوم</button></div>`);
-  const upd=()=>{ const c=parseFloat($("#clCount").value), k=parseFloat($("#clKeep").value)||0, d=$("#clDiff");
+  const upd=()=>{ const c=parseFloat($("#clCount").value), kv=$("#clKeep").value, k=kv===""?c:(parseFloat(kv)||0), d=$("#clDiff");
     if(isNaN(c)){ d.style.display="none"; $("#clDep").textContent="—"; return; }
     const df=c-exp; d.style.display="flex"; d.classList.toggle("bad",df<-0.009); d.innerHTML=`<span>${Math.abs(df)<.01?"✓ الدرج مطابق":df<0?"نقص":"زيادة"}</span><span class="v num">${Math.abs(df)<.01?"":money(Math.abs(df))}</span>`;
     $("#clDep").textContent=money(Math.max(0,c-Math.min(k,c))); };
@@ -1622,14 +1638,14 @@ function openCloseModal(){
   $("#modal [data-x]").onclick=closeModal;
   $("#clGo").onclick=async()=>{ const c=parseFloat($("#clCount").value); if(isNaN(c)||c<0){ toast("اكتب الكاش الموجود"); return; }
     if(queue.length){ await sync(); if(queue.length){ toast("فيه طلبات ما ارتفعت — تأكد من الإنترنت قبل الإغلاق"); return; } }
-    try{ const r=await rpc("pos_shift_close",{p_token:token,p_shift:shift.id,p_counted:+money(c),p_keep:+money(parseFloat($("#clKeep").value)||0),p_note:$("#clNote").value.trim()});
+    try{ const r=await rpc("pos_shift_close",{p_token:token,p_shift:shift.id,p_counted:+money(c),p_keep:+money($("#clKeep").value===""?c:(parseFloat($("#clKeep").value)||0)),p_note:$("#clNote").value.trim()});
       const closed=r.shift, cst=r.stats; shift=null; shiftStats=null; lastFloat=+closed.float_left||0; LS.set(shKey(),{shift:null,lastFloat});
-      renderShift(); let rep=null; try{ rep=await rpc("pos_shift_report",{p_token:token,p_shift:closed.id}); }catch(e){} printZ(closed,cst,rep);
+      lastShift=closed; LS.set(shKey(),{shift:null,lastFloat,lastShift}); renderShift(); let rep=null; try{ rep=await rpc("pos_shift_report",{p_token:token,p_shift:closed.id}); }catch(e){}
       modal(`<div class="done-box"><div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></div><div class="mt">تم إغلاق اليوم</div>
         <div class="id num">${Math.abs(+closed.diff)<.01?"✓ الدرج مطابق":(+closed.diff<0?"نقص ":"زيادة ")+money(Math.abs(+closed.diff))+" د.إ"}</div>
-        <div class="mt">يتسلّم للمدير: <b class="num">${money(closed.deposit)}</b> · يبقى في الدرج: <b class="num">${money(closed.float_left)}</b></div></div>
-        <div class="mact"><button class="b-cancel" id="zAgain">🖨 طباعة التقرير</button><button class="b-ok g" id="zOpen">فتح يوم جديد</button></div>`);
-      $("#zAgain").onclick=()=>printZ(closed,cst,rep); $("#zOpen").onclick=openDayModal;
+        <div class="mt">يبقى في الدرج لليوم الجاي: <b class="num">${money(closed.float_left)}</b>${+closed.deposit>0?` · للمدير: <b class="num">${money(closed.deposit)}</b>`:""}</div></div>
+        <div class="mact"><button class="b-cancel" id="zAgain">📄 عرض التقارير وطباعتها</button><button class="b-ok g" id="zOpen">فتح يوم جديد</button></div>`);
+      $("#zAgain").onclick=()=>reportsModal({shiftId:closed.id, rep, list:orders.filter(o=>o.shift_id===closed.id), day:closed.opened_at?bizDayOf(new Date(closed.opened_at).getTime()):day, tab:"till"}); $("#zOpen").onclick=openDayModal;
     }catch(e){ toast("تعذّر الإغلاق — تأكد من الإنترنت"); } };
   setTimeout(()=>{ if(matchMedia("(min-width:821px)").matches) $("#clCount").focus(); },50);
 }
@@ -1685,6 +1701,100 @@ async function printZ(s, st, rep){
   printCanvases(cvs, html.join('<div style="page-break-after:always"></div>'));
 }
 
+
+// ---------- reports (preview + print, Foodics-style) ----------
+const bizDayOf=ts=>ymd(new Date(ts-DAY_CUTOFF_H*3600e3));
+function showQR(o){
+  const u=trackUrl(o), qc=u&&qrCanvas(u,320); if(!qc){ toast("التتبع غير مفعّل لهذا الفرع"); return; }
+  modal(`<h3>▦ كود تتبع الطلب #${o.no}</h3><div class="sub">خلّ العميل يمسح الكود ونبّهه أول ما يجهز طلبه</div>
+    <div style="text-align:center"><img src="${qc.toDataURL()}" style="width:240px;height:240px;image-rendering:pixelated;background:#fff;padding:12px;border-radius:14px"></div>
+    <div class="mact"><button class="b-cancel" id="qrPrint">🖨 طباعة الفاتورة مع الكود</button><button class="b-ok" data-x>تم</button></div>`);
+  $("#modal [data-x]").onclick=closeModal; $("#qrPrint").onclick=()=>printOrder(o);
+}
+async function reportCanvas(rows){
+  const W=(prefs.width===58?384:576), PAD=10, sc=W/576, EN_R=(prefs.rlang||"en")==="en";
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=Math.max(800, rows.length*46+200);
+  const x=cv.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,W,cv.height); x.fillStyle="#000"; x.textBaseline="top";
+  const F=(z,b)=>`${b?"700":"500"} ${z*sc}px "IBM Plex Sans Arabic", Tahoma, Arial, sans-serif`; let y=8;
+  const DIR=EN_R?"ltr":"rtl", S0=EN_R?PAD:W-PAD, S1=EN_R?W-PAD:PAD, QX=EN_R?W*0.63:W*0.37;
+  const fit=(t,max)=>{ t=String(t); while(t.length>3&&x.measureText(t).width>max) t=t.slice(0,-2); return t; };
+  rows.forEach(r=>{
+    if(r==="-"){ y+=4; x.setLineDash([6,4]); x.lineWidth=2; x.beginPath(); x.moveTo(PAD,y); x.lineTo(W-PAD,y); x.stroke(); x.setLineDash([]); y+=10; return; }
+    if(r.t){ x.font=F(28,true); x.direction=DIR; x.textAlign="center"; String(r.t).split("\n").forEach(l=>{ x.fillText(l,W/2,y); y+=36*sc; }); y+=4; return; }
+    if(r.c){ x.font=F(21,false); x.direction=DIR; x.textAlign="center"; x.fillText(r.c,W/2,y); y+=30*sc; return; }
+    if(r.h){ y+=6; x.font=F(23,true); x.direction=DIR; x.textAlign="center"; x.fillText(r.h,W/2,y); y+=32*sc; x.lineWidth=1; x.beginPath(); x.moveTo(PAD,y); x.lineTo(W-PAD,y); x.stroke(); y+=6; return; }
+    const fs=r[2]?24:21; x.font=F(fs,!!r[2]);
+    x.direction=DIR; x.textAlign=EN_R?"left":"right"; x.fillText(fit(r[0], r[3]!=null?W*0.5:W*0.6), S0, y);
+    x.direction="ltr";
+    if(r[3]!=null){ x.textAlign="center"; x.fillText(String(r[3]), QX, y); }
+    x.textAlign=EN_R?"right":"left"; x.fillText(String(r[1]??""), S1, y); y+=fs*sc*1.5;
+  });
+  y+=14; const out=document.createElement("canvas"); out.width=W; out.height=Math.ceil(y); out.getContext("2d").drawImage(cv,0,0); return out;
+}
+function rowsHTML(rows){ return rows.map(r=>r==="-"?"<hr>":r.t?`<div class="rh">${esc(r.t)}</div>`:r.c?`<div style="text-align:center;color:#555">${esc(r.c)}</div>`:r.h?`<div class="rs">${esc(r.h)}</div>`:
+  `<div class="rr ${r[2]?"b":""}"><span>${esc(r[0])}</span><span>${r[3]!=null?esc(r[3]):""}</span><span>${esc(r[1]??"")}</span></div>`).join(""); }
+async function reportsModal(opts){
+  const EN_R=(prefs.rlang||"en")==="en", L=(en,ar)=>EN_R?en:ar, D=opts.day||day;
+  const list=opts.list||[], ok=list.filter(o=>o.status!=="cancelled"), cx=list.filter(o=>o.status==="cancelled");
+  const sum=a=>a.reduce((t,o)=>t+(+o.total||0),0);
+  const head=title=>[{t:"RQ KITCHEN — "+branchName()},{c:title},{c:L("Business date: ","تاريخ العمل: ")+D},{c:L("Printed: ","طُبع: ")+dt(Date.now())},"-"];
+  // orders summary
+  const tot=sum(ok), vat=ok.reduce((t,o)=>t+(+o.vat||0),0);
+  const grp=(arr,key)=>{ const m={}; arr.forEach(o=>{ const k=key(o); m[k]=m[k]||{n:0,t:0}; m[k].n++; m[k].t+=+o.total||0; }); return Object.entries(m).sort((a,b)=>b[1].t-a[1].t); };
+  const mode=o=>o.channel||o.mode==="app"?L("Delivery apps","تطبيقات التوصيل"):o.mode==="car"?L("Drive thru (car)","سيارة"):o.mode==="pickup"?L("Pick up","بيك أب"):L("Phone","هاتف");
+  const pN=id=>EN_R&&id==="cash"?"Cash":EN_R&&id==="visa"?"Card":(payNameOf(id)||id);
+  const kind=o=>o.channel?L("Apps","تطبيقات"):o.pay==="cash"?L("Cash","كاش"):o.pay==="unpaid"?L("Unpaid","غير محصّل"):L("Card & other","بطاقة وطرق أخرى");
+  const A=[...head(L("ORDERS SUMMARY","ملخص الطلبات")),{h:L("General","عام")},[L("Name","البند"),L("Amount","المبلغ"),1,L("Qty","العدد")],
+    [L("Gross sales","إجمالي المبيعات"),money(tot),0,ok.length],[L("Sales without tax","المبيعات بدون ضريبة"),money(tot-vat),0,ok.length],[L("Total taxes","الضريبة"),money(vat)],
+    [L("Net sales","صافي المبيعات"),money(tot),1,ok.length],[L("Average per order","متوسط الطلب"),money(ok.length?tot/ok.length:0)],[L("Cancelled (void)","الملغاة"),money(sum(cx)),0,cx.length],
+    {h:L("Order types","أنواع الطلبات")},...grp(ok,mode).map(([k,v])=>[k,money(v.t),0,v.n]),
+    {h:L("Payments","المدفوعات")},...grp(ok,o=>o.channel?payLabel(o):o.pay==="unpaid"?L("Unpaid","غير محصّل"):pN(o.pay)).map(([k,v])=>[k,money(v.t),0,v.n]),[L("Total payments","إجمالي المدفوعات"),money(tot),1],
+    {h:L("Net payments by type","المدفوعات حسب النوع")},...grp(ok,kind).map(([k,v])=>[k,money(v.t),0,v.n]),
+    {h:L("By cashier","حسب الكاشير")},...grp(ok,o=>o.cashier||"—").map(([k,v])=>[k,money(v.t),0,v.n]),"-",{c:L("End of report","نهاية التقرير")}];
+  // products mix
+  const catOf={}; (menu.items||[]).forEach(i=>catOf[i.id]=i.cat||i.category_id); const cName={}; (menu.cats||[]).forEach(c=>cName[c.id]=c.name||c.name_ar||c.name_en);
+  const pm={}; ok.forEach(o=>(o.items||[]).forEach(i=>{ const c=cName[catOf[i.id]]||L("Other","أخرى"); pm[c]=pm[c]||{}; const e=pm[c][i.name]=pm[c][i.name]||{q:0,t:0}; e.q+=+i.qty; e.t+=(+i.qty)*(+i.price); }));
+  const B=[...head(L("PRODUCTS MIX","المنتجات المباعة"))]; let gq=0, gt=0;
+  Object.entries(pm).forEach(([c,items])=>{ B.push({h:c},[L("Name","الصنف"),L("Amount","المبلغ"),1,L("Qty","العدد")]); let cq=0, ct=0;
+    Object.entries(items).sort((a,b)=>b[1].q-a[1].q).forEach(([n,e])=>{ B.push([n,money(e.t),0,e.q]); cq+=e.q; ct+=e.t; }); B.push([L("Total","المجموع"),money(ct),1,cq]); gq+=cq; gt+=ct; });
+  if(!gq) B.push({c:L("No sales","لا توجد مبيعات")});
+  B.push("-",[L("All products","كل المنتجات"),money(gt),1,gq],{c:L("End of report","نهاية التقرير")});
+  // till summary (needs the shift)
+  const tillRows=rep=>{ const sh=rep&&rep.shift; const C=[...head(L("TILL SUMMARY","ملخص الدرج والكاش"))];
+    if(!sh){ C.push({c:L("No day opened for this date","ما فيه يوم مفتوح بهذا التاريخ")}); return C; }
+    const st=rep.stats||{}, open=sh.status==="open", exp=(+sh.opening_cash)+(+st.cash||0);
+    C.push([L("Opened by","فتحه"),sh.opened_by||""],[L("Opened at","وقت الفتح"),dt(new Date(sh.opened_at).getTime())],[L("Closed by","أغلقه"),open?L("Still open","لسّا مفتوح"):(sh.closed_by||"")],[L("Closed at","وقت الإغلاق"),open?"—":dt(new Date(sh.closed_at).getTime())],
+      {h:L("Payments","المدفوعات")},...(rep.by_pay||[]).map(p=>[p.app?((appById(p.pay)||{}).name||p.pay):p.pay==="unpaid"?L("Unpaid","غير محصّل"):pN(p.pay),money(p.total),0,p.n]),
+      [L("Total payments","إجمالي المدفوعات"),money(st.total),1,st.orders],
+      {h:L("Cash drawer","الدرج")},[L("Opening amount","مبلغ فتح اليوم"),money(sh.opening_cash),1],[L("Cash sales","مبيعات الكاش"),money(st.cash)],[L("Estimated cash in register","المتوقع في الدرج"),money(open?exp:sh.expected_cash),1]);
+    if(!open){ C.push([L("Closing amount (counted)","مبلغ الإغلاق (المعدود)"),money(sh.counted_cash),1],[+sh.diff<0?L("Cash shortage","نقص"):L("Cash over","زيادة"),money(Math.abs(+sh.diff)),1]);
+      if(+sh.deposit>0) C.push([L("Handed to manager","اتسلّم للمدير"),money(sh.deposit)]); C.push([L("Carried to next day","يبقى للّيوم الجاي"),money(sh.float_left),1]); }
+    const m=rep.month; if(m){ const md=(+m.diff||0)+(+m.open_diff||0);
+      C.push({h:L("Cash — month to date","الكاش من بداية الشهر")},[L("Period","الفترة"),String(m.from).slice(5)+" → "+String(m.to).slice(5)],[L("Days","عدد الأيام"),String(m.days)],
+        [L("Month opening cash","كاش أول الشهر"),money(m.opening)],[L("Cash sales this month","مبيعات الكاش للشهر"),money(m.cash_sales),1],
+        [L("Handed to manager","المسلّم للمدير"),money(m.deposits)],[md<0?L("Total shortage","إجمالي النقص"):L("Total over","إجمالي الزيادة"),(Math.abs(md)<.01?"0.00":money(Math.abs(md))),1],
+        [L("Cash in drawer now","الكاش في الدرج الحين"),money(open?exp:sh.float_left),1]); }
+    C.push("-",{c:L("End of report","نهاية التقرير")}); return C; };
+  let rep=opts.rep||null;
+  const tabs=[["sum",L("Orders summary","ملخص الطلبات")],["mix",L("Products mix","المنتجات")],["till",L("Till & cash","الدرج والكاش")]];
+  let tab=opts.tab||"sum";
+  const rowsOf=t=>t==="sum"?A:t==="mix"?B:tillRows(rep);
+  modal(`<h3>📄 ${L("Reports","التقارير")} — <span class="num">${esc(D)}</span></h3>
+    <div class="rtabs">${tabs.map(([k,t])=>`<button class="cat ${k===tab?"on":""}" data-rt="${k}">${t}</button>`).join("")}</div>
+    <div class="rpaper" id="rPaper" dir="${EN_R?"ltr":"rtl"}"></div>
+    <div class="mact"><button class="b-cancel" data-x>${L("Close","إغلاق")}</button><button class="b-cancel" id="rPrintAll">🖨 ${L("Print all","طباعة الكل")}</button><button class="b-ok" id="rPrintOne">🖨 ${L("Print","طباعة")}</button></div>`);
+  const draw=()=>{ $("#rPaper").innerHTML=rowsHTML(rowsOf(tab)); document.querySelectorAll("[data-rt]").forEach(b=>b.classList.toggle("on",b.dataset.rt===tab)); };
+  draw();
+  $("#modal .rtabs").onclick=e=>{ const b=e.target.closest("[data-rt]"); if(b){ tab=b.dataset.rt; draw(); } };
+  $("#modal [data-x]").onclick=closeModal;
+  const pr=async ts=>{ const cvs=[]; for(const t of ts) cvs.push(await reportCanvas(rowsOf(t))); printCanvases(cvs, ts.map(t=>`<div class="pg">${rowsHTML(rowsOf(t))}</div>`).join('<div style="page-break-after:always"></div>')); };
+  $("#rPrintOne").onclick=()=>pr([tab]); $("#rPrintAll").onclick=()=>pr(["sum","mix","till"]);
+  if(!rep){ try{
+      let sid=opts.shiftId||(shift&&D===day&&shift.id);
+      if(!sid){ const sl=await rpc("pos_shift_list",{p_token:token,p_branch:branch,p_d1:D,p_d2:D}); const l=(sl||[]).filter(x=>x.branch_id===branch); if(l.length) sid=l[0].id; }
+      if(sid){ rep=await rpc("pos_shift_report",{p_token:token,p_shift:sid}); if($("#rPaper")&&tab==="till") draw(); }
+    }catch(e){} }
+}
 // ---------- report ----------
 let repOrders=null, repDay=null;
 function stats(list){
@@ -1729,21 +1839,8 @@ function updDiff(){
 }
 $("#counted").addEventListener("input", updDiff);
 function summaryText(){ const s=stats(repList()); return `RQ Kitchen — ${branchName()} — ${repDay||day}\nإجمالي المبيعات: ${money(s.total)} د.إ\nعدد الطلبات: ${s.count}\nكاش: ${money(s.cash)} د.إ (${s.cashN})\nفيزا: ${money(s.visa)} د.إ (${s.visaN})${Object.entries(s.apps).map(([n,a])=>`\n${n}: ${money(a.t)} د.إ (${a.n})`).join("")}${s.unpaidN?`\nغير محصّل: ${money(s.unpaid)} د.إ (${s.unpaidN})`:""}\nالضريبة: ${money(s.vat)} د.إ\nملغاة: ${s.cancelled}`; }
-$("#copyRep").addEventListener("click", async ()=>{ try{ await navigator.clipboard.writeText(summaryText()); toast("تم النسخ — الصقه في واتساب"); }catch(e){ toast("تعذّر النسخ"); } });
-$("#printRep").addEventListener("click", ()=>{
-  const s=stats(repList());
-  doPrint(`<div class="pg"><div class="c hd">RQ KITCHEN — ${esc(branchName())}</div><div class="c">تقرير مبيعات ${esc(repDay||day)}</div><hr>
-   <div class="t b"><span>الإجمالي</span><span class="num">${money(s.total)}</span></div>
-   <div class="t"><span>عدد الطلبات</span><span class="num">${s.count}</span></div>
-   <div class="t"><span>كاش (${s.cashN})</span><span class="num">${money(s.cash)}</span></div>
-   <div class="t"><span>فيزا (${s.visaN})</span><span class="num">${money(s.visa)}</span></div>
-   ${Object.entries(s.apps).map(([n,a])=>`<div class="t"><span>${esc(n)} (${a.n})</span><span class="num">${money(a.t)}</span></div>`).join("")}
-   ${s.unpaidN?`<div class="t"><span>غير محصّل (${s.unpaidN})</span><span class="num">${money(s.unpaid)}</span></div>`:""}
-   <div class="t"><span>الضريبة</span><span class="num">${money(s.vat)}</span></div>
-   <div class="t"><span>ملغاة</span><span class="num">${s.cancelled}</span></div><hr>
-   <table>${s.top.map(([n,q])=>`<tr><td class="q num">${q}</td><td class="n">${esc(n)}</td></tr>`).join("")}</table>
-   <hr><div class="c">طُبع ${dt(Date.now())}</div></div>`);
-});
+
+$("#printRep").addEventListener("click", ()=>reportsModal({list:repList(), day:repDay||day}));
 function csv(list){
   const rows=[["رقم الطلب","التاريخ","الوقت","الفرع","النوع","رقم السيارة/الهاتف","الإمارة","اللون","الأصناف","الإجمالي","الضريبة","الدفع","المستلم","الباقي","الحالة","ملاحظة"]];
   list.slice().sort((a,b)=>a.no-b.no).forEach(o=>rows.push([o.no,o.day,hm(o.ts),branchName(o.branch_id),o.mode==="app"?"تطبيق":o.mode==="car"?"سيارة":o.mode==="pickup"?"بيك أب":"هاتف",identText(o),o.car?o.car.em:"",o.car?o.car.color:"",o.items.map(i=>i.qty+"x "+i.name).join(" | "),money(o.total),money(o.vat),payLabel(o),o.received!=null?money(o.received):"",o.change!=null?money(o.change):"",STATUS[o.status],o.note||""]));
@@ -1961,7 +2058,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611060340";
+const BUILD="202611060500";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
@@ -1976,7 +2073,7 @@ setTimeout(checkUpdate, 15000);
 document.addEventListener("click",e=>{ const c=e.target.closest("[data-con]"); if(c){ c.href="https://console.rqkitchen.app/#"+(token?"t="+encodeURIComponent(token)+"&":"")+"p="+c.dataset.con; } });
 document.addEventListener("click",e=>{ const l=e.target.closest("#dashLink"); if(!l) return; l.href=(NATIVE?SELF:"/")+"dashboard"+(token?"#t="+encodeURIComponent(token):""); });
 if(!NATIVE && "serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")) navigator.serviceWorker.register("/sw.js").catch(()=>{});
-window.__rq={printZ,payLabel,identText,get orders(){return orders}};
+window.__rq={reportsModal,printZ,payLabel,identText,get orders(){return orders}};
 })();
 </script>
 </body>
