@@ -2077,17 +2077,19 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611061745";
+const BUILD="202611061920";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
     const t=await (await fetch((NATIVE?SELF:"/")+"?u="+Date.now(),{cache:"no-store"})).text();
     const m=t.match(/const BUILD="(\d+)"/); if(!m||m[1]===BUILD) return;
-    const idle=()=>!(typeof cart!=="undefined"&&cart.length) && !$("#ov").classList.contains("on");
-    if(idle()) location.reload(); else checkUpdate.pending=true;
+    if(updIdle()) location.reload(); else checkUpdate.pending=true;
   }catch(e){}
 }
-setInterval(()=>{ if(checkUpdate.pending){ if(!(cart&&cart.length)&&!$("#ov").classList.contains("on")) location.reload(); } else checkUpdate(); }, 120000);
+// only reload on the Sell screen, empty cart, no dialog open, untouched for 2 minutes — never while someone reads reports or orders
+let lastTouch=Date.now(); ["pointerdown","keydown","scroll"].forEach(ev=>document.addEventListener(ev,()=>{ lastTouch=Date.now(); },{passive:true,capture:true}));
+function updIdle(){ return curView==="pos" && !(typeof cart!=="undefined"&&cart.length) && !$("#ov").classList.contains("on") && !editing && Date.now()-lastTouch>120000; }
+setInterval(()=>{ if(checkUpdate.pending){ if(updIdle()) location.reload(); } else checkUpdate(); }, 60000);
 setTimeout(checkUpdate, 15000);
 document.addEventListener("click",e=>{ const c=e.target.closest("[data-con]"); if(c){ c.href="https://console.rqkitchen.app/#"+(token?"t="+encodeURIComponent(token)+"&":"")+"p="+c.dataset.con; } });
 document.addEventListener("click",e=>{ const l=e.target.closest("#dashLink"); if(!l) return; l.href=(NATIVE?SELF:"/")+"dashboard"+(token?"#t="+encodeURIComponent(token):""); });
