@@ -1754,8 +1754,7 @@ function openDrawerOps(){
     $("#opRep").onclick=()=>drawerReport();
     if($("#opCsv")) $("#opCsv").onclick=()=>{ const KX={in:"إيداع",out:"مصروف",drop:"تسليم للمدير"};
       const rows=[["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"]].concat(drawerOps.map(o=>[day,hm(new Date(o.at).getTime()),branchName(),KX[o.kind],money(o.amount),o.note||"",o.by_name||""]));
-      const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-      const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=`RQ-drawer_${branchName()}_${day}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),500); };
+      download(`RQ-drawer_${day}.csv`, "\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n")); };
     $("#opKind").onclick=e=>{ const b=e.target.closest("[data-k]"); if(!b) return; kind=b.dataset.k; document.querySelectorAll("#opKind [data-k]").forEach(x=>x.classList.toggle("on",x===b)); $("#opHint").textContent=K[kind][1]; };
     $("#opGo").onclick=async()=>{ const a=parseFloat(String($("#opAmt").value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))); if(!(a>0)){ toast("اكتب المبلغ"); return; }
       $("#opGo").disabled=true;
@@ -1790,8 +1789,7 @@ function drawerReport(){
     $("#drD1").value=a; $("#drD2").value=z; load(); };
   $("#drD1").onchange=$("#drD2").onchange=()=>{ document.querySelectorAll("#drQ [data-q]").forEach(x=>x.classList.remove("on")); load(); };
   $("#drCsv").onclick=()=>{ const out=[["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"]].concat(rows.map(o=>[o.day,hm(new Date(o.at).getTime()),branchName(o.branch_id),KX[o.kind]||o.kind,money(o.amount),o.note||"",o.by_name||""]));
-    const csv="﻿"+out.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=`RQ-drawer_${branchName()}_${$("#drD1").value}_${$("#drD2").value}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),500); };
+    download(`RQ-drawer_${$("#drD1").value}_${$("#drD2").value}.csv`, "\ufeff"+out.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n")); };
   load();
 }
 function askOpenDay(){
@@ -1981,8 +1979,18 @@ function csv(list){
   list.slice().sort((a,b)=>a.no-b.no).forEach(o=>rows.push([o.no,o.day,hm(o.ts),branchName(o.branch_id),o.mode==="app"?"تطبيق":o.mode==="car"?"سيارة":o.mode==="pickup"?"بيك أب":"هاتف",identText(o),o.car?o.car.em:"",o.car?o.car.color:"",o.items.map(i=>i.qty+"x "+i.name).join(" | "),money(o.total),money(o.vat),payLabel(o),o.received!=null?money(o.received):"",o.change!=null?money(o.change):"",STATUS[o.status],o.note||""]));
   return "﻿"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
 }
-function download(name, text){
-  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:"text/csv;charset=utf-8"})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+// In the iPad/Android app (and home-screen web apps) a blob download does nothing, so the file is
+// handed to the server and opened as a normal download link in the phone's browser.
+async function download(name, text){
+  const inApp = NATIVE || navigator.standalone || (window.matchMedia&&matchMedia("(display-mode: standalone)").matches) || /; wv\)/.test(navigator.userAgent);
+  if(!inApp){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:"text/csv;charset=utf-8"})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); return; }
+  toast("جارِ تجهيز الملف…");
+  try{
+    const safe=String(name).replace(/[^A-Za-z0-9._-]+/g,"-").replace(/-+/g,"-");
+    const r=await fetch(SB+"/functions/v1/export-file",{method:"POST",headers:{"Content-Type":"application/json",apikey:KEY,Authorization:"Bearer "+KEY},body:JSON.stringify({token,name:(branch||"")+"-"+safe,text})});
+    const j=await r.json().catch(()=>({})); if(!r.ok||!j.url) throw new Error(j.error||"export");
+    if(NATIVE) location.href=j.url; else window.open(j.url,"_blank");
+  }catch(e){ toast("تعذّر التصدير — تأكد من الإنترنت"); }
 }
 $("#dlCsv").addEventListener("click", ()=>download(`RQ-${branchName()}-${repDay||day}.csv`, csv(repList())));
 $("#rGo").addEventListener("click", async ()=>{
@@ -2193,7 +2201,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611062030";
+const BUILD="202611062045";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
