@@ -21,7 +21,8 @@ public class RQNativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDeleg
         CAPPluginMethod(name: "applePayComplete", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tcpSend", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tcpProbe", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "localIp", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "localIp", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "shareFile", returnType: CAPPluginReturnPromise)
     ]
 
     private var manager: CLLocationManager?
@@ -302,4 +303,26 @@ public class RQNativePlugin: CAPPlugin, CAPBridgedPlugin, CLLocationManagerDeleg
         call.resolve(["ip": ip ?? ""])
     }
 
+
+    // Share sheet (WhatsApp, Mail, Files, AirDrop…) for an exported report, without leaving the app.
+    @objc func shareFile(_ call: CAPPluginCall) {
+        guard let b64 = call.getString("data"), let data = Data(base64Encoded: b64) else { call.reject("data"); return }
+        let raw = call.getString("name") ?? "RQ-export"
+        let name = raw.replacingOccurrences(of: "/", with: "-")
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("rq-exports", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent(name)
+        do { try data.write(to: url, options: .atomic) } catch { call.reject("write"); return }
+        DispatchQueue.main.async {
+            guard let root = self.bridge?.viewController else { call.reject("vc"); return }
+            let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+            if let pop = vc.popoverPresentationController {
+                pop.sourceView = root.view
+                pop.sourceRect = CGRect(x: root.view.bounds.midX, y: root.view.bounds.maxY - 80, width: 1, height: 1)
+                pop.permittedArrowDirections = []
+            }
+            vc.completionWithItemsHandler = { _, done, _, _ in call.resolve(["completed": done]) }
+            root.present(vc, animated: true)
+        }
+    }
 }

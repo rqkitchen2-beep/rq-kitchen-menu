@@ -163,4 +163,31 @@ public class RQNativePlugin extends Plugin {
         } catch (Exception ignored) {}
         JSObject r = new JSObject(); r.put("ip", ip); call.resolve(r);
     }
+
+    /** Share sheet (WhatsApp, Gmail, Drive…) for an exported report, without leaving the app. */
+    @PluginMethod
+    public void shareFile(PluginCall call) {
+        String b64 = call.getString("data");
+        String name = call.getString("name", "RQ-export").replace("/", "-");
+        String mime = call.getString("mime", "application/octet-stream");
+        if (b64 == null) { call.reject("data"); return; }
+        try {
+            byte[] bytes = Base64.decode(b64, Base64.DEFAULT);
+            java.io.File dir = new java.io.File(getContext().getCacheDir(), "rq-exports");
+            dir.mkdirs();
+            java.io.File f = new java.io.File(dir, name);
+            java.io.FileOutputStream o = new java.io.FileOutputStream(f);
+            o.write(bytes); o.close();
+            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", f);
+            android.content.Intent send = new android.content.Intent(android.content.Intent.ACTION_SEND);
+            send.setType(mime);
+            send.putExtra(android.content.Intent.EXTRA_STREAM, uri);
+            send.putExtra(android.content.Intent.EXTRA_SUBJECT, name);
+            send.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            android.content.Intent chooser = android.content.Intent.createChooser(send, name);
+            chooser.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            getActivity().startActivity(chooser);
+            JSObject r = new JSObject(); r.put("completed", true); call.resolve(r);
+        } catch (Exception e) { call.reject(String.valueOf(e.getMessage())); }
+    }
 }

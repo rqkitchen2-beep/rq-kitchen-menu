@@ -43,6 +43,19 @@ VC=$((GITHUB_RUN_NUMBER + 100))
 sed -i "s/versionCode [0-9]*/versionCode $VC/; s/versionName \"[^\"]*\"/versionName \"1.0.$GITHUB_RUN_NUMBER\"/" android/app/build.gradle
 # keep the device awake & portrait-friendly; lock to sensor portrait is not forced
 sed -i 's#<application#<application android:usesCleartextTraffic="false"#' android/app/src/main/AndroidManifest.xml
+# share sheet for exported reports: FileProvider over the cache dir
+mkdir -p android/app/src/main/res/xml
+cat > android/app/src/main/res/xml/file_paths.xml <<'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path name="my_images" path="." />
+    <cache-path name="my_cache_images" path="." />
+</paths>
+XML
+if ! grep -q 'androidx.core.content.FileProvider' android/app/src/main/AndroidManifest.xml; then
+  sed -i 's#</application>#    <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" /></provider>\n    </application>#' android/app/src/main/AndroidManifest.xml
+fi
+grep -q 'androidx.core.content.FileProvider' android/app/src/main/AndroidManifest.xml && echo "RESULT: file provider ok"
 if [ "$APP" = attendance ]; then
   # clock-in checks the device location at the branch
   sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
