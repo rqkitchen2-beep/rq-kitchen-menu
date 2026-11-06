@@ -1747,10 +1747,14 @@ function openDrawerOps(){
       <div style="color:var(--mute);font-size:13px;margin-bottom:6px" id="opHint">${K[kind][1]}</div>
       <input id="opAmt" class="num" inputmode="decimal" placeholder="المبلغ" style="font-size:22px;text-align:center">
       <input id="opNote" placeholder="السبب (اختياري)" style="margin-top:8px">
-      <div class="mact"><button class="b-cancel" data-x>إغلاق</button><button class="b-ok" id="opGo">تسجيل</button></div>
+      <div class="mact"><button class="b-cancel" data-x>إغلاق</button>${drawerOps.length?`<button class="b-cancel" id="opCsv">⬇ Excel</button>`:""}<button class="b-ok" id="opGo">تسجيل</button></div>
       <div style="margin-top:14px;max-height:30vh;overflow:auto">${drawerOps.length?drawerOps.slice().reverse().map(o=>`<div class="tr"><span>${K[o.kind][0]} · <span class="num" dir="ltr">${hm(new Date(o.at).getTime())}</span>${o.by_name?" · "+esc(o.by_name):""}${o.note?`<br><small style="color:var(--mute)">${esc(o.note)}</small>`:""}</span><b class="num">${money(o.amount)}</b></div>`).join(""):`<div style="color:var(--mute);text-align:center">ما فيه عمليات اليوم</div>`}</div>
       <div class="tr big" style="margin-top:8px"><span>المتوقع في الدرج الحين</span><span class="num">${money(expCash(shift.opening_cash,st))}</span></div>`);
     $("#modal [data-x]").onclick=closeModal;
+    if($("#opCsv")) $("#opCsv").onclick=()=>{ const KX={in:"إيداع",out:"مصروف",drop:"تسليم للمدير"};
+      const rows=[["اليوم","الوقت","الفرع","النوع","المبلغ","السبب","الكاشير"]].concat(drawerOps.map(o=>[day,hm(new Date(o.at).getTime()),branchName(),KX[o.kind],money(o.amount),o.note||"",o.by_name||""]));
+      const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+      const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=`RQ-drawer_${branchName()}_${day}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),500); };
     $("#opKind").onclick=e=>{ const b=e.target.closest("[data-k]"); if(!b) return; kind=b.dataset.k; document.querySelectorAll("#opKind [data-k]").forEach(x=>x.classList.toggle("on",x===b)); $("#opHint").textContent=K[kind][1]; };
     $("#opGo").onclick=async()=>{ const a=parseFloat(String($("#opAmt").value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))); if(!(a>0)){ toast("اكتب المبلغ"); return; }
       $("#opGo").disabled=true;
@@ -2158,7 +2162,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611062030";
+const BUILD="202611062015";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
