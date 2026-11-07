@@ -536,10 +536,16 @@ main{flex:1;min-height:0;position:relative}
 
     <section class="view page" id="v-orders">
       <div class="page-h">
-        <h2>طلبات اليوم</h2>
+        <h2 id="oTitle">طلبات اليوم</h2>
         <div class="filters" id="ofilters"></div>
         <div class="sp"></div>
-        <div style="width:260px;max-width:100%"><input id="oq" placeholder="بحث برقم الطلب / السيارة / الهاتف"></div>
+        <div style="width:260px;max-width:100%"><input id="oq" placeholder="بحث برقم الطلب / السيارة / الهاتف / الصنف"></div>
+      </div>
+      <div class="page-h" style="margin-top:-6px;gap:8px">
+        <div class="filters" id="oPer"><button class="cat on" data-op="today">اليوم</button><button class="cat" data-op="yest">أمس</button><button class="cat" data-op="month">هذا الشهر</button><button class="cat" data-op="custom">📅 يوم أو مدة</button></div>
+        <span id="oCustom" hidden style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="date" id="oD1" style="width:auto"><span>→</span><input type="date" id="oD2" style="width:auto"></span>
+        <select id="oPay" style="width:auto;min-width:150px"></select>
+        <span id="oSum" class="num" style="color:var(--mute);font-size:13px"></span>
       </div>
       <div class="olist" id="olist"></div>
     </section>
@@ -548,7 +554,9 @@ main{flex:1;min-height:0;position:relative}
       <div class="page-h">
         <h2>التقرير</h2>
         <div class="filters" id="rScope"><button class="cat on" data-sc="me">👤 تقريري</button><button class="cat" data-sc="all">🏪 الفرع</button></div>
-        <input type="date" id="rDay" style="width:auto">
+        <div class="filters" id="rPer"><button class="cat on" data-rp="today">اليوم</button><button class="cat" data-rp="yest">أمس</button><button class="cat" data-rp="month">هذا الشهر</button><button class="cat" data-rp="last">الشهر الماضي</button><button class="cat" data-rp="custom">📅 يوم أو مدة</button></div>
+        <span id="rCustom" hidden style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="date" id="rD1" style="width:auto"><span>→</span><input type="date" id="rD2" style="width:auto"></span>
+        <input type="hidden" id="rDay">
         <span id="rInfo" style="color:var(--mute);font-size:13px"></span>
         <div class="sp"></div>
         <button class="abtn pri" id="printRep">📄 التقارير — عرض وطباعة</button>
@@ -1478,29 +1486,57 @@ function testOrder(){ return {no:0,ts:Date.now(),branch_id:branch,mode:"car",car
 // ---------- orders view ----------
 const STATUS={new:"قيد التحضير",ready:"جاهز",done:"تم التسليم",cancelled:"ملغي"};
 const OF=[["active","النشطة"],["unpaid","غير مدفوع"],["new","قيد التحضير"],["ready","جاهز"],["done","تم التسليم"],["all","الكل"]];
+let oPer="today", oD1=null, oD2=null, oPay="", oHist=null, oHistKey="";
+function oRange(){ if(oPer==="today") return [day,day]; if(oPer==="yest"){ const y=new Date(day+"T12:00:00"); y.setDate(y.getDate()-1); return [ymd(y),ymd(y)]; }
+  if(oPer==="month") return [day.slice(0,8)+"01",day]; let a=$("#oD1").value||day, b=$("#oD2").value||a; if(b<a){ const t=a; a=b; b=t; } return [a,b]; }
+async function loadOHist(){ [oD1,oD2]=oRange(); const key=oD1+"|"+oD2; if(oPer==="today"){ oHist=null; oHistKey=""; return renderOrders(); }
+  if(oHistKey===key&&oHist) return renderOrders();
+  oHist=null; oHistKey=key; $("#olist").innerHTML=`<div class="empty">جارِ التحميل…</div>`;
+  try{ const r=oD1===oD2?await rpc("pos_list",{p_token:token,p_branch:branch,p_day:oD1}):await rpc("pos_list_range",{p_token:token,p_branch:branch,p_d1:oD1,p_d2:oD2});
+    if(oHistKey!==key) return; oHist=(r||[]).filter(o=>o.day>=oD1&&o.day<=oD2); }
+  catch(e){ if(oHistKey===key){ oHistKey=""; $("#olist").innerHTML=`<div class="empty">تعذّر التحميل — يحتاج إنترنت</div>`; } return; }
+  renderOrders(); }
+function oPayOpts(){ const seen=new Set(), opts=[["","💳 كل طرق الدفع"]];
+  const add=(v,n)=>{ if(!seen.has(v)){ seen.add(v); opts.push([v,n]); } };
+  allPays().forEach(p=>add(p.id,p.name)); add("cash","كاش"); add("visa","فيزا"); add("unpaid","غير محصّل");
+  (oHist||orders).forEach(o=>{ if(o.channel) add("app:"+o.channel,"🛵 "+payLabel(o)); else if(o.pay&&!seen.has(o.pay)) add(o.pay,payNameOf(o.pay)||o.pay); });
+  return opts; }
+function payMatch(o){ if(!oPay) return true; if(oPay.startsWith("app:")) return o.channel===oPay.slice(4); return !o.channel&&o.pay===oPay; }
 function renderOrders(){
+  const HIST=oPer!=="today"&&oHist!==null, SRC=HIST?oHist:orders;
   const isAct=o=>o.status==="new"||o.status==="ready"||(o.pay==="unpaid"&&o.status!=="cancelled");
   const act=orders.filter(isAct).length;
   $("#badge").hidden=!act; $("#badge").textContent=act;
   $("#ofilters").innerHTML=OF.map(([k,n])=>`<button class="cat ${ofilter===k?"on":""}" data-f="${k}">${n}</button>`).join("");
   const qq=oq.trim(); const pend=new Set(queue.map(x=>x.id));
-  let list=orders.filter(o=>ofilter==="all"?true:ofilter==="active"?isAct(o):ofilter==="unpaid"?(o.pay==="unpaid"&&o.status!=="cancelled"):o.status===ofilter);
-  if(qq) list=list.filter(o=>String(o.no)===qq||identText(o).includes(qq)||(o.phone||"").includes(qq));
-  list=list.slice().sort((a,b)=>b.no-a.no);
+  const ps=$("#oPay"); const po=oPayOpts(); if(!po.some(x=>x[0]===oPay)) po.push([oPay,oPay]);
+  ps.innerHTML=po.map(([v,n])=>`<option value="${esc(v)}" ${v===oPay?"selected":""}>${esc(n)}</option>`).join("");
+  document.querySelectorAll("#oPer [data-op]").forEach(b=>b.classList.toggle("on",b.dataset.op===oPer)); $("#oCustom").hidden=oPer!=="custom";
+  $("#oTitle").textContent=HIST?("الطلبات — "+(oD1===oD2?oD1:oD1+" → "+oD2)):"طلبات اليوم";
+  let list=SRC.filter(o=>ofilter==="all"?true:ofilter==="active"?isAct(o):ofilter==="unpaid"?(o.pay==="unpaid"&&o.status!=="cancelled"):o.status===ofilter).filter(payMatch);
+  if(qq) list=list.filter(o=>String(o.no)===qq||identText(o).includes(qq)||(o.phone||"").includes(qq)||(o.items||[]).some(i=>String(i.name).toLowerCase().includes(qq.toLowerCase())));
+  list=list.slice().sort((a,b)=>HIST?(b.ts-a.ts):(b.no-a.no));
+  const okL=list.filter(o=>o.status!=="cancelled"); $("#oSum").textContent=`${list.length} طلب · ${money(okL.reduce((t,o)=>t+(+o.total||0),0))} د.إ`;
   $("#olist").innerHTML = list.length ? list.map(o=>`<div class="oc ${o.status} ${o.pay==="unpaid"&&o.status!=="cancelled"?"unpaid-o":""}">
     <div class="oc-top"><div class="ono num">#${o.no}</div>
-      <div class="oid"><div class="a num" dir="auto">${esc(identText(o))}</div><div class="b">${esc(identSub(o))} · <span class="num">${hm(o.ts)}</span>${o.cashier?` · 👤 ${esc(o.cashier)}`:""} ${pend.has(o.id)?`<span class="unsync">· لم يُرفع بعد</span>`:""}</div></div>
+      <div class="oid"><div class="a num" dir="auto">${esc(identText(o))}</div><div class="b">${esc(identSub(o))} · <span class="num">${HIST&&oD1!==oD2?esc(String(o.day).slice(5))+" ":""}${hm(o.ts)}</span>${o.cashier?` · 👤 ${esc(o.cashier)}`:""} ${pend.has(o.id)?`<span class="unsync">· لم يُرفع بعد</span>`:""}</div></div>
       <span class="st ${o.status}">${STATUS[o.status]||o.status}</span>${o.edits>0?`<span class="edtag">معدّل</span>`:""}</div>
     <div class="oitems">${o.items.map(i=>`${esc(i.name)} <b class="num">×${i.qty}</b>`).join(" · ")}${o.note?`<div style="color:var(--yellow);direction:rtl;text-align:right">ملاحظة: ${esc(o.note)}</div>`:""}${o.status==="cancelled"&&o.cancelled_by?`<div class="cxl">ألغاه: ${esc(o.cancelled_by)}${o.cancel_reason?" — السبب: "+esc(o.cancel_reason):""}</div>`:""}</div>
     <div class="oc-b"><div class="tot num">${money(o.total)} د.إ <span class="tag ${payCls(o)}">${esc(payLabel(o))}</span></div>
       <button class="abtn" data-act="print" data-id="${esc(o.id)}">🖨</button>${!o.channel&&o.status!=="cancelled"&&trackUrl(o)?`<button class="abtn" data-act="qr" data-id="${esc(o.id)}">▦ QR</button>`:""}
-      ${o.pay==="unpaid"&&o.status!=="cancelled"?`<button class="abtn pri" style="background:var(--green);border-color:var(--green);color:#04210f" data-act="collect" data-id="${esc(o.id)}">💰 تحصيل</button>`:""}
+      ${HIST?"":`${o.pay==="unpaid"&&o.status!=="cancelled"?`<button class="abtn pri" style="background:var(--green);border-color:var(--green);color:#04210f" data-act="collect" data-id="${esc(o.id)}">💰 تحصيل</button>`:""}
       ${o.status==="new"?`<button class="abtn pri" data-act="ready" data-id="${esc(o.id)}">جاهز</button>`:""}
       ${o.status==="ready"?`<button class="abtn pri" data-act="done" data-id="${esc(o.id)}">تم التسليم</button>`:""}
-      ${o.status==="new"||o.status==="ready"?`<button class="abtn" data-act="edit" data-id="${esc(o.id)}">✏️ تعديل</button><button class="abtn ghost" data-act="cancel" data-id="${esc(o.id)}">إلغاء</button>`:""}
+      ${o.status==="new"||o.status==="ready"?`<button class="abtn" data-act="edit" data-id="${esc(o.id)}">✏️ تعديل</button><button class="abtn ghost" data-act="cancel" data-id="${esc(o.id)}">إلغاء</button>`:""}`}
     </div></div>`).join("") : `<div class="empty">لا توجد طلبات</div>`;
 }
 $("#ofilters").addEventListener("click", e=>{ const b=e.target.closest("[data-f]"); if(!b) return; ofilter=b.dataset.f; renderOrders(); });
+$("#oPer").addEventListener("click", e=>{ const b=e.target.closest("[data-op]"); if(!b) return; oPer=b.dataset.op;
+  if(oPer!=="today"&&oPer!=="active"&&ofilter==="active") ofilter="all";
+  if(oPer==="today") ofilter="active";
+  if(oPer==="custom"&&!$("#oD1").value){ $("#oD1").value=day; $("#oD2").value=day; } loadOHist(); });
+["#oD1","#oD2"].forEach(id=>$(id).addEventListener("change", ()=>{ if(id==="#oD1"&&(!$("#oD2").value||$("#oD2").value<$("#oD1").value)) $("#oD2").value=$("#oD1").value; loadOHist(); }));
+$("#oPay").addEventListener("change", e=>{ oPay=e.target.value; renderOrders(); });
 $("#oq").addEventListener("input", e=>{ oq=e.target.value; renderOrders(); });
 function setStatus(o, st){ o.status=st; o.status_at=new Date().toISOString(); saveLocal(); const s=clone(o); delete s._local; enqueue(s); renderAll();
   if(o.channel) return;
@@ -1510,7 +1546,7 @@ function setStatus(o, st){ o.status=st; o.status_at=new Date().toISOString(); sa
 }
 $("#olist").addEventListener("click", e=>{
   const b=e.target.closest("[data-act]"); if(!b) return;
-  const o=orders.find(x=>x.id===b.dataset.id); if(!o) return;
+  const o=orders.find(x=>x.id===b.dataset.id)||(oHist||[]).find(x=>x.id===b.dataset.id); if(!o) return;
   const a=b.dataset.act;
   if(a==="print") return printOrder(o);
   if(a==="qr") return showQR(o);
@@ -1864,10 +1900,10 @@ async function reportCanvas(rows){
 function rowsHTML(rows){ return rows.map(r=>r==="-"?"<hr>":r.t?`<div class="rh">${esc(r.t)}</div>`:r.c?`<div style="text-align:center;color:#555">${esc(r.c)}</div>`:r.h?`<div class="rs">${esc(r.h)}</div>`:
   `<div class="rr ${r[2]?"b":""}"><span>${esc(r[0])}</span><span>${r[3]!=null?esc(r[3]):""}</span><span>${esc(r[1]??"")}</span></div>`).join(""); }
 async function reportsModal(opts){
-  const EN_R=(prefs.rlang||"en")==="en", L=(en,ar)=>EN_R?en:ar, D=opts.day||day;
+  const EN_R=(prefs.rlang||"en")==="en", L=(en,ar)=>EN_R?en:ar, D1=opts.day||day, D2=opts.d2||D1, RANGE=D1!==D2, D=RANGE?D1+" → "+D2:D1;
   const list=opts.list||[], ok=list.filter(o=>o.status!=="cancelled"), cx=list.filter(o=>o.status==="cancelled");
   const sum=a=>a.reduce((t,o)=>t+(+o.total||0),0);
-  const head=title=>[{t:"RQ KITCHEN — "+branchName()},{c:title},{c:L("Business date: ","تاريخ العمل: ")+D},{c:L("Printed: ","طُبع: ")+dt(Date.now())},"-"];
+  const head=title=>[{t:"RQ KITCHEN — "+branchName()},{c:title},{c:(RANGE?L("Period: ","الفترة: "):L("Business date: ","تاريخ العمل: "))+D},{c:L("Printed: ","طُبع: ")+dt(Date.now())},"-"];
   // orders summary
   const tot=sum(ok), vat=ok.reduce((t,o)=>t+(+o.vat||0),0);
   const grp=(arr,key)=>{ const m={}; arr.forEach(o=>{ const k=key(o); m[k]=m[k]||{n:0,t:0}; m[k].n++; m[k].t+=+o.total||0; }); return Object.entries(m).sort((a,b)=>b[1].t-a[1].t); };
@@ -1911,7 +1947,23 @@ async function reportsModal(opts){
   let rep=opts.rep||null;
   const tabs=[["sum",L("Orders summary","ملخص الطلبات")],["mix",L("Products mix","المنتجات")],["till",L("Till & cash","الدرج والكاش")]];
   let tab=opts.tab||"sum";
-  const rowsOf=t=>t==="sum"?A:t==="mix"?B:tillRows(rep);
+  let shl=null;
+  const tillRange=()=>{ const C=[...head(L("TILL SUMMARY","ملخص الدرج والكاش"))];
+    if(shl===null){ C.push({c:L("Loading…","جارِ التحميل…")}); return C; }
+    const l=shl.slice().sort((a,b)=>String(a.opened_at).localeCompare(String(b.opened_at)));
+    if(!l.length){ C.push({c:L("No days in this period","ما فيه أيام بهذي الفترة")}); return C; }
+    let cs=0, df=0, dep=0;
+    C.push([L("Day","اليوم"),L("Open → Close","فتح ← إغلاق"),1,L("Cash","كاش")]);
+    l.forEach(x=>{ const d=bizDayOf(new Date(x.opened_at).getTime()), op=x.status==="open"; cs+=+x.cash_sales||0; df+=+x.diff||0; dep+=+x.deposit||0;
+      C.push([d.slice(5)+(op?L(" (open)"," (مفتوح)"):""), money(x.opening_cash)+" → "+(op?"…":money(x.counted_cash)),0,money(x.cash_sales||0)]);
+      if(Math.abs(+x.diff||0)>=.01) C.push([L("  shortage/over","  نقص/زيادة"),(+x.diff<0?"−":"+")+money(Math.abs(+x.diff))]); });
+    const first=l[0], last=l[l.length-1];
+    C.push("-",[L("Days","عدد الأيام"),String(l.length)],[L("Opening cash (first day)","كاش فتح أول يوم"),money(first.opening_cash)],[L("Cash sales","مبيعات الكاش"),money(cs),1],
+      [L("Handed to manager","المسلّم للمدير"),money(dep)],[df<0?L("Total shortage","إجمالي النقص"):L("Total over","إجمالي الزيادة"),Math.abs(df)<.01?"0.00":money(Math.abs(df)),1],
+      [last.status==="open"?L("Cash in drawer now (expected)","الكاش في الدرج الحين"):L("Closing cash (last day)","كاش إغلاق آخر يوم"),money(last.status==="open"?(+last.opening_cash||0):last.counted_cash),1],
+      "-",{c:L("End of report","نهاية التقرير")});
+    return C; };
+  const rowsOf=t=>t==="sum"?A:t==="mix"?B:RANGE?tillRange():tillRows(rep);
   modal(`<h3>📄 ${L("Reports","التقارير")} — <span class="num">${esc(D)}</span></h3>
     <div class="rtabs">${tabs.map(([k,t])=>`<button class="cat ${k===tab?"on":""}" data-rt="${k}">${t}</button>`).join("")}</div>
     <div class="rpaper" id="rPaper" dir="${EN_R?"ltr":"rtl"}"></div>
@@ -1922,15 +1974,23 @@ async function reportsModal(opts){
   $("#modal [data-x]").onclick=closeModal;
   const pr=async ts=>{ const cvs=[]; for(const t of ts) cvs.push(await reportCanvas(rowsOf(t))); printCanvases(cvs, ts.map(t=>`<div class="pg">${rowsHTML(rowsOf(t))}</div>`).join('<div style="page-break-after:always"></div>')); };
   $("#rPrintOne").onclick=()=>pr([tab]);
-  $("#rShare").onclick=async()=>{ toast("جارِ تجهيز الملف…"); try{ const cvs=[]; for(const t of ["sum","mix","till"]) cvs.push(await reportCanvas(rowsOf(t))); await shareOut(`RQ-reports_${branch}_${D}.pdf`,"application/pdf",pdfFromCanvases(cvs),"تقارير "+D); }catch(e){ toast("تعذّر تجهيز الملف"); } }; $("#rPrintAll").onclick=()=>pr(["sum","mix","till"]);
-  if(!rep){ try{
+  $("#rShare").onclick=async()=>{ toast("جارِ تجهيز الملف…"); try{ const cvs=[]; for(const t of ["sum","mix","till"]) cvs.push(await reportCanvas(rowsOf(t))); await shareOut(`RQ-reports_${branch}_${D.replace(" → ","_to_")}.pdf`,"application/pdf",pdfFromCanvases(cvs),"تقارير "+D); }catch(e){ toast("تعذّر تجهيز الملف"); } }; $("#rPrintAll").onclick=()=>pr(["sum","mix","till"]);
+  if(RANGE){ try{ const sl=await rpc("pos_shift_list",{p_token:token,p_branch:branch,p_d1:D1,p_d2:D2}); shl=(sl||[]).filter(x=>x.branch_id===branch); }catch(e){ shl=[]; } if($("#rPaper")&&tab==="till") draw(); }
+  else if(!rep){ try{
       let sid=opts.shiftId||(shift&&D===day&&shift.id);
       if(!sid){ const sl=await rpc("pos_shift_list",{p_token:token,p_branch:branch,p_d1:D,p_d2:D}); const l=(sl||[]).filter(x=>x.branch_id===branch); if(l.length) sid=l[0].id; }
       if(sid){ rep=await rpc("pos_shift_report",{p_token:token,p_shift:sid}); if($("#rPaper")&&tab==="till") draw(); }
     }catch(e){} }
 }
 // ---------- report ----------
-let repOrders=null, repDay=null;
+let repOrders=null, repDay=null, repD1=null, repD2=null, repPer="today";
+function perRange(k){ const t=new Date(day+"T12:00:00"); if(k==="today") return [day,day];
+  if(k==="yest"){ const y=new Date(t); y.setDate(y.getDate()-1); return [ymd(y),ymd(y)]; }
+  if(k==="month") return [day.slice(0,8)+"01",day];
+  if(k==="last"){ const a=new Date(t.getFullYear(),t.getMonth()-1,1), b=new Date(t.getFullYear(),t.getMonth(),0); return [ymd(a),ymd(b)]; }
+  return [$("#rD1").value||day,$("#rD2").value||$("#rD1").value||day]; }
+const repLabel=()=>repD1===repD2?repD1:repD1+" → "+repD2;
+const repLive=()=>repD1===day&&repD2===day;
 function stats(list){
   const ok=list.filter(o=>o.status!=="cancelled");
   const sum=f=>ok.filter(f).reduce((s,o)=>s+(+o.total),0);
@@ -1944,14 +2004,18 @@ function stats(list){
 }
 let repScope="me";
 $("#rScope").addEventListener("click", e=>{ const b=e.target.closest("[data-sc]"); if(!b) return; repScope=b.dataset.sc; document.querySelectorAll("#rScope [data-sc]").forEach(x=>x.classList.toggle("on",x===b)); renderReport(); });
-function repList(){ const l=repDay===day||!repDay ? orders : (repOrders||[]); return repScope==="me" && ctx && ctx.cashier ? l.filter(o=>(o.cashier||"")===ctx.cashier) : l; }
+function repList(){ const l=!repD1||repLive() ? orders : (repOrders||[]); return repScope==="me" && ctx && ctx.cashier ? l.filter(o=>(o.cashier||"")===ctx.cashier) : l; }
 async function renderReport(){
-  const rd=$("#rDay"); if(!rd.value) rd.value=day; repDay=rd.value;
-  $("#drawerBox").hidden = repDay!==day;
+  if(!repD1){ [repD1,repD2]=perRange(repPer); }
+  if(repD2<repD1){ const t=repD1; repD1=repD2; repD2=t; }
+  repDay=repLabel(); $("#rDay").value=repD1;
+  document.querySelectorAll("#rPer [data-rp]").forEach(b=>b.classList.toggle("on",b.dataset.rp===repPer));
+  $("#rCustom").hidden=repPer!=="custom"; if(repPer==="custom"){ $("#rD1").value=repD1; $("#rD2").value=repD2; }
+  $("#drawerBox").hidden = !repLive();
   $("#rInfo").textContent=branchName()+(repScope==="me"&&ctx&&ctx.cashier?" · 👤 "+ctx.cashier:"");
-  if(repDay!==day && (repOrders===null || repOrders._d!==repDay)){
+  if(!repLive() && (repOrders===null || repOrders._d!==repDay)){
     $("#kpis").innerHTML=`<div class="empty">جارِ التحميل…</div>`;
-    try{ repOrders=await rpc("pos_list",{p_token:token,p_branch:branch,p_day:repDay}); repOrders._d=repDay; }catch(e){ $("#kpis").innerHTML=`<div class="empty">تعذّر التحميل — يحتاج إنترنت</div>`; return; }
+    try{ const want=repDay; const r=repD1===repD2?await rpc("pos_list",{p_token:token,p_branch:branch,p_day:repD1}):await rpc("pos_list_range",{p_token:token,p_branch:branch,p_d1:repD1,p_d2:repD2}); if(want!==repDay) return; repOrders=(r||[]).filter(o=>o.day>=repD1&&o.day<=repD2); repOrders._d=want; }catch(e){ $("#kpis").innerHTML=`<div class="empty">تعذّر التحميل — يحتاج إنترنت</div>`; return; }
   }
   const s=stats(repList());
   const k=(l,v,sm)=>`<div class="kpi"><div class="l">${l}</div><div class="v num">${v} ${sm?`<small>${sm}</small>`:""}</div></div>`;
@@ -1964,7 +2028,8 @@ async function renderReport(){
   if(cx.length) $("#top").insertAdjacentHTML("beforeend", `<h3 style="margin:16px 0 8px;color:var(--red)">🚫 الطلبات الملغاة (${cx.length})</h3>`+cx.map(o=>`<div class="tr" style="align-items:flex-start"><span><b class="num">#${o.no}</b> · ${esc(o.items.map(i=>i.qty+"× "+i.name).join("، "))}<br><small style="color:var(--mute)">ألغاه: ${esc(o.cancelled_by||"—")}${o.cancel_reason?" · "+esc(o.cancel_reason):""}${o.cashier?" · الكاشير: "+esc(o.cashier):""}</small></span><b class="num" style="color:var(--red)">${money(o.total)}</b></div>`).join(""));
 
 }
-$("#rDay").addEventListener("change", ()=>{ repOrders=null; renderReport(); });
+$("#rPer").addEventListener("click", e=>{ const b=e.target.closest("[data-rp]"); if(!b) return; repPer=b.dataset.rp; if(repPer==="custom"&&!$("#rD1").value){ $("#rD1").value=repD1||day; $("#rD2").value=repD2||day; } [repD1,repD2]=perRange(repPer); repOrders=null; renderReport(); });
+["#rD1","#rD2"].forEach(id=>$(id).addEventListener("change", ()=>{ if(id==="#rD1"&&(!$("#rD2").value||$("#rD2").value<$("#rD1").value)) $("#rD2").value=$("#rD1").value; [repD1,repD2]=perRange("custom"); repOrders=null; renderReport(); }));
 function updDiff(){
   const v=$("#counted").value, el=$("#cdiff"); if(!v){ el.textContent=""; return; }
   const d=parseFloat(v)-stats(orders).cash; if(isNaN(d)){ el.textContent=""; return; }
@@ -1974,7 +2039,7 @@ function updDiff(){
 $("#counted").addEventListener("input", updDiff);
 function summaryText(){ const s=stats(repList()); return `RQ Kitchen — ${branchName()} — ${repDay||day}\nإجمالي المبيعات: ${money(s.total)} د.إ\nعدد الطلبات: ${s.count}\nكاش: ${money(s.cash)} د.إ (${s.cashN})\nفيزا: ${money(s.visa)} د.إ (${s.visaN})${Object.entries(s.apps).map(([n,a])=>`\n${n}: ${money(a.t)} د.إ (${a.n})`).join("")}${s.unpaidN?`\nغير محصّل: ${money(s.unpaid)} د.إ (${s.unpaidN})`:""}\nالضريبة: ${money(s.vat)} د.إ\nملغاة: ${s.cancelled}`; }
 
-$("#printRep").addEventListener("click", ()=>reportsModal({list:repList(), day:repDay||day}));
+$("#printRep").addEventListener("click", ()=>reportsModal({list:repList(), day:repD1||day, d2:repD2||day}));
 function csv(list){ const rows=csvRows(list); return "\ufeff"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n"); }
 function csvRows(list){
   const rows=[["رقم الطلب","التاريخ","الوقت","الفرع","النوع","رقم السيارة/الهاتف","الإمارة","اللون","الأصناف","الإجمالي","الضريبة","الدفع","المستلم","الباقي","الحالة","ملاحظة"]];
@@ -2264,7 +2329,7 @@ $("#nav").addEventListener("click", e=>{
   document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x===b));
   if(curView==="admin") renderAdmin();
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+curView));
-  if(curView==="report"){ repOrders=null; $("#rDay").value=day; }
+  if(curView==="report"){ repOrders=null; repD1=null; }
   renderAll();
 });
 function renderWho(){ $("#whoName").textContent=(ctx&&ctx.cashier)||"الفرع"; }
@@ -2310,7 +2375,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611062230";
+const BUILD="202611071420";
 async function checkUpdate(){
   try{
     if(document.hidden) return;
