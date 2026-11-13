@@ -1,91 +1,116 @@
 {
- "headers": [
-  {
-   "source": "/sw.js",
-   "headers": [
+  "headers": [
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
-    }
-   ]
-  },
-  {
-   "source": "/",
-   "headers": [
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(self), camera=(self), microphone=(self), payment=(), usb=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
+        }
+      ]
+    },
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
-    }
-   ]
-  },
-  {
-   "source": "/index.html",
-   "headers": [
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
-    }
-   ]
-  },
-  {
-   "source": "/manifest.webmanifest",
-   "headers": [
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
     {
-     "key": "Content-Type",
-     "value": "application/manifest+json"
-    }
-   ]
-  },
-  {
-   "source": "/dashboard",
-   "headers": [
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
-    }
-   ]
-  },
-  {
-   "source": "/console",
-   "headers": [
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
+    },
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
-    }
-   ]
-  },
-  {
-   "source": "/console-sw.js",
-   "headers": [
+      "source": "/dashboard",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
     {
-     "key": "Cache-Control",
-     "value": "no-cache"
-    }
-   ]
-  },
-  {
-   "source": "/console.webmanifest",
-   "headers": [
+      "source": "/console",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
     {
-     "key": "Content-Type",
-     "value": "application/manifest+json"
-    }
-   ]
-  }
- ],
- "cleanUrls": true,
- "rewrites": [],
- "redirects": [
-  {
-   "source": "/",
-   "has": [
+      "source": "/console-sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
     {
-     "type": "host",
-     "value": "console.rqkitchen.app"
+      "source": "/console.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
     }
-   ],
-   "destination": "/console",
-   "permanent": false
-  }
- ]
+  ],
+  "cleanUrls": true,
+  "rewrites": [],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "console.rqkitchen.app"
+        }
+      ],
+      "destination": "/console",
+      "permanent": false
+    }
+  ]
 }
