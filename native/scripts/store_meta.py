@@ -379,14 +379,15 @@ def publiclink(app):
     s, j = call("GET", f"/v1/apps/{aid}/betaAppLocalizations")
     desc = ("RQ Kitchen internal staff app. " + c["promo"])[:4000]
     locs = j.get("data", [])
-    if locs:
-        s, j = call("PATCH", f"/v1/betaAppLocalizations/{locs[0]['id']}", {"data": {"type": "betaAppLocalizations", "id": locs[0]["id"],
-            "attributes": {"feedbackEmail": CONTACT["contactEmail"], "description": desc, "privacyPolicyUrl": PRIVACY, "marketingUrl": "https://www.rqkitchen.ae"}}})
-    else:
-        s, j = call("POST", "/v1/betaAppLocalizations", {"data": {"type": "betaAppLocalizations", "attributes": {"locale": "en-US",
-            "feedbackEmail": CONTACT["contactEmail"], "description": desc, "privacyPolicyUrl": PRIVACY, "marketingUrl": "https://www.rqkitchen.ae"},
-            "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
-    out.append(f"loc {s}" + ("" if s < 300 else " " + err(j)[:200]))
+    have = {l["attributes"].get("locale"): l for l in locs}
+    battrs = {"feedbackEmail": CONTACT["contactEmail"], "description": desc, "privacyPolicyUrl": PRIVACY, "marketingUrl": "https://www.rqkitchen.ae"}
+    for loc in ("en-US", "ar-SA"):
+        if loc in have:
+            s, j = call("PATCH", f"/v1/betaAppLocalizations/{have[loc]['id']}", {"data": {"type": "betaAppLocalizations", "id": have[loc]["id"], "attributes": battrs}})
+        else:
+            s, j = call("POST", "/v1/betaAppLocalizations", {"data": {"type": "betaAppLocalizations", "attributes": dict(battrs, locale=loc),
+                "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
+        out.append(f"loc {loc} {s}" + ("" if s < 300 else " " + err(j)[:160]))
     attrs = dict(CONTACT, demoAccountRequired=True, demoAccountName=c["demo_name"], notes=(INFO[app] + COMMON)[:3990])
     pw = os.environ.get("DEMO_" + app.upper(), "")
     if pw: attrs["demoAccountPassword"] = pw
