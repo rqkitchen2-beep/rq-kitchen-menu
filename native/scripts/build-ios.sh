@@ -43,7 +43,7 @@ $PB -c "Add :CFBundleLocalizations array" -c "Add :CFBundleLocalizations:0 strin
 $PB -c "Delete :UISupportedInterfaceOrientations" "$PLIST" >/dev/null 2>&1
 $PB -c "Add :UISupportedInterfaceOrientations array" -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" "$PLIST"
 $PB -c "Delete :UISupportedInterfaceOrientations~ipad" "$PLIST" >/dev/null 2>&1
-if [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ] || [ "$APP" = owner ]; then
+if [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ] || [ "$APP" = owner ] || [ "$APP" = console ]; then
   $PB -c "Add :UISupportedInterfaceOrientations~ipad array" -c "Add :UISupportedInterfaceOrientations~ipad:0 string UIInterfaceOrientationPortrait" -c "Add :UISupportedInterfaceOrientations~ipad:1 string UIInterfaceOrientationPortraitUpsideDown" -c "Add :UISupportedInterfaceOrientations~ipad:2 string UIInterfaceOrientationLandscapeLeft" -c "Add :UISupportedInterfaceOrientations~ipad:3 string UIInterfaceOrientationLandscapeRight" "$PLIST"
   $PB -c "Add :UISupportedInterfaceOrientations:1 string UIInterfaceOrientationLandscapeLeft" -c "Add :UISupportedInterfaceOrientations:2 string UIInterfaceOrientationLandscapeRight" "$PLIST"
 fi
@@ -59,6 +59,12 @@ elif [ "$APP" = inventory ]; then
   setp NSLocationWhenInUseUsageDescription string "لا يستخدم التطبيق موقعك."
   setp NSCameraUsageDescription string "لتصوير الفواتير والأصناف وإرفاقها في الجرد."
   setp NSPhotoLibraryUsageDescription string "لاختيار صور أو ملفات من الجهاز وإرفاقها في الجرد."
+elif [ "$APP" = owner ]; then
+  setp NSLocationWhenInUseUsageDescription string "لا يستخدم التطبيق موقعك."
+elif [ "$APP" = console ]; then
+  setp NSLocationWhenInUseUsageDescription string "لا يستخدم التطبيق موقعك."
+  setp NSCameraUsageDescription string "لتصوير المنتجات والفواتير وإرفاقها."
+  setp NSPhotoLibraryUsageDescription string "لاختيار صور المنتجات أو الملفات من الجهاز."
 elif [ "$APP" = cashier ]; then
   setp NSLocationWhenInUseUsageDescription string "لا يستخدم التطبيق موقعك."
   setp NSLocalNetworkUsageDescription string "يتصل الكاشير بطابعة الإيصالات على شبكة الفرع لطباعة الفواتير."
@@ -76,7 +82,7 @@ LOC_EN_ALWAYS=""
 if [ "$APP" = driver ]; then
   LOC_EN_WHEN="We use your location to share the driver's position with the customer during delivery."
   LOC_EN_ALWAYS="We use your location during deliveries, even when the screen is locked, so the customer can follow their order."
-elif [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ]; then
+elif [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = owner ] || [ "$APP" = console ]; then
   LOC_EN_WHEN="This app does not use your location."
 elif [ "$APP" = attendance ]; then
   LOC_EN_WHEN="We use your location to confirm you are at the branch when you clock in and out."
@@ -87,6 +93,7 @@ mkdir -p "$APPDIR/App/en.lproj" "$APPDIR/App/ar.lproj"
   echo "\"NSLocationWhenInUseUsageDescription\" = \"$LOC_EN_WHEN\";"
   [ "$APP" = cashier ] && echo "\"NSLocalNetworkUsageDescription\" = \"The cashier connects to the branch receipt printer on the local network.\";"
   [ "$APP" = attendance ] && echo "\"NSCameraUsageDescription\" = \"To attach a photo when needed.\";" && echo "\"NSPhotoLibraryUsageDescription\" = \"To choose a photo from your device and attach it.\";"
+  [ "$APP" = console ] && echo "\"NSCameraUsageDescription\" = \"To photograph products and invoices and attach them.\";" && echo "\"NSPhotoLibraryUsageDescription\" = \"To choose product photos or files from your device.\";"
   [ "$APP" = inventory ] && echo "\"NSCameraUsageDescription\" = \"To photograph invoices and items and attach them to the count.\";" && echo "\"NSPhotoLibraryUsageDescription\" = \"To choose photos or files from your device for the count.\";"
   [ -n "$LOC_EN_ALWAYS" ] && echo "\"NSLocationAlwaysAndWhenInUseUsageDescription\" = \"$LOC_EN_ALWAYS\";" && echo "\"NSLocationAlwaysUsageDescription\" = \"$LOC_EN_ALWAYS\";"
 } > "$APPDIR/App/en.lproj/InfoPlist.strings"
@@ -225,7 +232,7 @@ else
 fi
 sed -i '' "s#CODE_SIGN_STYLE = Automatic;#CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\"; CODE_SIGN_ENTITLEMENTS = App/App.entitlements;#g" "$PBX"
 sed -i '' -e 's/"iPhone Developer"/"Apple Distribution"/g' -e 's/"Apple Development"/"Apple Distribution"/g' -e 's/= "iPhone Developer";/= "Apple Distribution";/g' "$PBX"
-{ [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ] || [ "$APP" = owner ]; } || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
+{ [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ] || [ "$APP" = owner ] || [ "$APP" = console ]; } || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
 grep -E "CODE_SIGN|PROVISIONING|DEVELOPMENT_TEAM" "$PBX" | sort | uniq -c
 
 if [ -d "$APPDIR/App.xcworkspace" ]; then CONT=(-workspace "$APPDIR/App.xcworkspace"); else CONT=(-project "$APPDIR/App.xcodeproj"); fi

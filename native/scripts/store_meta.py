@@ -100,6 +100,14 @@ APPS = {
     notes=UNLISTED + "\n\nSign in by typing the PIN from the demo account password field on the keypad and tapping ✓. "
           "The demo PIN shows a separate demo branch with sample sales, so no real business data is shown. "
           "Choose 'This month' or 'Last 7 days' at the top to see more data."),
+  "console": dict(
+    bundle="com.rqkitchen.console",
+    subtitle="RQ Kitchen back office",
+    keywords="console,reports,sales,menu,restaurant,RQ Kitchen,لوحة تحكم,تقارير",
+    promo="The back-office console of RQ Kitchen: sales, orders, reports, menu and branches.",
+    description="RQ Console is the back-office app of RQ Kitchen restaurants in the UAE.",
+    demo_name="Internal testing only",
+    notes=UNLISTED),
 }
 
 COMMON = ("\n\n4) External services: Supabase (our own database and staff sign-in), Vercel (hosting of our web content), "

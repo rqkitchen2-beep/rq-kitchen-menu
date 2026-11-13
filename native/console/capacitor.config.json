@@ -2,9 +2,9 @@
   "appId": "com.rqkitchen.console",
   "appName": "RQ Console",
   "webDir": "www",
-  "backgroundColor": "#1D1813",
+  "backgroundColor": "#0c0c0e",
   "server": {
-    "url": "https://console.rqkitchen.app/",
+    "url": "https://console.rqkitchen.app/console",
     "cleartext": false,
     "errorPath": "offline.html"
   },
@@ -17,7 +17,7 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 800,
-      "backgroundColor": "#1D1813",
+      "backgroundColor": "#0c0c0e",
       "showSpinner": false,
       "launchAutoHide": true
     },

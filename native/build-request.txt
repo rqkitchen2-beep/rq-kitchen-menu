@@ -1,1 +1,1 @@
-cashier attendance inventory owner
+console owner

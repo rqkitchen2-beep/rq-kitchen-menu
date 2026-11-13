@@ -51,6 +51,7 @@ jobs:
           python3 native/scripts/asc.py ensure-bundle com.rqkitchen.attendance "RQ Attendance" >/dev/null 2>>"$ST"
           python3 native/scripts/asc.py ensure-bundle com.rqkitchen.inventory "RQ Inventory" >/dev/null 2>>"$ST"
           python3 native/scripts/asc.py ensure-bundle com.rqkitchen.owner "RQ Owner" >/dev/null 2>>"$ST"
+          python3 native/scripts/asc.py ensure-bundle com.rqkitchen.console "RQ Console" >/dev/null 2>>"$ST"
           echo "team: $T1 / $T2" >> "$ST"
           A1=$(python3 native/scripts/asc.py find-app com.rqkitchen.app)
           A2=$(python3 native/scripts/asc.py find-app com.rqkitchen.driver)
@@ -66,6 +67,8 @@ jobs:
           echo "app_inventory: ${A6:-MISSING}" >> "$ST"
           A7=$(python3 native/scripts/asc.py find-app com.rqkitchen.owner)
           echo "app_owner: ${A7:-MISSING}" >> "$ST"
+          A8=$(python3 native/scripts/asc.py find-app com.rqkitchen.console)
+          echo "app_console: ${A8:-MISSING}" >> "$ST"
           REQ=$(cat native/build-request.txt)
           M="[]"
           L=""
@@ -81,6 +84,9 @@ jobs:
             fi
             if [ "$a" = owner ]; then
               if [ -n "$A7" ]; then L="$L\"owner\","; else echo "owner: create the app in App Store Connect first (bundle com.rqkitchen.owner)" >> "$ST"; fi
+            fi
+            if [ "$a" = console ]; then
+              if [ -n "$A8" ]; then L="$L\"console\","; else echo "console: create the app in App Store Connect first (bundle com.rqkitchen.console)" >> "$ST"; fi
             fi
             if [ "$a" = inventory ]; then
               if [ -n "$A6" ]; then L="$L\"inventory\","; else echo "inventory: create the app in App Store Connect first (bundle com.rqkitchen.inventory)" >> "$ST"; fi
