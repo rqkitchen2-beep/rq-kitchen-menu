@@ -1,4 +1,4 @@
-android branch run: 38 rc: 0 Fri Nov  6 16:39:35 UTC 2026
+android branch run: 39 rc: 0 Fri Nov 13 23:42:32 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
@@ -6,7 +6,7 @@ RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "cl
 STEP: icon + version
 RESULT: file provider ok
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 138
+RESULT: apk signed 3.2M versionCode 139
 ---- errors ----
 ---- tail ----
 > Task :capacitor-android:mapReleaseSourceSetPaths
@@ -14,8 +14,8 @@ RESULT: apk signed 3.2M versionCode 138
 > Task :capacitor-android:mergeReleaseResources
 > Task :capacitor-cordova-android-plugins:bundleReleaseAar
 > Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
-> Task :capacitor-android:verifyReleaseResources
 > Task :capacitor-cordova-android-plugins:mergeReleaseResources
+> Task :capacitor-android:verifyReleaseResources
 > Task :capacitor-android:assembleRelease
 > Task :capacitor-haptics:bundleReleaseAar
 > Task :capacitor-haptics:mapReleaseSourceSetPaths
@@ -40,11 +40,11 @@ RESULT: apk signed 3.2M versionCode 138
 > Task :rq-native:bundleReleaseAar
 > Task :rq-native:mapReleaseSourceSetPaths
 > Task :rq-native:mergeReleaseResources
-> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-status-bar:verifyReleaseResources
 > Task :capacitor-status-bar:assembleRelease
 > Task :rq-native:verifyReleaseResources
 > Task :rq-native:assembleRelease
+> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-haptics:lintVitalAnalyzeRelease
 > Task :capacitor-android:lintVitalAnalyzeRelease
 > Task :capacitor-splash-screen:lintVitalAnalyzeRelease
@@ -66,7 +66,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 2m 27s
+BUILD SUCCESSFUL in 2m 18s
 324 actionable tasks: 324 executed
-RESULT: apk signed 3.2M versionCode 138
+RESULT: apk signed 3.2M versionCode 139
 RESULT: published
