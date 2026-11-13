@@ -904,6 +904,7 @@ async function sync(){
         queue.shift(); saveQueue();
         online=true; lastErr="";
         { const lo=orders.find(x=>x.id===o.id); if(lo && !lo._ok){ lo._ok=true; saveLocal(); } }
+        if(r && r.total!=null && Math.abs((+r.total)-(+o.total||0))>0.009){ const lo=orders.find(x=>x.id===o.id); if(lo){ lo.total=+r.total; lo.vat=+money(lo.total-lo.total/(1+VAT)); saveLocal(); } if(r.flag==="mismatch") toast("⚠️ مبلغ الطلب #"+(r.no||o.no)+" اتعدّل حسب أسعار المنيو: "+money(r.total)+" د.إ",5000); }
         if(r && r.no && r.no!==o.no && o.day===day && o.branch_id===branch){
           const lo=orders.find(x=>x.id===o.id); if(lo){ const old=lo.no; lo.no=r.no; saveLocal(); toast("تم تعديل رقم الطلب إلى #"+r.no+" لتفادي التكرار"); if(!lo.channel){ trackCall("pos_remove",old); trackCall("pos_create",r.no); } }
         }
@@ -2375,7 +2376,7 @@ renderPad(); renderMenuSide(); loadBranches();
 if(token && ctx && branch) startApp(); else showLogin();
 
 // auto-update: when a new version is published, reload while the cashier is idle
-const BUILD="202611071420";
+const BUILD="202611140100";
 async function checkUpdate(){
   try{
     if(document.hidden) return;

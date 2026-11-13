@@ -449,7 +449,7 @@ async function pOrders(){
     $("#main").innerHTML=`<div class="card">
       <div class="toolbar">
         <input type="search" id="oq" placeholder="🔎 رقم الطلب، رقم السيارة، الهاتف، رقم طلب التطبيق، الكاشير أو اسم صنف">
-        <select id="ost"><option value="">كل الحالات</option><option value="open">قيد التحضير</option><option value="new">جديد</option><option value="ready">جاهز</option><option value="done">تم التسليم</option><option value="cancelled">ملغي</option><option value="edited">معدّل</option></select>
+        <select id="ost"><option value="">كل الحالات</option><option value="open">قيد التحضير</option><option value="new">جديد</option><option value="ready">جاهز</option><option value="done">تم التسليم</option><option value="cancelled">ملغي</option><option value="edited">معدّل</option><option value="price">⚠️ مبلغ الجهاز مختلف</option></select>
         <select id="opay"><option value="">كل طرق الدفع</option>${pays.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}<option value="unpaid">غير مدفوع</option>${apps.map(a=>`<option value="app:${esc(a.id)}">${esc(a.name)}</option>`).join("")}</select>
         <button class="btn ghost sm" id="oexp">⬇ Excel</button>
       </div>
@@ -471,8 +471,8 @@ async function loadOrders(){
   $("#osum").innerHTML=`${int(r.total)} طلب · مجموع غير الملغي <b class="num">${money(r.sum)}</b> د.إ`;
   table($("#otb"),["#","التاريخ","الفرع","العميل","الأصناف","المبلغ","الدفع","الحالة","الكاشير"],ordersRows.map(o=>[
     `<b class="num">${o.no}</b>`,`<span class="num">${dt(o.created_at)}</span>`,esc(bName(o.branch_id)),`<span class="num">${esc(ident(o))}</span>`,
-    `<div style="min-width:170px">${esc((o.items||[]).map(i=>i.qty+"× "+i.name).join("، "))}</div>${o.edits>0?`<span class="pill new">معدّل</span>`:""}`,
-    n2(o.total),esc(payName(o.channel?"app:"+o.channel:o.pay)),stPill(o.status),esc(o.cashier||"")]),{click:true,empty:"لا توجد طلبات بهذه الشروط"});
+    `<div style="min-width:170px">${esc((o.items||[]).map(i=>i.qty+"× "+i.name).join("، "))}</div>${o.edits>0?`<span class="pill new">معدّل</span>`:""}${o.price_flag?`<span class="pill" style="background:var(--badbg,rgba(239,68,68,.12));color:var(--bad)" title="${o.price_flag==="unknown_item"?"صنف غير موجود في المنيو":"الجهاز أرسل مبلغ مختلف عن أسعار المنيو"}">⚠️ ${o.price_flag==="unknown_item"?"صنف محذوف":"مبلغ مختلف"}</span>`:""}`,
+    n2(o.total)+(o.price_flag==="mismatch"&&o.client_total!=null?`<div class="muted num" style="font-size:11px">الجهاز: ${n2(o.client_total)}</div>`:""),esc(payName(o.channel?"app:"+o.channel:o.pay)),stPill(o.status),esc(o.cashier||"")]),{click:true,empty:"لا توجد طلبات بهذه الشروط"});
   $("#otb").onclick=e=>{const tr=e.target.closest("[data-row]"); if(tr) orderModal(ordersRows[+tr.dataset.row])};
   const pages=Math.ceil((r.total||0)/PAGE);
   $("#opg").innerHTML=pages>1?`<button class="btn ghost sm" id="opv" ${ordersPage?"":"disabled"}>السابق</button><span class="num">${ordersPage+1} / ${pages}</span><button class="btn ghost sm" id="onx" ${ordersPage+1<pages?"":"disabled"}>التالي</button>`:"";
