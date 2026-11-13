@@ -539,8 +539,8 @@ function dayHTML(){
 }
 
 function moreHTML(){
-  const pushOK="serviceWorker" in navigator&&"PushManager" in window;
-  const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  const pushOK=NATIVE?!!NPUSH:("serviceWorker" in navigator&&"PushManager" in window);
+  const standalone=NATIVE||window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
   const on=LS.get("own.push",false);
   return `<div class="grid" style="max-width:640px">
@@ -601,9 +601,24 @@ let rT;window.addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>
 
 /* ---------- push ---------- */
 let swReg=null;
-async function regSW(){if(!("serviceWorker" in navigator))return;if(location.hostname.startsWith("cashier.")||location.hostname.startsWith("console."))return;try{swReg=await navigator.serviceWorker.register("/owner-sw.js")}catch(e){}}
+const CAP=window.Capacitor, NATIVE=!!(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform());
+const NPUSH=NATIVE&&CAP.Plugins&&CAP.Plugins.PushNotifications;
+if(NATIVE)document.documentElement.classList.add("native");
+async function nativePush(on){
+  if(!NPUSH){toast("الإشعارات غير متاحة");return}
+  if(!on){const t=LS.get("own.apns","");if(t){try{await rpc("owner_push_native",{p_token:token,p_apns:t,p_on:false})}catch(e){}}LS.set("own.push",false);toast("تم إيقاف الإشعارات");render();return}
+  let p=await NPUSH.checkPermissions();if(p.receive!=="granted")p=await NPUSH.requestPermissions();
+  if(p.receive!=="granted"){toast("فعّل الإشعارات للتطبيق من إعدادات الآيفون");return}
+  await NPUSH.removeAllListeners();
+  NPUSH.addListener("registration",async t=>{try{LS.set("own.apns",t.value);await rpc("owner_push_native",{p_token:token,p_apns:t.value,p_on:true});LS.set("own.push",true);toast("✅ بيوصلك ملخص كل فرع عند إغلاق يومه");render()}catch(e){toast("تعذّر تفعيل الإشعارات")}});
+  NPUSH.addListener("registrationError",()=>toast("تعذّر تفعيل الإشعارات"));
+  NPUSH.addListener("pushNotificationActionPerformed",()=>{setTab("day")});
+  await NPUSH.register();
+}
+async function regSW(){if(NATIVE)return;if(!("serviceWorker" in navigator))return;if(location.hostname.startsWith("cashier.")||location.hostname.startsWith("console."))return;try{swReg=await navigator.serviceWorker.register("/owner-sw.js")}catch(e){}}
 function b64u(s){const p="=".repeat((4-s.length%4)%4);const b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0))}
 async function togglePush(on){
+  if(NATIVE)return nativePush(on);
   try{
     if(!swReg)await regSW();if(!swReg)throw new Error("sw");
     if(on){const perm=await Notification.requestPermission();if(perm!=="granted"){toast("ما تم السماح بالإشعارات من إعدادات الجهاز");return}
