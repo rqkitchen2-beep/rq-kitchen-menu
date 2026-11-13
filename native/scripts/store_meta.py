@@ -374,6 +374,10 @@ def testflight(app):
         "relationships": {"betaGroups": {"data": [{"type": "betaGroups", "id": g["id"]}]}}}})
     out.append(f"tester {s}" + ("" if s < 300 else " " + err(j)[:200]))
     s, j = call("GET", f"/v1/betaGroups/{g['id']}/betaTesters?limit=20")
+    for t in j.get("data", []):
+        s2, j2 = call("POST", "/v1/betaTesterInvitations", {"data": {"type": "betaTesterInvitations", "relationships": {
+            "app": {"data": {"type": "apps", "id": aid}}, "betaTester": {"data": {"type": "betaTesters", "id": t["id"]}}}}})
+        out.append(f"invite {t['attributes'].get('email')} {s2} state {t['attributes'].get('state')}" + ("" if s2 < 300 else " " + err(j2)[:200]))
     out.append(f"group {g['attributes'].get('name')} testers {[t['attributes'].get('email') for t in j.get('data', [])]}")
     s, j = call("GET", f"/v1/builds?filter[app]={aid}&sort=-uploadedDate&limit=3&include=buildBetaDetail")
     out.append("builds " + str([(b['attributes'].get('version'), b['attributes'].get('processingState')) for b in j.get('data', [])]) +
