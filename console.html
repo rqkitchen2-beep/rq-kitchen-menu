@@ -872,9 +872,20 @@ async function pSettings(){
         <a class="btn ghost" href="https://inventory.rqkitchen.app/" target="_blank">📦 تطبيق الجرد</a>
         <a class="btn ghost" href="https://track.rqkitchen.app/" target="_blank">🔔 صفحة تتبع الطلبات</a>
         <a class="btn ghost" href="https://apps.rqkitchen.app/" target="_blank">⬇ تحميل تطبيقات الموظفين</a>
+        <a class="btn ghost" href="https://owner.rqkitchen.app/" target="_blank">📊 تطبيق المالك</a>
       </div>
       <div class="muted" style="font-size:12.5px;margin-top:12px">الطابعة وإعدادات الجهاز تُضبط من داخل تطبيق الكاشير في كل فرع.</div></div>
+    ${admin?`<div class="card"><h2>📊 تطبيق المالك</h2>
+      <div class="muted" style="font-size:13px;margin-bottom:10px">رقم سري للمالك يفتح فيه <b>owner.rqkitchen.app</b> ويشوف كل المبيعات والمنتجات والأيام لكل الفروع — <b>مشاهدة فقط</b>، ما يقدر يغيّر شي. (رقم المدير يفتح التطبيق بعد.)</div>
+      <div class="fld"><label>رقم سري جديد للمالك (٦–٨ أرقام)</label><input id="opin" class="num" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="••••••"></div>
+      <div class="err" id="operr"></div>
+      <div class="mact"><button class="btn" id="opsave">🔐 حفظ رقم المالك</button></div>
+      <div class="muted" style="font-size:12px;margin-top:8px">تغيير الرقم يسجّل خروج المالك من كل الأجهزة.</div></div>`:""}
   </div>`;
+  if(admin) $("#opsave").onclick=async()=>{ const v=$("#opin").value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,""); $("#operr").textContent="";
+    if(!/^\d{6,8}$/.test(v)) return $("#operr").textContent="الرقم لازم ٦ إلى ٨ أرقام";
+    try{ await rpc("pos_set_owner_pin",{p_token:token,p_pin:v}); $("#opin").value=""; toast("تم حفظ رقم المالك ✓"); }
+    catch(e){ $("#operr").textContent=/pin_taken/.test(e.message)?"هذا الرقم مستخدم لفرع أو كاشير أو للمدير — اختر غيره":"تعذّر الحفظ"; } };
   if(admin) $("#ssave").onclick=async()=>{ try{ await rpc("pos_save_settings",{p_token:token,p_trn:$("#strn").value.trim(),p_footer:$("#sfoot").value.trim()}); settings.trn=$("#strn").value.trim(); settings.footer=$("#sfoot").value.trim(); toast("تم الحفظ ✓"); }catch(e){ toast("تعذّر الحفظ"); } };
 }
 
