@@ -1,1 +1,1 @@
-cashier attendance inventory
+cashier attendance inventory owner

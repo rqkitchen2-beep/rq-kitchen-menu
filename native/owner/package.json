@@ -1,0 +1,14 @@
+{
+  "name": "rq-kitchen-owner",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@capacitor/cli": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/ios": "latest",
+    "@capacitor/splash-screen": "latest",
+    "@capacitor/status-bar": "latest",
+    "@capacitor/push-notifications": "latest",
+    "rq-native": "file:../plugins/rq-native"
+  }
+}

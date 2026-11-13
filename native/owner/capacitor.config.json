@@ -1,0 +1,36 @@
+{
+  "appId": "com.rqkitchen.owner",
+  "appName": "RQ Owner",
+  "webDir": "www",
+  "backgroundColor": "#0c0c0e",
+  "server": {
+    "url": "https://owner.rqkitchen.app/owner",
+    "cleartext": false,
+    "errorPath": "offline.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "scheme": "RQ Owner",
+    "webContentsDebuggingEnabled": false,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 700,
+      "backgroundColor": "#0c0c0e",
+      "showSpinner": false,
+      "launchAutoHide": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "overlaysWebView": true
+    },
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    }
+  }
+}

@@ -40,7 +40,7 @@ jobs:
           # demo PINs come from a Supabase function that only answers this workflow (GitHub OIDC)
           OIDC=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=rq-demo-creds" | python -c "import sys,json;print(json.load(sys.stdin)['value'])")
           CR=$(curl -s -H "Authorization: Bearer $OIDC" https://dhqgorvtwgzekmmjztyr.supabase.co/functions/v1/demo-creds)
-          for a in cashier attendance inventory; do
+          for a in cashier attendance inventory owner; do
             v=$(printf '%s' "$CR" | python -c "import sys,json;print(json.load(sys.stdin).get('$a',''))" 2>/dev/null)
             if [ -n "$v" ]; then echo "::add-mask::$v"; echo "DEMO_${a^^}=$v" >> "$GITHUB_ENV"; else echo "::warning title=demo::no PIN for $a"; fi
           done

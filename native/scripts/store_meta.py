@@ -81,6 +81,25 @@ APPS = {
     demo_name="Enter this branch PIN on the keypad",
     notes=UNLISTED + "\n\nSign in by typing the PIN from the demo account password field on the keypad and tapping the button "
           "next to 0. The demo PIN opens a separate demo branch, so you can try the stock count freely."),
+  "owner": dict(
+    bundle="com.rqkitchen.owner",
+    subtitle="Sales dashboard for RQ Kitchen",
+    keywords="sales,dashboard,reports,owner,restaurant,RQ Kitchen,مبيعات,تقارير,مالك",
+    promo="Live sales and product reports for the owner of RQ Kitchen.",
+    description=(
+      "RQ Owner is the private sales dashboard for the owner of RQ Kitchen restaurants in the UAE.\n\n"
+      "• Live sales of every branch: totals, orders, average order and items sold\n"
+      "• Compare with the previous period and the same day last week\n"
+      "• Every product with quantities and sales, per branch\n"
+      "• Peak hours and a weekday × hour heat map\n"
+      "• Daily cash: opening, counted cash and any shortage per branch\n"
+      "• A notification with each branch's summary when it closes the day\n\n"
+      "View only. This app is for RQ Kitchen management; access is given by the restaurant.\n\n"
+      "لوحة مبيعات مالك مطاعم RQ Kitchen."),
+    demo_name="Type this PIN on the keypad and tap ✓",
+    notes=UNLISTED + "\n\nSign in by typing the PIN from the demo account password field on the keypad and tapping ✓. "
+          "The demo PIN shows a separate demo branch with sample sales, so no real business data is shown. "
+          "Choose 'This month' or 'Last 7 days' at the top to see more data."),
 }
 
 COMMON = ("\n\n4) External services: Supabase (our own database and staff sign-in), Vercel (hosting of our web content), "
@@ -106,6 +125,10 @@ INFO = {
               "the monthly report, salary details, points and leave request.\n"
               "Accounts: there is no account sign-up inside the iOS app; employee accounts are created and approved by the restaurant management. "
               "Employees can request account and data deletion through their manager or the contact in our privacy policy."),
+  "owner": ("2) Purpose & audience: a private, view-only sales dashboard for the owner of RQ Kitchen restaurants (UAE): live sales, "
+              "products sold, peak hours and daily cash for every branch, with a notification when a branch closes its day.\n"
+              "3) Instructions: type the demo PIN on the keypad and tap ✓. The demo account only sees an isolated demo branch with sample sales. "
+              "Use the period buttons (Today, Yesterday, Last 7 days, This month) and the bottom tabs: Home, Products, Insights, Days & cash, More."),
   "inventory": ("1) Screen recording: attached to our reply in App Review.\n"
               "2) Purpose & audience: stock-count app for RQ Kitchen branches and warehouse staff (UAE). Staff count stock step by step, record "
               "transfers from the warehouse to branches, and management sees consumption calculated from sales and recipes. It replaces "

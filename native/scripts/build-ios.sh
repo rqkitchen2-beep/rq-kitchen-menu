@@ -43,7 +43,7 @@ $PB -c "Add :CFBundleLocalizations array" -c "Add :CFBundleLocalizations:0 strin
 $PB -c "Delete :UISupportedInterfaceOrientations" "$PLIST" >/dev/null 2>&1
 $PB -c "Add :UISupportedInterfaceOrientations array" -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" "$PLIST"
 $PB -c "Delete :UISupportedInterfaceOrientations~ipad" "$PLIST" >/dev/null 2>&1
-if [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ]; then
+if [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ] || [ "$APP" = owner ]; then
   $PB -c "Add :UISupportedInterfaceOrientations~ipad array" -c "Add :UISupportedInterfaceOrientations~ipad:0 string UIInterfaceOrientationPortrait" -c "Add :UISupportedInterfaceOrientations~ipad:1 string UIInterfaceOrientationPortraitUpsideDown" -c "Add :UISupportedInterfaceOrientations~ipad:2 string UIInterfaceOrientationLandscapeLeft" -c "Add :UISupportedInterfaceOrientations~ipad:3 string UIInterfaceOrientationLandscapeRight" "$PLIST"
   $PB -c "Add :UISupportedInterfaceOrientations:1 string UIInterfaceOrientationLandscapeLeft" -c "Add :UISupportedInterfaceOrientations:2 string UIInterfaceOrientationLandscapeRight" "$PLIST"
 fi
@@ -225,7 +225,7 @@ else
 fi
 sed -i '' "s#CODE_SIGN_STYLE = Automatic;#CODE_SIGN_STYLE = Manual; DEVELOPMENT_TEAM = $TEAM_ID; PROVISIONING_PROFILE_SPECIFIER = \"$PROF_NAME\"; CODE_SIGN_ENTITLEMENTS = App/App.entitlements;#g" "$PBX"
 sed -i '' -e 's/"iPhone Developer"/"Apple Distribution"/g' -e 's/"Apple Development"/"Apple Distribution"/g' -e 's/= "iPhone Developer";/= "Apple Distribution";/g' "$PBX"
-{ [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ]; } || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
+{ [ "$APP" = branch ] || [ "$APP" = cashier ] || [ "$APP" = inventory ] || [ "$APP" = attendance ] || [ "$APP" = owner ]; } || sed -i '' "s/TARGETED_DEVICE_FAMILY = \"1,2\";/TARGETED_DEVICE_FAMILY = 1;/g" "$PBX"
 grep -E "CODE_SIGN|PROVISIONING|DEVELOPMENT_TEAM" "$PBX" | sort | uniq -c
 
 if [ -d "$APPDIR/App.xcworkspace" ]; then CONT=(-workspace "$APPDIR/App.xcworkspace"); else CONT=(-project "$APPDIR/App.xcodeproj"); fi
