@@ -1,2 +1,18 @@
-run: 85  Fri Nov 13 23:04:39 UTC 2026
-bundle error 409 {"errors": [{"id": "3718e8cd-4453-427d-bf2d-b1de3317cbf6", "status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.INVALID", "title": "An attribute in the provided entity has invalid value", "detail": "An App ID with Identifier 'com.rqkitchen.app' is not available. Please enter a different string."}]}
+run: 86  Fri Nov 13 23:08:05 UTC 2026
+team: Z34R6L55G2 / Z34R6L55G2
+app_customer: 6822102459
+app_driver: 6822102915
+app_branch: 6822106188
+app_cashier: 6828219503
+app_attendance: 6828220436
+app_inventory: 6828220575
+app_owner: MISSING
+owner: create the app in App Store Connect first (bundle com.rqkitchen.owner)
+matrix: ["cashier","attendance","inventory"]
+---- apple pay ----
+list-merchant 200 {"data": [{"type": "merchantIds", "id": "3MWDKN79PG", "attributes": {"isPlatformIntegrator": false, "identifier": "merchant.com.rqkitchen.app", "prefix": "Z34R6L55G2", "canEdit": true, "name": "RQ Kitchen", "delegatedCommerceEnabled": true, "canDelete": true, "isPSP": false}, "relationships": {"certificates": {"meta": {"paging": {"total": 0, "limit": 2147483647}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/relationships/certificates", "related": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/certificates"}}}, "links": {"self": "https://
+merchant_id: 3MWDKN79PG
+caps: []
+merchant-bundles 404 {"errors": [{"id": "1b8fb816-e2b0-4689-b782-fd5d8542ede2", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
+revoked old cert 7DWK53MUTC
+cert: 888K8FA762
