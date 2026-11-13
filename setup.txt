@@ -1,16 +1,2 @@
-run: 81  Fri Nov  6 16:36:56 UTC 2026
-team: Z34R6L55G2 / Z34R6L55G2
-app_customer: 6822102459
-app_driver: 6822102915
-app_branch: 6822106188
-app_cashier: 6828219503
-app_attendance: 6828220436
-app_inventory: 6828220575
-matrix: ["cashier","attendance","inventory"]
----- apple pay ----
-list-merchant 200 {"data": [{"type": "merchantIds", "id": "3MWDKN79PG", "attributes": {"isPlatformIntegrator": false, "identifier": "merchant.com.rqkitchen.app", "prefix": "Z34R6L55G2", "canEdit": true, "name": "RQ Kitchen", "delegatedCommerceEnabled": true, "canDelete": true, "isPSP": false}, "relationships": {"certificates": {"meta": {"paging": {"total": 0, "limit": 2147483647}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/relationships/certificates", "related": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/certificates"}}}, "links": {"self": "https://
-merchant_id: 3MWDKN79PG
-caps: []
-merchant-bundles 404 {"errors": [{"id": "a31670c4-a7da-495d-af3a-dd5cfc62b230", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
-revoked old cert 6FNLGRCN96
-cert: 7DWK53MUTC
+run: 82  Fri Nov 13 22:22:10 UTC 2026
+bundle error 403 {"errors": [{"id": "6ASBHJ6BIXRPSLRE2G53JXU2AQ", "status": "403", "code": "FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED", "title": "A required agreement is missing or has expired.", "detail": "This request requires an in-effect agreement that has not been signed or has expired.", "links": {"see": "/business"}}]}
