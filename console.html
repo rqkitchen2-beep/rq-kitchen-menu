@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>RQ Console — لوحة التحكم</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#1D1813">
+<meta name="theme-color" content="#0c0c0e">
 <link rel="manifest" href="/console.webmanifest">
 <link rel="icon" href="/console-192.png">
 <link rel="apple-touch-icon" href="/console-180.png">
@@ -13,18 +13,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RQ Console">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light;
-  --bg:#F6F3EF;--card:#FFFFFF;--line:#E8E1D9;--ink:#1D1813;--ink2:#5A524B;--mute:#8A8179;--side:#1D1813;--side-ink:#EDE6DE;--side-mute:#9C928A;
-  --brand:#E07A1F;--brand-soft:#FCEBDD;--grid:#EEE8E1;--hover:#FAF7F3;
+  --bg:#f4f4f6;--card:#ffffff;--line:#e6e6ec;--ink:#141417;--ink2:#4b4b55;--mute:#80808c;--side:#ffffff;--side-ink:#4b4b55;--side-mute:#80808c;
+  --brand:#f47a20;--brand2:#d9600a;--brand-soft:rgba(244,122,32,.12);--grid:#ececf1;--hover:#f7f7fa;--surface2:#f3f3f6;
   --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;
-  --good:#1a8a4a;--good-bg:#E5F4EA;--bad:#c93a3a;--bad-bg:#FBE7E7;--warn:#a96a00;--warn-bg:#FDF1DA}
+  --good:#15803d;--good-bg:rgba(34,197,94,.13);--bad:#dc2626;--bad-bg:rgba(239,68,68,.12);--warn:#a16207;--warn-bg:rgba(234,179,8,.15);--shadow:0 1px 2px rgba(20,20,30,.05)}
 :root[data-theme="dark"]{color-scheme:dark;
-  --bg:#141210;--card:#1E1B18;--line:#332E29;--ink:#F3EEE8;--ink2:#C9C0B6;--mute:#958C83;--side:#0E0C0B;--side-ink:#EDE6DE;--side-mute:#857B73;
-  --brand:#F08A2A;--brand-soft:#3A2614;--grid:#2A2622;--hover:#25211D;
+  --bg:#0c0c0e;--card:#151518;--line:#26262c;--ink:#f4f4f5;--ink2:#b4b4bd;--mute:#7c7c87;--side:#121215;--side-ink:#b4b4bd;--side-mute:#7c7c87;
+  --brand:#f47a20;--brand2:#ff9a4d;--brand-soft:rgba(244,122,32,.14);--grid:#202026;--hover:#1c1c20;--surface2:#1c1c20;
   --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;
-  --good:#4cc47e;--good-bg:#173323;--bad:#ef6b6b;--bad-bg:#3a1b1b;--warn:#e7a73a;--warn-bg:#3a2c12}
+  --good:#22c55e;--good-bg:rgba(34,197,94,.13);--bad:#ef4444;--bad-bg:rgba(239,68,68,.13);--warn:#eab308;--warn-bg:rgba(234,179,8,.14);--shadow:0 1px 0 rgba(255,255,255,.03) inset}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;font-size:14px;line-height:1.5}
@@ -151,14 +151,61 @@ svg.chart text{fill:var(--mute);font-size:11px;font-family:inherit}
   .kpi .v{font-size:21px}.hb{grid-template-columns:72px 1fr auto}
   .frow{grid-template-columns:1fr}
 }
+
+/* ===== RQ design (same look as the owner app) ===== */
+body{font-size:14.5px}
+.brandmark{display:flex;align-items:baseline;gap:8px;direction:ltr}
+.brandmark .rq{font-family:Pacifico,cursive;color:var(--brand);font-size:34px;line-height:1}
+.brandmark .k{font-weight:700;letter-spacing:4px;font-size:12.5px;color:var(--ink2)}
+#login{background:radial-gradient(120% 70% at 50% 0%,#2a1708 0%,var(--bg) 60%)}
+:root:not([data-theme="dark"]) #login{background:radial-gradient(120% 70% at 50% 0%,#ffe6d1 0%,var(--bg) 60%)}
+.lbox{background:transparent;padding:10px}
+.lbox .brandmark{justify-content:center}.lbox .brandmark .rq{font-size:48px}
+.lbox h1{font-size:20px;margin:16px 0 4px}
+.pin{background:var(--card);border-radius:16px;padding:14px;font-size:28px}
+.lbox .btn{border-radius:14px}
+.btn{border-radius:12px;padding:9px 16px}
+.btn.ghost{background:var(--card)}
+aside{background:var(--side);border-inline-end:1px solid var(--line);padding:20px 14px;width:240px}
+aside .brand{padding:4px 8px 22px}
+aside nav{gap:3px}
+aside nav a{padding:10px 12px;border-radius:12px;color:var(--side-ink);opacity:1;font-weight:600;font-size:14px}
+aside nav a:hover{background:var(--hover)}
+aside nav a.on{background:var(--brand-soft);color:var(--brand2)}
+aside .foot{border-top:1px solid var(--line)}
+aside .foot button{color:var(--side-ink);opacity:1;border-radius:10px}
+aside .foot button:hover{background:var(--hover)}
+.top{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.topin{padding:14px 22px}
+.topin h1{font-size:20px;font-weight:700}
+.chips{background:transparent;border:0;padding:0;gap:6px}
+.chips button{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600;color:var(--ink2)}
+.chips button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+select,input:not([type]),input[type=date],input[type=text],input[type=search],input[type=number],input[type=password],textarea,.inp{border-radius:12px;padding:8px 11px}
+main{padding:18px 22px 90px}
+.card{border-radius:18px;padding:16px 18px;box-shadow:var(--shadow)}
+.card h2{font-size:15px;color:var(--ink);font-weight:700}
+.kpis .card:first-child{background:linear-gradient(135deg,color-mix(in srgb,var(--brand) 18%,var(--card)) 0%,var(--card) 70%);border-color:color-mix(in srgb,var(--brand) 35%,var(--line))}
+.kpi .l{font-weight:600}.kpi .v{font-size:26px}
+.tabs button.on{color:var(--brand2);border-bottom-color:var(--brand)}
+.pill{border-radius:999px}
+.mdl{border-radius:22px}
+th{background:var(--card)}
+@media (max-width:900px){
+  .mnav{background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
+  .mnav a{color:var(--mute);opacity:1;font-weight:600}
+  .mnav a.on{color:var(--brand);background:transparent}
+  .topin{padding:10px 12px}
+  main{padding:12px 12px 100px}
+}
 </style>
 </head>
 <body>
 <div id="login">
   <div class="lbox">
-    <img class="logo" src="/logo.png" alt="RQ Kitchen">
-    <h1>RQ Console</h1>
-    <p>لوحة التحكم — ادخل برمز المدير<br>(رمز الفرع يعرض فرعه فقط)</p>
+    <div class="brandmark"><span class="rq">RQ</span><span class="k">CONSOLE</span></div>
+    <h1>لوحة التحكم</h1>
+    <p>ادخل برمز المدير<br>(رمز الفرع يعرض فرعه فقط)</p>
     <input id="pin" class="pin num" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="••••">
     <button class="btn" id="go">دخول</button>
     <div class="err" id="lerr"></div>
@@ -167,7 +214,7 @@ svg.chart text{fill:var(--mute);font-size:11px;font-family:inherit}
 
 <div id="app" class="hidden">
   <aside>
-    <div class="brand"><img src="/logo.png" alt=""><div><b>RQ Console</b><small>لوحة التحكم</small></div></div>
+    <div class="brand"><div class="brandmark"><span class="rq">RQ</span><span class="k">CONSOLE</span></div></div>
     <nav id="nav"></nav>
     <div class="foot">
       <div class="who" id="who"></div>
@@ -217,8 +264,9 @@ const dt=s=>new Date(s).toLocaleString("en-GB",{timeZone:"Asia/Dubai",day:"2-dig
 const hm=s=>s?new Date(s).toLocaleTimeString("en-GB",{timeZone:"Asia/Dubai",hour:"2-digit",minute:"2-digit"}):"";
 // theme
 const setTheme=t=>{document.documentElement.dataset.theme=t;LS.set("con.theme",t)};
-setTheme(LS.get("con.theme",matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
-$("#themeBtn").onclick=()=>{setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");route()};
+setTheme(LS.get("con.theme2","dark")); /* new design: dark by default */
+const _st=setTheme; window.setTheme=t=>{_st(t);LS.set("con.theme2",t)};
+$("#themeBtn").onclick=()=>{window.setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");route()};
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 // business day: 5am cutoff, Dubai
 const ymd=d=>d.toISOString().slice(0,10);
