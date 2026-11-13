@@ -200,6 +200,31 @@
   ],
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(self), camera=(self), microphone=(self), payment=(), usb=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
+        }
+      ]
+    },
+    {
       "source": "/(app|driver|branch|app.html|driver.html|branch.html)",
       "headers": [
         {
