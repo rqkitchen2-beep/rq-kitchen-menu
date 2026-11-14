@@ -304,13 +304,12 @@ const PAGES=[
   {id:"transfers",t:"التحويلات",i:"🔁",perm:"inventory",inv:true,g:"inv"},
   {id:"counts",t:"الجرد",i:"📋",perm:"inventory",inv:true,g:"inv"},
   {id:"menu",t:"قائمة المنتجات",i:"🍔",perm:"menu"},
-  {id:"users",t:"المستخدمين",i:"👥",admin:true,perm:"manage",g:"adm"},
+  {id:"users",t:"المستخدمين والكاشيرية",i:"👥",admin:true,perm:"manage",g:"adm"},
   {id:"devices",t:"الأجهزة والجلسات",i:"📱",admin:true,perm:"manage",g:"adm"},
   {id:"branches",t:"الفروع",i:"🏪",admin:true,perm:"manage",g:"adm"},
   {id:"pays",t:"طرق الدفع",i:"💳",admin:true,perm:"manage",g:"adm"},
   {id:"hours",t:"أوقات الفروع",i:"⏰",admin:true,perm:"manage",g:"adm"},
   {id:"apps",t:"التطبيقات",i:"🛵",admin:true,perm:"manage",g:"adm"},
-  {id:"cashiers",t:"الكاشيرية",i:"👤",admin:true,perm:"manage",g:"adm"},
   {id:"settings",t:"الإعدادات",i:"⚙️",perm:"settings",g:"adm"},
 ];
 
@@ -598,46 +597,64 @@ async function pCounts(){
 
 // ---------- management ----------
 async function pUsers(){
-  const list=await rpc("con_users_list",{p_token:token})||[];
-  $("#main").innerHTML=`<div class="toolbar"><span class="muted">كل مستخدم له رمز دخول خاص وصلاحيات. التغييرات تطبق من الدخول التالي.</span><span class="sp"></span><button class="btn" id="uadd">+ مستخدم جديد</button></div>
+  const [cu,cs]=await Promise.all([rpc("con_users_list",{p_token:token}),rpc("pos_cashiers_list",{p_token:token})]);
+  const list=(cu||[]).map(u=>({...u,kind:"user"})).concat((cs||[]).filter(c=>c.branch_id!=="bdemo").map(c=>({...c,kind:"cashier",role:"cashier"})));
+  let rf=LS.get("con.urf","");
+  $("#main").innerHTML=`<div class="toolbar"><div class="chips" id="urf">${[["","الكل"],["cashier","الكاشيرية"],["branch","مدراء الفروع"],["admin","المدراء"],["store","المستودع"]].map(([k,t])=>`<button data-r="${k}" class="${k===rf?"on":""}">${t} <small class="num">${k?list.filter(x=>x.role===k).length:list.length}</small></button>`).join("")}</div>
+      <span class="sp"></span><button class="btn" id="uadd">+ مستخدم جديد</button></div>
     <div class="card"><div class="scroll" style="max-height:none"><table id="ut"></table></div></div>
     <div class="grid half" style="margin-top:12px">
       <div class="card"><h2>الأدوار</h2><table>
-        <tr><td><b>👑 مدير عام</b></td><td class="muted">كل الفروع وكل الصفحات، أو الصفحات اللي تختارها له</td></tr>
-        <tr><td><b>🏪 مدير فرع</b></td><td class="muted">فرعه فقط: الملخص والطلبات والتقارير والمنيو</td></tr>
-        <tr><td><b>📦 أمين مستودع</b></td><td class="muted">صفحات المخزون فقط: المواد والموردين والمشتريات والتحويلات والجرد</td></tr></table></div>
-      <div class="card"><h2>رموز النظام الأساسية</h2><table>
-        <tr><td>رمز المدير الرئيسي</td><td class="muted">يتغير من الإعدادات</td></tr>
-        <tr><td>رموز الفروع</td><td class="muted">من صفحة الفروع</td></tr>
-        <tr><td>رموز الكاشيرية</td><td class="muted">من صفحة الكاشيرية (للكاشير فقط)</td></tr></table></div>
+        <tr><td><b>🧾 كاشير</b></td><td class="muted">يدخل تطبيق الكاشير برمزه، واسمه يطلع على كل طلب. ما يدخل لوحة التحكم</td></tr>
+        <tr><td><b>🏪 مدير فرع</b></td><td class="muted">لوحة التحكم لفرعه فقط، ويقدر يفتح الكاشير في فرعه</td></tr>
+        <tr><td><b>👑 مدير عام</b></td><td class="muted">كل الفروع، والصفحات اللي تختارها له</td></tr>
+        <tr><td><b>📦 أمين مستودع</b></td><td class="muted">صفحات المخزون فقط</td></tr></table></div>
+      <div class="card"><h2>ملاحظات</h2><table>
+        <tr><td class="muted">كل شخص له رمز خاص، والنظام يمنع تكرار الرموز.</td></tr>
+        <tr><td class="muted">إيقاف أي مستخدم يطلّعه من كل الأجهزة فوراً.</td></tr>
+        <tr><td class="muted">رمز المدير الرئيسي يتغير من الإعدادات، ورموز الفروع من صفحة الفروع.</td></tr></table></div>
     </div>`;
-  table($("#ut"),["الاسم","الدور","الفرع","الصلاحيات","آخر دخول","الحالة"],list.map(u=>[`<b>${esc(u.name)}</b>`,ROLES[u.role]||u.role,u.branch_id?esc(bName(u.branch_id)):"—",
-    `<small class="muted">${(u.perms||[]).map(p=>(PERMS.find(x=>x[0]===p)||[])[1]).filter(Boolean).join("، ")||"حسب الدور"}</small>`,u.last_login?`<span class="num">${dt(u.last_login)}</span>`:"—",`<span class="pill ${u.active?"on":"off"}">${u.active?"فعّال":"موقوف"}</span>`]),{click:true,empty:"ما في مستخدمين بعد — أضف أول مستخدم"});
-  $("#ut").onclick=e=>{const tr=e.target.closest("[data-row]"); if(tr) userModal(list[+tr.dataset.row])};
-  $("#uadd").onclick=()=>userModal(null);
+  const draw=()=>{const l=list.filter(x=>!rf||x.role===rf);
+    table($("#ut"),["الاسم","الدور","الفرع","الصلاحيات","آخر دخول","الحالة"],l.map(u=>[`<b>${esc(u.name)}</b>`,u.kind==="cashier"?"🧾 كاشير":ROLES[u.role]||u.role,
+      u.branch_id==="all"?"كل الفروع":u.branch_id?esc(bName(u.branch_id)):"—",
+      u.kind==="cashier"?`<small class="muted">تطبيق الكاشير</small>`:`<small class="muted">${(u.perms||[]).map(p=>(PERMS.find(x=>x[0]===p)||[])[1]).filter(Boolean).join("، ")||"حسب الدور"}</small>`,
+      u.last_login?`<span class="num">${dt(u.last_login)}</span>`:"—",`<span class="pill ${u.active?"on":"off"}">${u.active?"فعّال":"موقوف"}</span>`]),{click:true,empty:"ما في مستخدمين"});
+    $("#ut").onclick=e=>{const tr=e.target.closest("[data-row]"); if(tr) userModal(l[+tr.dataset.row])};
+  };
+  $("#urf").onclick=e=>{const b=e.target.closest("[data-r]"); if(!b) return; rf=b.dataset.r; LS.set("con.urf",rf); $("#urf").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); draw()};
+  $("#uadd").onclick=()=>userModal(null); draw();
 }
 function userModal(u){
-  const r0=u?u.role:"branch", p0=u&&u.perms&&u.perms.length?u.perms:ROLE_DEF[r0];
+  const R={cashier:"كاشير",...ROLES};
+  const r0=u?u.role:"cashier", p0=u&&u.perms&&u.perms.length?u.perms:(ROLE_DEF[r0]||[]);
   const m=modal(`<h3>${u?"تعديل مستخدم":"مستخدم جديد"}<button class="x" data-x>×</button></h3>
     <div class="fld"><label>الاسم</label><input id="un" value="${esc(u&&u.name||"")}"></div>
-    <div class="frow"><div class="fld"><label>الدور</label><select id="ur">${Object.entries(ROLES).map(([k,t])=>`<option value="${k}" ${k===r0?"selected":""}>${t}</option>`).join("")}</select></div>
-      <div class="fld" id="ubw"><label>الفرع</label><select id="ub">${branches.map(b=>`<option value="${esc(b.id)}" ${u&&u.branch_id===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select></div></div>
+    <div class="frow"><div class="fld"><label>الدور</label><select id="ur" ${u?"disabled":""}>${Object.entries(R).map(([k,t])=>`<option value="${k}" ${k===r0?"selected":""}>${t}</option>`).join("")}</select></div>
+      <div class="fld" id="ubw"><label>الفرع</label><select id="ub"><option value="all">كل الفروع</option>${branches.map(b=>`<option value="${esc(b.id)}" ${u&&u.branch_id===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select></div></div>
+    ${u?`<div class="muted" style="font-size:12px;margin:-4px 0 8px">لتغيير الدور: احذف المستخدم وأضفه من جديد بالدور الثاني.</div>`:""}
     <div class="fld"><label>رمز الدخول (٤–٨ أرقام)${u?" — اتركه فاضي بدون تغيير":""}</label><input id="up" class="num" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password"></div>
-    <div class="fld"><label>الصلاحيات</label><div id="upm" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${PERMS.map(([k,t])=>`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" value="${k}" ${p0.includes(k)?"checked":""}> ${t}</label>`).join("")}</div></div>
+    <div class="fld" id="upw"><label>الصلاحيات في لوحة التحكم</label><div id="upm" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${PERMS.map(([k,t])=>`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" value="${k}" ${p0.includes(k)?"checked":""}> ${t}</label>`).join("")}</div></div>
     <label style="display:flex;gap:8px;align-items:center"><span class="switch"><input type="checkbox" id="ua" ${!u||u.active?"checked":""}><span></span></span> فعّال</label>
     <div class="mact">${u?`<button class="btn red" id="udel" style="margin-inline-end:auto">حذف</button>`:""}<button class="btn ghost" data-x>إلغاء</button><button class="btn" id="usv">حفظ</button></div>`);
-  const sync=()=>{m.querySelector("#ubw").style.visibility=m.querySelector("#ur").value==="branch"?"visible":"hidden"}; sync();
-  m.querySelector("#ur").onchange=()=>{sync(); const d=ROLE_DEF[m.querySelector("#ur").value]; m.querySelectorAll("#upm input").forEach(c=>c.checked=d.includes(c.value))};
+  if(u&&u.branch_id) m.querySelector("#ub").value=u.branch_id;
+  const sync=()=>{const r=m.querySelector("#ur").value;
+    m.querySelector("#ubw").style.visibility=(r==="branch"||r==="cashier")?"visible":"hidden";
+    m.querySelector("#ub option[value=all]").hidden=r!=="cashier"; if(r==="branch"&&m.querySelector("#ub").value==="all") m.querySelector("#ub").selectedIndex=1;
+    m.querySelector("#upw").style.display=r==="cashier"?"none":""}; sync();
+  m.querySelector("#ur").onchange=()=>{sync(); const d=ROLE_DEF[m.querySelector("#ur").value]||[]; m.querySelectorAll("#upm input").forEach(c=>c.checked=d.includes(c.value))};
+  const errMsg=e=>/pin_taken/.test(e.message)?"هذا الرمز مستخدم — اختر رمز ثاني":/pin_len|pin_format/.test(e.message)?"الرمز لازم ٤–٨ أرقام":"تعذّر الحفظ";
   m.querySelector("#usv").onclick=async()=>{
     const pin=m.querySelector("#up").value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,"");
-    const p={id:u?u.id:null,name:m.querySelector("#un").value,role:m.querySelector("#ur").value,branch_id:m.querySelector("#ub").value,pin,
-      perms:[...m.querySelectorAll("#upm input:checked")].map(c=>c.value),active:m.querySelector("#ua").checked};
-    if(!p.name.trim()) return toast("اكتب الاسم"); if(!u&&pin.length<4) return toast("اكتب رمز من ٤ أرقام أو أكثر");
-    try{ await rpc("con_user_save",{p_token:token,p}); closeModal(); toast("تم الحفظ"); route(); }
-    catch(e){ toast(/pin_taken/.test(e.message)?"هذا الرمز مستخدم — اختر رمز ثاني":/pin_len/.test(e.message)?"الرمز لازم ٤–٨ أرقام":"تعذّر الحفظ") }
+    const role_=m.querySelector("#ur").value, name=m.querySelector("#un").value, active=m.querySelector("#ua").checked, br=m.querySelector("#ub").value;
+    if(!name.trim()) return toast("اكتب الاسم"); if(!u&&pin.length<4) return toast("اكتب رمز من ٤ أرقام أو أكثر");
+    try{
+      if(role_==="cashier") await rpc("pos_cashier_save",{p_token:token,p_id:u?u.id:null,p_branch:br,p_name:name,p_pin:pin||null,p_active:active});
+      else await rpc("con_user_save",{p_token:token,p:{id:u?u.id:null,name,role:role_,branch_id:br,pin,perms:[...m.querySelectorAll("#upm input:checked")].map(c=>c.value),active}});
+      closeModal(); toast("تم الحفظ"); route();
+    }catch(e){ toast(errMsg(e)) }
   };
   const d=m.querySelector("#udel"); if(d) d.onclick=async()=>{ if(d.dataset.ok!=="1"){d.dataset.ok="1";d.textContent="اضغط مرة ثانية للحذف";return}
-    try{await rpc("con_user_delete",{p_token:token,p_id:u.id}); closeModal(); toast("تم الحذف"); route()}catch(e){toast("تعذّر الحذف")} };
+    try{await rpc(u.kind==="cashier"?"con_cashier_delete":"con_user_delete",{p_token:token,p_id:u.id}); closeModal(); toast("تم الحذف"); route()}catch(e){toast("تعذّر الحذف")} };
 }
 async function pDevices(){
   const r=await rpc("con_devices",{p_token:token});
@@ -731,6 +748,7 @@ const branchSel=()=>$("#branch").value||null;
 let cur="home";
 async function route(quiet){
   let id=(location.hash||"#home").slice(1).split("?")[0];
+  if(id==="cashiers") id="users";
   let pg=PAGES.find(p=>p.id===id&&canSee(p)); if(!pg){pg=PAGES.find(canSee)||PAGES[0];id=pg.id}
   cur=id;
   document.querySelectorAll("[data-pg]").forEach(a=>a.classList.toggle("on",a.dataset.pg===id));
