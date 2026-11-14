@@ -10,6 +10,16 @@
         }
       ],
       "destination": "/app.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "tablet.rqkitchen.app"
+        }
+      ],
+      "destination": "/tablet.html"
     }
   ],
   "git": {

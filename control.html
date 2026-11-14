@@ -293,6 +293,7 @@ function editProduct(it){var newImg;
   openModal('<h2>'+(it.id?'تعديل منتج':'منتج جديد')+'</h2>'+
     '<div class="field"><label class="lbl">القسم</label><select class="f" id="eCat">'+CATS.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===it.category_id?' selected':'')+'>'+esc(c.name_ar)+' · '+esc(c.name_en||'')+'</option>';}).join('')+'</select></div>'+
     '<div class="field"><label class="lbl">اسم المنتج</label><input class="f" id="eName" maxlength="80" value="'+esc(it.name||'')+'" style="direction:ltr;text-align:right"></div>'+
+    '<div class="field"><label class="lbl">الاسم بالعربي (يظهر في منيو التابلت)</label><input class="f" id="eNameAr" maxlength="80" value="'+esc(it.name_ar||'')+'"></div>'+
     '<div class="field"><label class="lbl">المكونات (افصل بينها بفاصلة)</label><textarea class="f" id="eIng" rows="3" style="direction:ltr;text-align:right">'+esc(it.ingredients||'')+'</textarea></div>'+
     '<div class="g2"><div class="field"><label class="lbl">السعر (AED)</label><input class="f" id="ePrice" type="number" step="0.5" min="0" inputmode="decimal" value="'+esc(it.price==null?'':it.price)+'"></div><div class="field"><label class="lbl">الصورة</label><div class="imgpick"><img id="eImg" src="'+esc(img(it.image))+'" alt="" style="'+(it.image?'':'visibility:hidden')+'"><div><input type="file" id="eFile" accept="image/*" hidden><button type="button" class="btn ghost sm" id="ePick">اختر صورة</button><br><button type="button" class="btn ghost sm" id="eNoImg" style="margin-top:6px">بدون صورة</button></div></div></div></div>'+
     '<p class="hint" style="margin-top:-4px">يفضّل صورة بخلفية شفافة (PNG). تتصغّر تلقائياً.</p>'+
@@ -302,7 +303,7 @@ function editProduct(it){var newImg;
   $('#ePick').onclick=function(){$('#eFile').click();};
   $('#eFile').onchange=function(){pickImage(this,520,function(d){newImg=d;var im=$('#eImg');im.src=d;im.style.visibility='visible';});};
   $('#eNoImg').onclick=function(){newImg='';$('#eImg').style.visibility='hidden';};
-  $('#eSave').onclick=function(){var b=this,x={id:it.id||null,category_id:$('#eCat').value,name:$('#eName').value.trim(),ingredients:$('#eIng').value.trim(),price:$('#ePrice').value,active:$('#eActive').checked};
+  $('#eSave').onclick=function(){var b=this,x={id:it.id||null,category_id:$('#eCat').value,name:$('#eName').value.trim(),name_ar:$('#eNameAr').value.trim(),ingredients:$('#eIng').value.trim(),price:$('#ePrice').value,active:$('#eActive').checked};
     if(newImg!==undefined)x.image=newImg;if(!x.name||x.price===''){$('#eErr').textContent=ERR.missing;return;}var feat=$('#eFeat').checked;
     b.disabled=true;rpc('menu_admin_save_item',{p:PIN,it:x}).then(guard).then(function(r){var id=x.id||(r&&r.id);return (id&&feat!==!!it.featured?rpc('app_admin_set_featured',{p:PIN,item_id:id,on_:feat}):Promise.resolve()).then(function(){return loadItems();});})
       .then(function(){closeModal();toast('تم الحفظ، التطبيق تحدّث');vProducts();}).catch(function(e){$('#eErr').textContent=msg(e.message);}).finally(function(){b.disabled=false;});};
