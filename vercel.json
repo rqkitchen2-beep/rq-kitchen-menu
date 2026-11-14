@@ -10,16 +10,6 @@
         }
       ],
       "destination": "/app.html"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "tablet.rqkitchen.app"
-        }
-      ],
-      "destination": "/tablet.html"
     }
   ],
   "git": {
@@ -28,6 +18,17 @@
     }
   },
   "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "tablet.rqkitchen.app"
+        }
+      ],
+      "destination": "/tablet",
+      "permanent": false
+    },
     {
       "source": "/",
       "has": [
