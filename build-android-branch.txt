@@ -1,4 +1,4 @@
-android branch run: 40 rc: 0 Wed Nov 18 18:22:18 UTC 2026
+android branch run: 41 rc: 1 Wed Nov 18 18:24:00 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
@@ -6,67 +6,68 @@ RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "cl
 STEP: icon + version
 RESULT: file provider ok
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 140
+ERROR: gradle failed
 ---- errors ----
+BUILD FAILED in 9s
+ERROR: gradle failed
 ---- tail ----
-> Task :capacitor-android:bundleReleaseAar
-> Task :capacitor-android:mapReleaseSourceSetPaths
-> Task :capacitor-android:mergeReleaseResources
-> Task :capacitor-cordova-android-plugins:bundleReleaseAar
-> Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
-> Task :capacitor-android:verifyReleaseResources
-> Task :capacitor-cordova-android-plugins:mergeReleaseResources
-> Task :capacitor-android:assembleRelease
-> Task :capacitor-haptics:bundleReleaseAar
-> Task :capacitor-haptics:mapReleaseSourceSetPaths
-> Task :capacitor-haptics:mergeReleaseResources
-> Task :capacitor-cordova-android-plugins:verifyReleaseResources
-> Task :capacitor-cordova-android-plugins:assembleRelease
-> Task :capacitor-local-notifications:bundleReleaseAar
-> Task :capacitor-local-notifications:mapReleaseSourceSetPaths
-> Task :capacitor-haptics:verifyReleaseResources
-> Task :capacitor-local-notifications:mergeReleaseResources
-> Task :capacitor-haptics:assembleRelease
-> Task :capacitor-splash-screen:bundleReleaseAar
-> Task :capacitor-splash-screen:mapReleaseSourceSetPaths
-> Task :capacitor-splash-screen:mergeReleaseResources
-> Task :capacitor-local-notifications:verifyReleaseResources
-> Task :capacitor-local-notifications:assembleRelease
-> Task :capacitor-status-bar:bundleReleaseAar
-> Task :capacitor-status-bar:mapReleaseSourceSetPaths
-> Task :capacitor-splash-screen:verifyReleaseResources
-> Task :capacitor-status-bar:mergeReleaseResources
-> Task :capacitor-splash-screen:assembleRelease
-> Task :rq-native:bundleReleaseAar
-> Task :rq-native:mapReleaseSourceSetPaths
-> Task :capacitor-status-bar:verifyReleaseResources
-> Task :rq-native:mergeReleaseResources
-> Task :capacitor-status-bar:assembleRelease
-> Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
-> Task :rq-native:verifyReleaseResources
-> Task :rq-native:assembleRelease
-> Task :capacitor-haptics:lintVitalAnalyzeRelease
-> Task :capacitor-android:lintVitalAnalyzeRelease
-> Task :capacitor-splash-screen:lintVitalAnalyzeRelease
-> Task :capacitor-status-bar:lintVitalAnalyzeRelease
-> Task :rq-native:lintVitalAnalyzeRelease
-> Task :capacitor-local-notifications:lintVitalAnalyzeRelease
-> Task :app:lintVitalAnalyzeRelease
-> Task :app:lintVitalReportRelease
-> Task :app:lintVitalRelease
-> Task :app:packageRelease
-> Task :app:createReleaseApkListingFileRedirect
-> Task :app:assembleRelease
+     Required by:
+         root project : > com.android.tools.build:gradle:8.13.0 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.ow2.asm:asm-util:9.8.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-util/9.8/asm-util-9.8.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-util/9.8/asm-util-9.8.pom
+     Required by:
+         root project : > com.android.tools.build:gradle:8.13.0 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.ow2.asm:asm-commons:9.8.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-commons/9.8/asm-commons-9.8.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.8/asm-commons-9.8.pom
+     Required by:
+         root project : > com.android.tools.build:gradle:8.13.0 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.jdom:jdom2:2.0.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jdom/jdom2/2.0.6/jdom2-2.0.6.pom
+       - https://repo.maven.apache.org/maven2/org/jdom/jdom2/2.0.6/jdom2-2.0.6.pom
+     Required by:
+         root project : > com.android.tools.build:gradle:8.13.0 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find com.google.protobuf:protobuf-java:3.25.5.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/protobuf/protobuf-java/3.25.5/protobuf-java-3.25.5.pom
+       - https://repo.maven.apache.org/maven2/com/google/protobuf/protobuf-java/3.25.5/protobuf-java-3.25.5.pom
+     Required by:
+         root project : > com.android.tools.build:gradle:8.13.0 > com.google.testing.platform:core-proto:0.0.9-alpha03
+   > Could not find com.squareup:javawriter:2.5.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
+       - https://repo.maven.apache.org/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
+     Required by:
+         root project : > com.android.tools.build:gradle:8.13.0 > com.android.tools.build:builder:8.13.0
+   > Could not find com.google.code.findbugs:jsr305:3.0.2.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom
+       - https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom
+     Required by:
+         root project : > com.google.gms:google-services:4.4.4 > com.google.android.gms:strict-version-matcher-plugin:1.2.4
+         root project : > com.android.tools.build:gradle:8.13.0 > com.android.tools.build:builder:8.13.0 > com.android.tools.build:apkzlib:8.13.0
+   > Could not find com.google.guava:guava:33.3.1-jre.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/guava/guava/33.3.1-jre/guava-33.3.1-jre.pom
+       - https://repo.maven.apache.org/maven2/com/google/guava/guava/33.3.1-jre/guava-33.3.1-jre.pom
+     Required by:
+         root project : > com.google.gms:google-services:4.4.4 > com.google.android.gms:strict-version-matcher-plugin:1.2.4
+   > Could not find org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jetbrains/kotlin/kotlin-stdlib-jdk8/2.2.0/kotlin-stdlib-jdk8-2.2.0.pom
+       - https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-jdk8/2.2.0/kotlin-stdlib-jdk8-2.2.0.pom
+     Required by:
+         root project : > com.google.gms:google-services:4.4.4 > com.google.android.gms:strict-version-matcher-plugin:1.2.4
 
-[Incubating] Problems report is available at: file:///home/runner/work/rq-kitchen-menu/rq-kitchen-menu/native/branch/android/build/reports/problems/problems-report.html
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
 
-Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
-
-You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
-
-For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-
-BUILD SUCCESSFUL in 1m 51s
-324 actionable tasks: 324 executed
-RESULT: apk signed 3.2M versionCode 140
-RESULT: published
+BUILD FAILED in 9s
+ERROR: gradle failed
