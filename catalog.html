@@ -99,6 +99,31 @@ main{padding-block:10px 40px}
   body{font-size:12px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- edit mode (owner only, PIN) ---- */
+.btn.edit{margin-inline-start:0;background:transparent;border:1px solid var(--line);font-weight:500}
+body.editing .btn.edit{background:var(--ok);color:#fff;border-color:var(--ok)}
+.card .ed{display:none;margin-top:8px;border:0;border-radius:999px;background:var(--ink);color:var(--paper);font-weight:700;font-size:13px;padding:8px 12px}
+body.editing .card .ed{display:block}
+body.editing .ph .dl{display:none}
+.card.off{opacity:.5}
+.card.off .en::after{content:" · Hidden / مخفي";font-family:var(--body);font-size:11px;color:#B42318;font-weight:700}
+.addp{display:none;border:2px dashed var(--line);border-radius:18px;background:transparent;min-height:120px;font-weight:700;color:var(--muted)}
+body.editing .addp{display:block}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(27,22,18,.55);display:grid;place-items:center;padding:16px}
+.dlg{background:var(--paper);border-radius:22px;width:min(520px,100%);max-height:92vh;overflow:auto;padding:20px;direction:rtl;text-align:right}
+.dlg h3{margin:0 0 12px;font-family:var(--display);font-weight:400;font-size:26px}
+.fld{display:block;margin-bottom:12px}
+.fld span{display:block;font-weight:700;font-size:13px;margin-bottom:4px}
+.fld input,.fld textarea,.fld select{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;background:var(--paper)}
+.fld input:focus,.fld textarea:focus{border-color:var(--orange);outline:none}
+.ltr{direction:ltr;text-align:left}
+.imgrow{display:flex;gap:12px;align-items:center}
+.imgrow img{width:96px;height:96px;object-fit:contain;background:var(--cream);border-radius:12px}
+.chk{display:flex;gap:8px;align-items:center;font-weight:700;margin:4px 0 14px}
+.dlg .acts{display:flex;gap:8px;flex-wrap:wrap}
+.err2{color:#B42318;font-size:13px;min-height:1em;margin-top:8px}
+@media print{.card .ed,.addp,.btn.edit{display:none!important}.card.off{display:none}}
 </style>
 </head>
 <body>
@@ -117,6 +142,7 @@ main{padding-block:10px 40px}
     <button class="btn pri" id="xls" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13l4 5M12 13l-4 5"/></svg>Download Excel</button>
     <button class="btn org" id="zip" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>Download all photos (ZIP)</button>
     <button class="btn" id="pdf" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print / PDF</button>
+    <button class="btn edit" id="editBtn" type="button">✎ تعديل</button>
     <span class="prog" id="prog" aria-live="polite"></span>
     <nav class="jump" id="jump" aria-label="Categories"></nav>
   </div>
@@ -135,32 +161,33 @@ function money(n){n=Number(n);return n%1?n.toFixed(2):String(n);}
 function hm(t){var a=String(t||'').split(':'),h=+a[0],m=a[1]||'00',ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+m+' '+ap;}
 var DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
 
-var CATS=[],ITEMS=[],BR=[];
+var CATS=[],ITEMS=[],BR=[],RAWCATS=[],PIN=null;try{PIN=sessionStorage.getItem('rq-admin-pin');}catch(e){}
+function rpc(fn,b){return fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error((j&&j.message)||'net');return j;});});}
 function load(){
-  Promise.all([api('menu_categories?select=*'),api('menu_items?select=*&active=eq.true'),api('menu_branches?select=name,name_ar,address,open_time,close_time,sort')])
+  Promise.all([api('menu_categories?select=*'),PIN?rpc('menu_admin_items',{p:PIN}).then(function(r){if(!r||r.ok===false)throw new Error('pin');return r.items;}):api('menu_items?select=*&active=eq.true'),api('menu_branches?select=name,name_ar,address,open_time,close_time,sort')])
   .then(function(r){
     var items=r[1];
     CATS=r[0].slice().sort(function(a,b){return a.sort-b.sort;}).map(function(c){
       var list=items.filter(function(i){return i.category_id===c.id;}).sort(function(a,b){return (a.sort||0)-(b.sort||0);});
       return{id:c.id,en:c.name_en||'',ar:(c.name_ar&&c.name_ar!==c.name_en)?c.name_ar:'',items:list};
-    }).filter(function(c){return c.items.length;});
-    ITEMS=[];CATS.forEach(function(c,ci){c.items.forEach(function(i,k){
+    }).filter(function(c){return c.items.length||PIN;});
+    RAWCATS=r[0];ITEMS=[];CATS.forEach(function(c,ci){c.items.forEach(function(i,k){
       var code='RQ-'+String(ci+1).padStart(2,'0')+String(k+1).padStart(2,'0');
       i._code=code;i._cat=c;i._file=i.image?(String(ci+1).padStart(2,'0')+'-'+slug(c.en)+'/'+code+'-'+slug(i.name)+'.jpg'):'';ITEMS.push(i);});});
     BR=(r[2]||[]).filter(function(b){return b.address;}).sort(function(a,b){return a.sort-b.sort;});
     render();
-  }).catch(function(){document.getElementById('main').innerHTML='<div class="state">Could not load the menu. Check the internet connection.<br><button class="btn pri" type="button" onclick="load()">Try again</button></div>';});
+  }).catch(function(e){if(PIN&&e&&e.message==='pin'){PIN=null;try{sessionStorage.removeItem('rq-admin-pin');}catch(_){}setEditing(false);load();return;}document.getElementById('main').innerHTML='<div class="state">Could not load the menu. Check the internet connection.<br><button class="btn pri" type="button" onclick="load()">Try again</button></div>';});
 }
 function render(){
   var upd=ITEMS.reduce(function(m,i){var v=i.updated_at||i.created_at,t=v?(Date.parse(v)||0):0;return t>m?t:m;},0);
-  document.getElementById('meta').innerHTML='<span><b>'+ITEMS.length+'</b> products</span><span><b>'+CATS.length+'</b> categories</span><span>Prices in <b>AED</b>, VAT inclusive</span>'+(upd?'<span>Last updated <b>'+new Date(upd).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'</b></span>':'');
+  document.getElementById('meta').innerHTML='<span><b>'+ITEMS.filter(function(i){return i.active!==false;}).length+'</b> products</span><span><b>'+CATS.length+'</b> categories</span><span>Prices in <b>AED</b>, VAT inclusive</span>'+(upd?'<span>Last updated <b>'+new Date(upd).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'</b></span>':'');
   document.getElementById('jump').innerHTML=CATS.map(function(c){return '<a href="#c-'+esc(c.id)+'">'+esc(c.en)+'</a>';}).join('');
   var html=CATS.map(function(c){
     return '<section class="cat" id="c-'+esc(c.id)+'"><div class="cat-h"><h2>'+esc(c.en)+(c.ar?'<span>'+esc(c.ar)+'</span>':'')+'</h2><small>'+c.items.length+(c.items.length===1?' item':' items')+'</small></div><div class="grid">'+
       c.items.map(function(i){var src=abs(i.image);
-        return '<article class="card"><div class="ph">'+(src?'<img src="'+esc(src)+'" alt="'+esc(i.name)+'" loading="lazy" crossorigin="anonymous"'+(isPhoto(src)?' class="photo"':'')+'><button class="dl" type="button" data-id="'+esc(i.id)+'" aria-label="Download photo of '+esc(i.name)+'" title="Download photo">'+DL+'</button>':'<div class="none">No photo</div>')+'</div>'+
+        return '<article class="card'+(i.active===false?' off':'')+'"><div class="ph">'+(src?'<img src="'+esc(src)+'" alt="'+esc(i.name)+'" loading="lazy" crossorigin="anonymous"'+(isPhoto(src)?' class="photo"':'')+'><button class="dl" type="button" data-id="'+esc(i.id)+'" aria-label="Download photo of '+esc(i.name)+'" title="Download photo">'+DL+'</button>':'<div class="none">No photo</div>')+'</div>'+
           '<div class="body"><div class="en">'+esc(i.name)+'</div>'+(i.name_ar?'<div class="ar">'+esc(i.name_ar)+'</div>':'')+(i.ingredients?'<div class="desc">'+esc(i.ingredients)+'</div>':'')+
-          '<div class="row"><span class="price">'+money(i.price)+'<small>AED</small></span><span class="code">'+i._code+'</span></div></div></article>';}).join('')+'</div></section>';
+          '<div class="row"><span class="price">'+money(i.price)+'<small>AED</small></span><span class="code">'+i._code+'</span></div><button class="ed" type="button" data-edit="'+esc(i.id)+'">✎ تعديل المنتج</button></div></article>';}).join('')+'<button class="addp" type="button" data-add="'+esc(c.id)+'">+ منتج جديد في '+esc(c.ar||c.en)+'</button></div></section>';
   }).join('');
   if(BR.length)html+='<section class="branches"><h2>Branches</h2><div class="tablewrap"><table class="btab"><thead><tr><th>Branch</th><th>الفرع</th><th>Location</th><th>Hours</th></tr></thead><tbody>'+
     BR.map(function(b){return '<tr><td>'+esc(b.name)+'</td><td class="ar" dir="rtl">'+esc(b.name_ar)+'</td><td>'+esc(b.address)+'</td><td>'+hm(b.open_time)+' – '+hm(b.close_time)+'</td></tr>';}).join('')+'</tbody></table></div></section>';
@@ -191,7 +218,7 @@ document.getElementById('main').addEventListener('click',function(e){var b=e.tar
 
 document.getElementById('xls').onclick=function(){var btn=this;btn.disabled=true;prog.textContent='Preparing Excel…';
   lib('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js','XLSX').then(function(X){
-    var rows=ITEMS.map(function(i){return{'Item code':i._code,'Category (EN)':i._cat.en,'Category (AR)':i._cat.ar||'','Item name (EN)':i.name,'Item name (AR)':i.name_ar||'','Description / ingredients (EN)':i.ingredients||'','Price (AED, incl. VAT)':Number(i.price),'Photo file (in ZIP)':i._file,'Photo link':abs(i.image)&&!/^data:/.test(i.image)?abs(i.image):''};});
+    var rows=ITEMS.filter(function(i){return i.active!==false;}).map(function(i){return{'Item code':i._code,'Category (EN)':i._cat.en,'Category (AR)':i._cat.ar||'','Item name (EN)':i.name,'Item name (AR)':i.name_ar||'','Description / ingredients (EN)':i.ingredients||'','Price (AED, incl. VAT)':Number(i.price),'Photo file (in ZIP)':i._file,'Photo link':abs(i.image)&&!/^data:/.test(i.image)?abs(i.image):''};});
     var ws=X.utils.json_to_sheet(rows);ws['!cols']=[{wch:10},{wch:16},{wch:14},{wch:34},{wch:26},{wch:70},{wch:12},{wch:44},{wch:60}];
     var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Menu');
     if(BR.length){var b=X.utils.json_to_sheet(BR.map(function(r){return{'Branch':r.name,'Branch (AR)':r.name_ar,'Location':r.address,'Opens':hm(r.open_time),'Closes':hm(r.close_time)};}));b['!cols']=[{wch:16},{wch:18},{wch:30},{wch:10},{wch:10}];X.utils.book_append_sheet(wb,b,'Branches');}
@@ -200,12 +227,48 @@ document.getElementById('xls').onclick=function(){var btn=this;btn.disabled=true
 
 document.getElementById('zip').onclick=function(){var btn=this;btn.disabled=true;prog.textContent='Preparing photos…';
   lib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','JSZip').then(function(JSZip){
-    var z=new JSZip(),list=ITEMS.filter(function(i){return i.image;}),done=0,fail=[];
+    var z=new JSZip(),list=ITEMS.filter(function(i){return i.image&&i.active!==false;}),done=0,fail=[];
     return list.reduce(function(p,i){return p.then(function(){return toJpg(abs(i.image)).then(function(bl){z.file(i._file,bl);}).catch(function(){fail.push(i.name);}).then(function(){done++;prog.textContent='Photos '+done+' / '+list.length;});});},Promise.resolve())
     .then(function(){z.file('README.txt','RQ Kitchen menu photos, '+today()+'\r\nEach photo is 1000x1000 JPG on a white background.\r\nFile names start with the item code used in the Excel sheet (RQ-0101, ...).\r\n'+(fail.length?'\r\nMissing: '+fail.join(', ')+'\r\n':''));
       return z.generateAsync({type:'blob'});})
     .then(function(b){save(b,'RQ-Kitchen-Menu-Photos-'+today()+'.zip');prog.textContent=fail.length?'Downloaded. '+fail.length+' photo(s) could not be added.':'Photos downloaded.';});
   }).catch(function(){prog.textContent='Could not build the ZIP. Try again.';}).finally(function(){btn.disabled=false;});};
+
+
+/* ---- edit mode ---- */
+var ERRS={bad_pin:'الرقم السري غلط.',locked:'محاولات كثيرة غلط. جرّب بعد 10 دقائق.',missing:'اكتب الاسم والسعر.',net:'تعذّر الاتصال، تأكد من الإنترنت.'};
+function emsg(e){return ERRS[e&&e.message||e]||ERRS.net;}
+function modal(html){var m=document.createElement('div');m.className='modal';m.innerHTML='<div class="dlg" role="dialog" aria-modal="true">'+html+'</div>';document.body.appendChild(m);
+  m.addEventListener('click',function(e){if(e.target===m||e.target.closest('[data-x]'))m.remove();});var f=m.querySelector('input,textarea');if(f)f.focus();return m;}
+function setEditing(on){document.body.classList.toggle('editing',on);document.getElementById('editBtn').textContent=on?'✓ وضع التعديل (اضغط للخروج)':'✎ تعديل';}
+document.getElementById('editBtn').onclick=function(){
+  if(PIN){PIN=null;try{sessionStorage.removeItem('rq-admin-pin');}catch(e){}setEditing(false);load();return;}
+  var m=modal('<h3>تعديل المنيو</h3><label class="fld"><span>الرقم السري (نفس لوحة التحكم)</span><input id="pinIn" type="password" inputmode="numeric" autocomplete="current-password"></label><div class="acts"><button class="btn pri" id="pinGo" type="button">دخول</button><button class="btn" data-x type="button">إلغاء</button></div><div class="err2" id="pinErr"></div>');
+  function go(){var p=m.querySelector('#pinIn').value.trim();if(!p)return;rpc('menu_admin_login',{p:p}).then(function(r){if(r!=='ok')throw new Error(r);PIN=p;try{sessionStorage.setItem('rq-admin-pin',p);}catch(e){}m.remove();setEditing(true);load();}).catch(function(e){m.querySelector('#pinErr').textContent=emsg(e);});}
+  m.querySelector('#pinGo').onclick=go;m.querySelector('#pinIn').onkeydown=function(e){if(e.key==='Enter')go();};};
+function pick(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var max=900,k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);var d=c.toDataURL('image/webp',.85);if(d.indexOf('data:image/webp')!==0)d=c.toDataURL('image/png');cb(d);};im.src=r.result;};r.readAsDataURL(file);}
+function editItem(it){var newImg;
+  var cats=RAWCATS.slice().sort(function(a,b){return a.sort-b.sort;});
+  var m=modal('<h3>'+(it.id?'تعديل منتج':'منتج جديد')+'</h3>'+
+    '<label class="fld"><span>القسم</span><select id="fCat">'+cats.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===it.category_id?' selected':'')+'>'+esc(c.name_ar)+' · '+esc(c.name_en)+'</option>';}).join('')+'</select></label>'+
+    '<label class="fld"><span>الاسم بالإنجليزي</span><input id="fEn" class="ltr" maxlength="80" value="'+esc(it.name||'')+'"></label>'+
+    '<label class="fld"><span>الاسم بالعربي</span><input id="fAr" maxlength="80" value="'+esc(it.name_ar||'')+'"></label>'+
+    '<label class="fld"><span>السعر (درهم)</span><input id="fPr" class="ltr" type="number" step="0.5" min="0" inputmode="decimal" value="'+esc(it.price==null?'':Number(it.price))+'"></label>'+
+    '<label class="fld"><span>المكونات / الوصف (بالإنجليزي، افصل بفاصلة)</span><textarea id="fIng" class="ltr" rows="3">'+esc(it.ingredients||'')+'</textarea></label>'+
+    '<div class="fld"><span>الصورة</span><div class="imgrow"><img id="fImg" alt="" src="'+esc(abs(it.image))+'"'+(it.image?'':' style="visibility:hidden"')+'><div><input type="file" id="fFile" accept="image/*" hidden><button class="btn" type="button" id="fPick">اختر صورة</button></div></div></div>'+
+    '<label class="chk"><input type="checkbox" id="fOn"'+(it.active!==false?' checked':'')+'> ظاهر في المنيو</label>'+
+    '<div class="acts"><button class="btn pri" id="fSave" type="button">حفظ</button><button class="btn" data-x type="button">إلغاء</button></div><div class="err2" id="fErr"></div>');
+  var q=function(s){return m.querySelector(s);};
+  q('#fPick').onclick=function(){q('#fFile').click();};
+  q('#fFile').onchange=function(){if(this.files[0])pick(this.files[0],function(d){newImg=d;q('#fImg').src=d;q('#fImg').style.visibility='visible';});};
+  q('#fSave').onclick=function(){var b=this;var x={id:it.id||null,category_id:q('#fCat').value,name:q('#fEn').value.trim(),name_ar:q('#fAr').value.trim(),ingredients:q('#fIng').value.trim(),price:q('#fPr').value,active:q('#fOn').checked};
+    if(newImg!==undefined)x.image=newImg;if(!x.name||x.price===''){q('#fErr').textContent=ERRS.missing;return;}
+    b.disabled=true;rpc('menu_admin_save_item',{p:PIN,it:x}).then(function(r){if(r&&r.ok===false)throw new Error(r.error);m.remove();prog.textContent='تم الحفظ. المنيو تحدّث في كل مكان.';load();}).catch(function(e){q('#fErr').textContent=emsg(e);b.disabled=false;});};}
+document.getElementById('main').addEventListener('click',function(e){
+  var b=e.target.closest('[data-edit]');if(b){var it=ITEMS.find(function(x){return String(x.id)===b.dataset.edit;});if(it)editItem(it);return;}
+  var a=e.target.closest('[data-add]');if(a)editItem({category_id:a.dataset.add,active:true});});
+var ownerView=PIN||/[?&#]edit\b/.test(location.search+location.hash);document.getElementById('editBtn').hidden=!ownerView;
+if(PIN)setEditing(true);
 
 document.getElementById('pdf').onclick=function(){window.print();};
 load();
