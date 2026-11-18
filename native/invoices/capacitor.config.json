@@ -4,7 +4,7 @@
   "webDir": "www",
   "backgroundColor": "#F8F5F1",
   "server": {
-    "url": "https://invoices.rqkitchen.app/",
+    "url": "https://menu.rqkitchen.app/invoices",
     "cleartext": false,
     "errorPath": "offline.html"
   },
