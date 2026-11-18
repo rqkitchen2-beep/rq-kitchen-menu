@@ -1,4 +1,4 @@
-run: 91  Fri Nov 13 23:58:07 UTC 2026
+run: 92  Wed Nov 18 18:20:15 UTC 2026
 team: Z34R6L55G2 / Z34R6L55G2
 app_customer: 6822102459
 app_driver: 6822102915
@@ -13,6 +13,6 @@ matrix: ["console","owner"]
 list-merchant 200 {"data": [{"type": "merchantIds", "id": "3MWDKN79PG", "attributes": {"isPlatformIntegrator": false, "identifier": "merchant.com.rqkitchen.app", "prefix": "Z34R6L55G2", "canEdit": true, "name": "RQ Kitchen", "delegatedCommerceEnabled": true, "canDelete": true, "isPSP": false}, "relationships": {"certificates": {"meta": {"paging": {"total": 0, "limit": 2147483647}}, "links": {"self": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/relationships/certificates", "related": "https://api.appstoreconnect.apple.com/v1/merchantIds/3MWDKN79PG/certificates"}}}, "links": {"self": "https://
 merchant_id: 3MWDKN79PG
 caps: []
-merchant-bundles 404 {"errors": [{"id": "6f5124fe-e73e-4ace-9c1f-4fff0c3530fb", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
-revoked old cert USQ29A7322
-cert: 4ANKX5FU5J
+merchant-bundles 404 {"errors": [{"id": "b81a3456-8e60-4bdd-9ac9-bf4ba2784e65", "status": "404", "code": "PATH_ERROR", "title": "The URL path is not valid", "detail": "The relationship 'bundleIds' does not exist"}]}
+revoked old cert 4ANKX5FU5J
+cert: Q2VSMRPZ3H
