@@ -1,4 +1,4 @@
-android cashier run: 39 rc: 0 Fri Nov 13 23:41:49 UTC 2026
+android cashier run: 40 rc: 0 Wed Nov 18 18:21:48 UTC 2026
 STEP: npm install
 STEP: prepare www
 STEP: cap add android
@@ -6,7 +6,7 @@ RESULT: plugins "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin" "cl
 STEP: icon + version
 RESULT: file provider ok
 STEP: gradle build
-RESULT: apk signed 3.2M versionCode 139
+RESULT: apk signed 3.2M versionCode 140
 ---- errors ----
 ---- tail ----
 > Task :app:optimizeReleaseResources
@@ -48,8 +48,8 @@ RESULT: apk signed 3.2M versionCode 139
 > Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
 > Task :capacitor-haptics:lintVitalAnalyzeRelease
 > Task :capacitor-splash-screen:lintVitalAnalyzeRelease
-> Task :capacitor-status-bar:lintVitalAnalyzeRelease
 > Task :capacitor-android:lintVitalAnalyzeRelease
+> Task :capacitor-status-bar:lintVitalAnalyzeRelease
 > Task :rq-native:lintVitalAnalyzeRelease
 > Task :app:lintVitalAnalyzeRelease
 > Task :app:lintVitalReportRelease
@@ -66,7 +66,7 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD SUCCESSFUL in 1m 41s
+BUILD SUCCESSFUL in 1m 23s
 283 actionable tasks: 283 executed
-RESULT: apk signed 3.2M versionCode 139
+RESULT: apk signed 3.2M versionCode 140
 RESULT: published
