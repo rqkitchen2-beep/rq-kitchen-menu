@@ -10,6 +10,16 @@
         }
       ],
       "destination": "/app.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "invoices.rqkitchen.app"
+        }
+      ],
+      "destination": "/invoices.html"
     }
   ],
   "git": {
@@ -206,6 +216,17 @@
     {
       "source": "/delivery-policy",
       "destination": "/legal#delivery",
+      "permanent": false
+    },
+    {
+      "source": "/invoices",
+      "has": [
+        {
+          "type": "host",
+          "value": "apps.rqkitchen.app"
+        }
+      ],
+      "destination": "https://github.com/rqkitchen2-beep/rq-kitchen-menu/releases/download/android-invoices/RQ-Invoices.apk",
       "permanent": false
     }
   ],

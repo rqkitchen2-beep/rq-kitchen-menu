@@ -14,6 +14,7 @@ on:
       - 'native/customer/**'
       - 'native/driver/**'
       - 'native/expenses/**'
+      - 'native/invoices/**'
       - 'native/sauces/**'
       - 'native/shawarma/**'
       - 'native/track/**'
@@ -137,6 +138,10 @@ jobs:
             apk: RQ-Sauces.apk
             title: "RQ Sauces (Android)"
             notes: "RQ Sauces app for Android. Download the APK and install it."
+          - app: invoices
+            apk: RQ-Invoices.apk
+            title: "RQ Invoices (Android)"
+            notes: "RQ Kitchen supplier invoices upload app for Android. Download the APK and install it."
           - app: shawarma
             apk: RQ-Shawarma.apk
             title: "RQ Shawarma (Android)"

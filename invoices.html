@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>فواتير RQ KITCHEN</title>
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RQ Invoices">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="/staff-icons/invoices-180.png">
+<link rel="icon" href="/staff-icons/invoices.png">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22RQ%20Invoices%22%2C%22short_name%22%3A%22RQ%20Invoices%22%2C%22start_url%22%3A%22https%3A%2F%2Finvoices.rqkitchen.app%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f6f3ef%22%2C%22theme_color%22%3A%22%23111111%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Finvoices.rqkitchen.app%2Fstaff-icons%2Finvoices.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+<style>
+  html,body{margin:0;height:100%;background:#111}
+  body{padding-top:env(safe-area-inset-top);box-sizing:border-box}
+  iframe{display:block;border:0;width:100%;height:100%;background:#f6f3ef}
+  #wait{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#f6f3ef;
+        font-family:-apple-system,system-ui,sans-serif;color:#7a7470;font-size:16px;transition:opacity .3s}
+</style>
+</head>
+<body>
+<div id="wait">جاري فتح فواتير RQ KITCHEN...</div>
+<!-- صفحة رفع الفواتير (Google Apps Script) — نفس الرابط بعد أي نشر جديد -->
+<iframe id="f" allow="clipboard-write; camera"
+  src="https://script.google.com/macros/s/AKfycbxQi2kDBhf9WfDsueE3e-V7PQTUpmYzwYr4cHpYvR5U0_uQPMyX5JLftyhD4Qpx6YkhZw/exec"
+  onload="var w=document.getElementById('wait');w.style.opacity=0;setTimeout(function(){w.remove()},300)"></iframe>
+</body>
+</html>
