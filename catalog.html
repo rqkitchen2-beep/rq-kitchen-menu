@@ -62,8 +62,8 @@ main{padding-block:10px 40px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
 .card{border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-width:0;break-inside:avoid;background:var(--paper)}
 .ph{aspect-ratio:1/1;background:var(--cream);display:grid;place-items:center;padding:14px;position:relative}
-.ph img{max-height:100%;object-fit:contain}
-.ph img.photo{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.ph img{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);max-width:none;object-fit:contain}
+.ph img.photo{object-fit:cover;border-radius:10px}
 .ph .none{font-size:13px;color:var(--muted);text-align:center}
 .ph .dl{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:0;background:var(--paper);display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .ph .dl svg{width:16px;height:16px}
